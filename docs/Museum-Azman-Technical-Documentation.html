@@ -1,0 +1,585 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Museum Azman Technical Documentation</title>
+  <style>
+    :root {
+      --bg: #f5f6f8;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --accent: #0f766e;
+      --code-bg: #0b1020;
+      --code-text: #e5e7eb;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: linear-gradient(180deg, #f8fafc, #eef2f7 40%, #f8fafc);
+      color: var(--text);
+      font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+      line-height: 1.6;
+    }
+
+    .container {
+      width: min(1280px, 95vw);
+      margin: 28px auto 40px;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 28px;
+      box-shadow: 0 8px 28px rgba(2, 6, 23, 0.07);
+    }
+
+    h1, h2, h3 { line-height: 1.3; margin-top: 1.3em; }
+    h1 { margin-top: 0; font-size: 1.9rem; }
+    h2 {
+      font-size: 1.3rem;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 6px;
+    }
+    h3 { font-size: 1.08rem; }
+
+    .meta {
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    .toc {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fafafa;
+      padding: 14px 16px;
+      margin: 16px 0 24px;
+    }
+
+    .doc-layout {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr);
+      gap: 24px;
+      align-items: start;
+    }
+
+    .toc-sidebar {
+      position: sticky;
+      top: 20px;
+      max-height: calc(100vh - 40px);
+      overflow: auto;
+      margin: 0;
+    }
+
+    .doc-content {
+      min-width: 0;
+    }
+
+    .toc a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .toc a:hover { text-decoration: underline; }
+
+    ul, ol { margin-top: 6px; }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      background: #f3f4f6;
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: 0.93em;
+    }
+
+    pre {
+      background: #f3f4f6;
+      color: #111827;
+      overflow: auto;
+      border-radius: 12px;
+      padding: 14px 16px;
+      border: 1px solid #d1d5db;
+      position: relative;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+    }
+
+    pre code {
+      background: transparent;
+      padding: 0;
+      color: inherit;
+      font-size: 0.92em;
+      white-space: pre;
+      display: block;
+      line-height: 1.5;
+    }
+
+    .code-copy-btn {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      border: 1px solid #cfd6df;
+      background: #eef2f7;
+      color: #6b7280;
+      border-radius: 8px;
+      padding: 4px 10px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .code-copy-btn:hover {
+      background: #e5e9ef;
+      border-color: #b8c1cc;
+    }
+
+    .code-copy-btn:active {
+      transform: translateY(1px);
+    }
+
+    .tok-comment { color: #6b7280; }
+    .tok-keyword { color: #ef4444; }
+    .tok-fn { color: #2563eb; }
+    .tok-string { color: #16a34a; }
+    .tok-number { color: #d97706; }
+    .tok-operator { color: #4b5563; }
+
+    .foot {
+      margin-top: 30px;
+      padding-top: 14px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 980px) {
+      .doc-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .toc-sidebar {
+        position: static;
+        max-height: none;
+      }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .container {
+        width: 100%;
+        margin: 0;
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+        padding: 0;
+      }
+      a { color: inherit; text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h1>Museum Azman Technical Documentation</h1>
+    <p class="meta">
+      <strong>Version:</strong> 1.1<br>
+      <strong>Date:</strong> 2026-03-10<br>
+      <strong>System:</strong> Museum Azman (Laravel 12)
+    </p>
+
+    <div class="doc-layout">
+      <aside class="toc toc-sidebar">
+        <strong>Contents</strong>
+        <ol>
+          <li><a href="#purpose">Document Purpose</a></li>
+          <li><a href="#overview">System Overview</a></li>
+          <li><a href="#stack">Technology Stack</a></li>
+          <li><a href="#structure">Project Structure</a></li>
+          <li><a href="#architecture">Architecture</a></li>
+          <li><a href="#modules">Core Modules</a></li>
+          <li><a href="#model">Data Model</a></li>
+          <li><a href="#routing">Routing and Access Control</a></li>
+          <li><a href="#files">File and Image Handling</a></li>
+          <li><a href="#backup">Backup and Recovery</a></li>
+          <li><a href="#pwa">PWA and Mobile Installability</a></li>
+          <li><a href="#env">Environment Configuration</a></li>
+          <li><a href="#build">Build and Run</a></li>
+          <li><a href="#tests">Test Strategy</a></li>
+          <li><a href="#deploy">Deployment Guide</a></li>
+          <li><a href="#security">Security Notes</a></li>
+          <li><a href="#perf">Performance Notes</a></li>
+          <li><a href="#ops">Operations and Monitoring</a></li>
+          <li><a href="#troubleshoot">Troubleshooting Guide</a></li>
+          <li><a href="#commands">Command Reference</a></li>
+          <li><a href="#gaps">Known Gaps and Future Improvements</a></li>
+          <li><a href="#index">Source Reference Index</a></li>
+        </ol>
+      </aside>
+
+      <section class="doc-content">
+
+    <h2 id="purpose">1. Document Purpose</h2>
+    <p>
+      This document provides technical guidance for developing, deploying, operating, and maintaining Museum Azman.
+      Target audiences include developers, DevOps/infrastructure engineers, technical support teams, and system administrators.
+    </p>
+
+    <h2 id="overview">2. System Overview</h2>
+    <p>Museum Azman is a web-based collection management platform supporting:</p>
+    <ul>
+      <li>Artwork inventory lifecycle</li>
+      <li>Artist and location management</li>
+      <li>Artwork movement tracking</li>
+      <li>Reporting and export (CSV/PDF)</li>
+      <li>User and role administration</li>
+      <li>Settings and backup operations</li>
+      <li>Installable PWA behavior</li>
+    </ul>
+
+    <h2 id="stack">3. Technology Stack</h2>
+    <h3>3.1 Backend</h3>
+    <ul>
+      <li><code>php ^8.2</code></li>
+      <li><code>laravel/framework ^12.0</code></li>
+      <li><code>laravel/tinker</code></li>
+      <li><code>barryvdh/laravel-dompdf</code></li>
+      <li><code>bupple/laravel-ai-engine</code> (optional)</li>
+    </ul>
+
+    <h3>3.2 Frontend</h3>
+    <ul>
+      <li>Blade templates in <code>resources/views</code></li>
+      <li>Vite build pipeline</li>
+      <li>Tailwind CSS 4</li>
+      <li>Vanilla JavaScript for suggestions, modal interactions, AJAX flows, and PWA</li>
+    </ul>
+
+    <h3>3.3 Data and Storage</h3>
+    <ul>
+      <li>Database configurable via Laravel (<code>sqlite</code> default in <code>.env.example</code>)</li>
+      <li>Backup table-snapshot support for <code>mysql</code>, <code>pgsql</code>, and <code>sqlite</code></li>
+      <li>Public disk for media and local private disk for backup JSON files</li>
+    </ul>
+
+    <h2 id="structure">4. Project Structure</h2>
+    <ul>
+      <li><code>app/</code>, <code>bootstrap/</code>, <code>config/</code>, <code>database/</code>, <code>public/</code>, <code>resources/</code>, <code>routes/</code>, <code>storage/</code>, <code>tests/</code></li>
+      <li>Controllers: <code>app/Http/Controllers</code></li>
+      <li>Models: <code>app/Models</code></li>
+      <li>Services: <code>app/Services</code></li>
+      <li>Console commands: <code>app/Console/Commands</code></li>
+    </ul>
+
+    <h2 id="architecture">5. Architecture</h2>
+    <h3>5.1 Runtime Request Flow</h3>
+    <ol>
+      <li>Client request</li>
+      <li>Route resolution in <code>routes/web.php</code></li>
+      <li>Middleware checks (<code>guest</code>, <code>auth</code>, <code>admin</code>)</li>
+      <li>Controller orchestration</li>
+      <li>Eloquent model operations</li>
+      <li>Optional service layer processing</li>
+      <li>Blade/JSON/file response</li>
+    </ol>
+
+    <h3>5.2 Scheduled Operations</h3>
+    <p>
+      Cron runs <code>php artisan schedule:run</code> each minute. Scheduler in <code>routes/console.php</code>
+      executes <code>backup:auto</code> daily at configured time/timezone with overlap prevention.
+    </p>
+
+    <h2 id="modules">6. Core Modules</h2>
+
+    <h3>6.1 Authentication Module</h3>
+    <p>Controller: <code>app/Http/Controllers/AuthController.php</code></p>
+    <pre><code>// routes/web.php
+Route::middleware('guest')-&gt;group(function () {
+  Route::get('login', [AuthController::class, 'showLogin'])-&gt;name('login');
+  Route::post('login', [AuthController::class, 'login'])-&gt;name('login.perform');
+});
+Route::post('logout', [AuthController::class, 'logout'])-&gt;middleware('auth')-&gt;name('logout');</code></pre>
+
+    <h3>6.2 Dashboard Module</h3>
+    <p>Controller: <code>app/Http/Controllers/DashboardController.php</code></p>
+    <pre><code>$stats = [
+  'total_artworks' =&gt; $artworks-&gt;count(),
+  'collection_value' =&gt; (float) $artworks-&gt;sum('current_valuation'),
+  'on_loan' =&gt; $artworks-&gt;where('status', 'On Loan')-&gt;count(),
+];</code></pre>
+
+    <h3>6.3 Artwork Module</h3>
+    <p>Controller: <code>app/Http/Controllers/ArtworkController.php</code></p>
+    <pre><code>Route::resource('artworks', ArtworkController::class);
+Route::get('artworks/suggestions', [ArtworkController::class, 'suggestions']);
+Route::get('artworks/export/pdf', [ArtworkController::class, 'exportPdf']);
+
+if ($request-&gt;hasFile('primary_image')) {
+  $primary = $this-&gt;imageOptimizer-&gt;storeUploaded($request-&gt;file('primary_image'));
+  $artwork-&gt;primary_image_path = $primary['path'] ?? null;
+}</code></pre>
+
+    <h3>6.4 Artist Module</h3>
+    <p>Controller: <code>app/Http/Controllers/ArtistController.php</code></p>
+    <pre><code>$artists = Artist::query()
+  -&gt;withCount('artworks')
+  -&gt;withSum('artworks as portfolio_value', 'current_valuation')
+  -&gt;orderBy('name')
+  -&gt;get();</code></pre>
+
+    <h3>6.5 Location Module</h3>
+    <p>Controller: <code>app/Http/Controllers/LocationController.php</code></p>
+    <pre><code>Route::get('locations/create', [LocationController::class, 'create'])
+  -&gt;middleware('admin');
+
+private function mapUrl(string $query): ?string
+{
+  return $query === ''
+    ? null
+    : 'https://www.google.com/maps/search/?api=1&amp;query=' . rawurlencode($query);
+}</code></pre>
+
+    <h3>6.6 Movement Module</h3>
+    <p>Controller: <code>app/Http/Controllers/MovementController.php</code></p>
+    <pre><code>$movement = Movement::create($request-&gt;validated());
+$movement-&gt;artwork()-&gt;update([
+  'status' =&gt; $movement-&gt;status,
+]);</code></pre>
+
+    <h3>6.7 Reporting Module</h3>
+    <p>Controller: <code>app/Http/Controllers/ReportController.php</code></p>
+    <pre><code>return response()-&gt;streamDownload(function () use ($stats) {
+  $out = fopen('php://output', 'w');
+  fputcsv($out, ['Reports &amp; Analytics Export']);
+  fputcsv($out, ['Total Portfolio Value', number_format((float) $stats['total_value'], 2)]);
+  fclose($out);
+}, 'reports-analytics-'.now()-&gt;format('Ymd-His').'.csv');</code></pre>
+
+    <h3>6.8 Settings and Backup Module</h3>
+    <p>Controller: <code>app/Http/Controllers/SettingController.php</code></p>
+    <pre><code>$timezone = $this-&gt;getConfiguredTimezone();
+$relativePath = $this-&gt;createBackupFile($timezone);
+
+$this-&gt;saveSettings([
+  'backup_last_file' =&gt; $relativePath,
+  'backup_last_generated_at' =&gt; now($timezone)-&gt;toIso8601String(),
+]);</code></pre>
+
+    <h3>6.9 Admin User Module</h3>
+    <p>Controller: <code>app/Http/Controllers/AdminUserController.php</code></p>
+    <pre><code>Route::prefix('admin')-&gt;name('admin.')-&gt;middleware('admin')-&gt;group(function () {
+  Route::get('users', [AdminUserController::class, 'index'])-&gt;name('users.index');
+  Route::post('users', [AdminUserController::class, 'store'])-&gt;name('users.store');
+});</code></pre>
+
+    <h2 id="model">7. Data Model</h2>
+    <ul>
+      <li><code>User</code> belongsTo <code>Role</code>; <code>Role</code> hasMany <code>User</code></li>
+      <li><code>Artist</code> hasMany <code>Artwork</code>; <code>Location</code> hasMany <code>Artwork</code></li>
+      <li><code>Artwork</code> belongsTo <code>Artist</code> and <code>Location</code></li>
+      <li><code>Artwork</code> hasMany <code>ArtworkImage</code> and <code>Movement</code></li>
+      <li><code>Setting</code> stores key-value configuration</li>
+    </ul>
+
+    <h2 id="routing">8. Routing and Access Control</h2>
+    <ul>
+      <li>Routes in <code>routes/web.php</code> and <code>routes/console.php</code></li>
+      <li>Middleware boundaries: <code>guest</code>, <code>auth</code>, <code>admin</code></li>
+      <li><code>admin</code> alias configured in <code>bootstrap/app.php</code></li>
+      <li>PWA manifest route: <code>GET /manifest.json</code></li>
+    </ul>
+
+    <h2 id="files">9. File and Image Handling</h2>
+    <p>Service: <code>app/Services/ImageOptimizer.php</code></p>
+    <ul>
+      <li>Stores uploaded or URL-based images</li>
+      <li>Resizes/compresses via GD</li>
+      <li>Writes WebP/JPEG optimized images to public disk</li>
+      <li>Fallback stores original binary if transform unsupported</li>
+    </ul>
+
+    <h2 id="backup">10. Backup and Recovery</h2>
+    <ul>
+      <li>Manual backup via <code>POST /settings/backup/generate</code></li>
+      <li>Automatic backup via <code>php artisan backup:auto</code></li>
+      <li>Backup files saved to <code>storage/app/private/backups</code></li>
+      <li>Payload includes <code>generated_at</code>, <code>timezone</code>, <code>connection</code>, and <code>tables</code></li>
+      <li>Automated restore flow is not exposed in production UI</li>
+    </ul>
+
+    <h2 id="pwa">11. PWA and Mobile Installability</h2>
+    <ul>
+      <li><code>public/manifest.json</code>, <code>public/sw.js</code>, and icons in <code>public/icons/</code></li>
+      <li>Manifest uses standalone display mode and maskable icons</li>
+      <li>Service worker provides cache-first fetch strategy for core assets</li>
+    </ul>
+
+    <h2 id="env">12. Environment Configuration</h2>
+    <p>Template file: <code>.env.example</code></p>
+    <ul>
+      <li>Core app: <code>APP_*</code></li>
+      <li>Database: <code>DB_*</code></li>
+      <li>Session/cache/queue: <code>SESSION_*</code>, <code>CACHE_*</code>, <code>QUEUE_*</code></li>
+      <li>Mail: <code>MAIL_*</code></li>
+      <li>Filesystem/cloud: <code>FILESYSTEM_DISK</code>, <code>AWS_*</code></li>
+      <li>Optional AI engine: <code>BUPPLE_*</code></li>
+    </ul>
+
+    <h2 id="build">13. Build and Run</h2>
+    <h3>13.1 Initial Setup</h3>
+    <pre><code>composer install
+cp .env.example .env
+php artisan key:generate
+php artisan migrate --force
+npm install
+npm run build</code></pre>
+
+    <h3>13.2 Local Development</h3>
+    <pre><code>composer run dev</code></pre>
+
+    <h3>13.3 Production Build</h3>
+    <pre><code>composer install --no-dev --optimize-autoloader
+npm ci
+npm run build
+php artisan migrate --force
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache</code></pre>
+
+    <h2 id="tests">14. Test Strategy</h2>
+    <ul>
+      <li>PHPUnit config: <code>phpunit.xml</code></li>
+      <li>Suites: <code>tests/Unit</code> and <code>tests/Feature</code></li>
+      <li>Default test DB: in-memory SQLite</li>
+    </ul>
+    <pre><code>composer run test</code></pre>
+
+    <h2 id="deploy">15. Deployment Guide</h2>
+    <ul>
+      <li>Recommended runtime: Ubuntu LTS, Nginx, PHP-FPM, MySQL, TLS</li>
+      <li>Deployment flow: pull, install, build assets, migrate, cache, restart services</li>
+      <li>Required cron shown below</li>
+    </ul>
+    <pre><code>* * * * * cd /path/to/project && php artisan schedule:run >> /dev/null 2>&1</code></pre>
+
+    <h2 id="security">16. Security Notes</h2>
+    <ul>
+      <li>Enforce HTTPS in production</li>
+      <li>Use strong <code>APP_KEY</code> and credentials</li>
+      <li>Restrict administrative accounts</li>
+      <li>Validate upload inputs and URL sources</li>
+      <li>Harden file permissions and backup access</li>
+    </ul>
+
+    <h2 id="perf">17. Performance Notes</h2>
+    <ul>
+      <li>Use Laravel production caches</li>
+      <li>Monitor DB query performance as data grows</li>
+      <li>Move heavy operations to queues when needed</li>
+      <li>Offload large media/backup retention to object storage if required</li>
+    </ul>
+
+    <h2 id="ops">18. Operations and Monitoring</h2>
+    <p>Monitor uptime, latency, system resources, DB health, queue status, backup freshness, and <code>storage/logs</code>.</p>
+
+    <h2 id="troubleshoot">19. Troubleshooting Guide</h2>
+    <h3>19.1 Common Issues</h3>
+    <ul>
+      <li>Missing APP_KEY: run <code>php artisan key:generate</code></li>
+      <li>Images missing: run <code>php artisan storage:link</code></li>
+      <li>Assets missing: run <code>npm run build</code></li>
+      <li>Schedule not running: verify cron + <code>php artisan schedule:list</code></li>
+    </ul>
+
+    <h3>19.2 Useful Commands</h3>
+    <pre><code>php artisan route:list
+php artisan migrate:status
+php artisan optimize:clear
+php artisan schedule:list
+php artisan backup:auto</code></pre>
+
+    <h2 id="commands">20. Command Reference</h2>
+    <ul>
+      <li><code>backup:auto</code>: generates automatic DB snapshot backup</li>
+      <li><code>museum:import-xlsx {path} {--download-images}</code>: imports spreadsheet data to artist/artwork/location entities</li>
+    </ul>
+
+    <h2 id="gaps">21. Known Gaps and Future Improvements</h2>
+    <ul>
+      <li>Add production-grade restore workflow and UI validation</li>
+      <li>Expand automated test coverage for backup/reporting paths</li>
+      <li>Add ERD and sequence diagrams</li>
+      <li>Consider async export for large datasets</li>
+    </ul>
+
+    <h2 id="index">22. Source Reference Index</h2>
+    <ul>
+      <li>Routes: <code>routes/web.php</code>, <code>routes/console.php</code></li>
+      <li>Controllers: <code>app/Http/Controllers/*.php</code></li>
+      <li>Models: <code>app/Models/*.php</code></li>
+      <li>Services: <code>app/Services/ImageOptimizer.php</code></li>
+      <li>Commands: <code>app/Console/Commands/AutoBackupCommand.php</code>, <code>app/Console/Commands/ImportMuseumXlsxCommand.php</code></li>
+      <li>PWA: <code>public/manifest.json</code>, <code>public/sw.js</code></li>
+    </ul>
+
+      </section>
+    </div>
+
+    <p class="foot">End of technical documentation.</p>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const escapeHtml = (value) => value
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+      const highlightCode = (source) => {
+        let html = escapeHtml(source);
+
+        html = html.replace(/(^|\s)(\/\/.*)$/gm, '$1<span class="tok-comment">$2</span>');
+        html = html.replace(/('(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*")/g, '<span class="tok-string">$1</span>');
+        html = html.replace(/\b(Route|function|class|public|private|protected|return|if|else|new|null|true|false|try|catch|use|namespace|const|let|var|async|await)\b/g, '<span class="tok-keyword">$1</span>');
+        html = html.replace(/\b(middleware|group|get|post|put|delete|name|resource|with|where|sum|count|query|create|update|pluck|redirect|response|view|firstOrCreate)\b(?=\s*\()/g, '<span class="tok-fn">$1</span>');
+        html = html.replace(/\b(\d+(?:\.\d+)?)\b/g, '<span class="tok-number">$1</span>');
+        html = html.replace(/(-&gt;|::)/g, '<span class="tok-operator">$1</span>');
+
+        return html;
+      };
+
+      document.querySelectorAll('pre').forEach((block) => {
+        const code = block.querySelector('code');
+        if (!code) {
+          return;
+        }
+
+        const rawCode = code.innerText;
+        code.dataset.raw = rawCode;
+        code.innerHTML = highlightCode(rawCode);
+
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'code-copy-btn';
+        button.textContent = 'Copy';
+
+        button.addEventListener('click', async () => {
+          try {
+            await navigator.clipboard.writeText(code.dataset.raw || code.innerText);
+            button.textContent = 'Copied';
+            setTimeout(() => {
+              button.textContent = 'Copy';
+            }, 1200);
+          } catch (_) {
+            button.textContent = 'Failed';
+            setTimeout(() => {
+              button.textContent = 'Copy';
+            }, 1200);
+          }
+        });
+
+        block.appendChild(button);
+      });
+    });
+  </script>
+</body>
+</html>

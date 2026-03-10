@@ -63,6 +63,19 @@ Route::middleware('auth')->group(function () {
 	Route::post('settings/backup/delete', [SettingController::class, 'deleteBackup'])->name('settings.backup.delete');
 
 	Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
+		Route::get('technical-documentation', function () {
+			$docPath = base_path('docs/Museum-Azman-Technical-Documentation.html');
+
+			if (! file_exists($docPath)) {
+				abort(404, 'Technical documentation file not found.');
+			}
+
+			return response()->file($docPath, [
+				'Content-Type' => 'text/html; charset=UTF-8',
+				'X-Robots-Tag' => 'noindex, nofollow',
+			]);
+		})->name('docs.technical');
+
 		Route::get('users', [AdminUserController::class, 'index'])->name('users.index');
 		Route::post('users', [AdminUserController::class, 'store'])->name('users.store');
 		Route::get('users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');

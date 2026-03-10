@@ -20,10 +20,20 @@ class AdminUserController extends Controller
 
     public function index(): View
     {
-        $users = User::query()->with('roleRelation')->orderBy('name')->get();
+        $sort = request()->query('sort', 'name');
+        $direction = strtolower((string) request()->query('direction', 'asc')) === 'desc' ? 'desc' : 'asc';
+
+        // Allowlist sortable columns to keep ordering predictable and safe.
+        $sortableColumns = ['name', 'email'];
+        $sortColumn = in_array($sort, $sortableColumns, true) ? $sort : 'name';
+
+        $users = User::query()
+            ->with('roleRelation')
+            ->orderBy($sortColumn, $direction)
+            ->get();
         $roles = Role::query()->orderBy('name')->get();
 
-        return view('admin.users.index', compact('users', 'roles'));
+        return view('admin.users.index', compact('users', 'roles', 'sortColumn', 'direction'));
     }
 
     public function store(Request $request): RedirectResponse

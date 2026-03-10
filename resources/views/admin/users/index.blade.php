@@ -47,7 +47,21 @@
                 <table class="w-full min-w-245 text-sm">
                     <thead>
                         <tr class="border-b border-zinc-200 text-left text-zinc-600">
-                            <th class="px-4 py-3">User</th>
+                            <th class="px-4 py-3">
+                                @php
+                                    $isNameSort = ($sortColumn ?? 'name') === 'name';
+                                    $nextNameDirection = $isNameSort && ($direction ?? 'asc') === 'asc' ? 'desc' : 'asc';
+                                @endphp
+                                <a
+                                    href="{{ route('admin.users.index', ['sort' => 'name', 'direction' => $nextNameDirection]) }}"
+                                    class="inline-flex items-center gap-1 hover:text-zinc-900"
+                                >
+                                    <span>User</span>
+                                    @if($isNameSort)
+                                        <span class="text-xs">{{ ($direction ?? 'asc') === 'asc' ? '▲' : '▼' }}</span>
+                                    @endif
+                                </a>
+                            </th>
                             <th class="px-4 py-3">Email</th>
                             <th class="px-4 py-3">Role</th>
                             <th class="px-4 py-3">Actions</th>

@@ -33,6 +33,37 @@
             $uiHeadingFontKey = array_key_exists($headingFontValue, $fontFamilies) ? $headingFontValue : 'cormorant';
             $uiBodyFontKey = array_key_exists($bodyFontValue, $fontFamilies) ? $bodyFontValue : 'inter';
         }
+
+        if (auth()->check()) {
+            $currentUser = auth()->user();
+
+            $userThemeValue = (string) ($currentUser->appearance_theme ?? '');
+            $userDensityValue = (string) ($currentUser->appearance_density ?? '');
+            $userAccentValue = (string) ($currentUser->appearance_accent_color ?? '');
+            $userHeadingFontValue = (string) ($currentUser->appearance_heading_font ?? '');
+            $userBodyFontValue = (string) ($currentUser->appearance_body_font ?? '');
+
+            if (in_array($userThemeValue, ['light', 'dark'], true)) {
+                $uiTheme = $userThemeValue;
+            }
+
+            if (in_array($userDensityValue, ['comfortable', 'compact', 'spacious'], true)) {
+                $uiDensity = $userDensityValue;
+            }
+
+            if (preg_match('/^#[0-9A-Fa-f]{6}$/', $userAccentValue)) {
+                $uiAccent = strtolower($userAccentValue);
+            }
+
+            if (array_key_exists($userHeadingFontValue, $fontFamilies)) {
+                $uiHeadingFontKey = $userHeadingFontValue;
+            }
+
+            if (array_key_exists($userBodyFontValue, $fontFamilies)) {
+                $uiBodyFontKey = $userBodyFontValue;
+            }
+        }
+
         $uiHeadingFontFamily = $fontFamilies[$uiHeadingFontKey];
         $uiBodyFontFamily = $fontFamilies[$uiBodyFontKey];
     ?>
@@ -326,16 +357,6 @@
             </div>
         </div>
 
-        <?php if(auth()->guard()->check()): ?>
-            <div class="space-y-3 px-4 pt-4">
-                <div class="rounded-xl border border-zinc-200 bg-white px-3 py-2">
-                    <p class="text-xs font-semibold text-zinc-900"><?php echo e(auth()->user()->name); ?></p>
-                    <p class="truncate text-[11px] leading-4 text-zinc-500"><?php echo e(auth()->user()->email); ?></p>
-                    <p class="text-[11px] leading-4 text-zinc-500"><?php echo e(ucfirst((string) auth()->user()->role)); ?></p>
-                </div>
-            </div>
-        <?php endif; ?>
-
         <nav class="flex-1 space-y-1 p-4 text-sm">
             <a href="<?php echo e(route('dashboard')); ?>" class="museum-nav-item flex items-center gap-3 <?php echo e(request()->routeIs('dashboard') ? 'active' : ''); ?>">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
@@ -385,21 +406,81 @@
         </nav>
 
         <div class="mt-auto px-4 pb-6 pt-6 space-y-3">
-            <?php if(auth()->guard()->check()): ?>
-                <form method="POST" action="<?php echo e(route('logout')); ?>">
-                    <?php echo csrf_field(); ?>
-                    <button type="submit" class="museum-nav-item logout-menu-item flex w-full items-center gap-3 text-left" style="cursor: pointer">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                        <span>Logout</span>
-                    </button>
-                </form>
-            <?php endif; ?>
             <p class="px-2 text-xs text-zinc-500">Management System v1.0</p>
         </div>
     </aside>
 
     <main class="flex-1 overflow-y-auto">
-        <div class="mx-auto w-full max-w-[1400px] p-6 lg:p-10">
+        <div class="mx-auto w-full max-w-350 p-6 lg:p-10">
+            <?php if(auth()->guard()->check()): ?>
+                <?php
+                    $pendingRegistrationCount = 0;
+                    $pendingRegistrationNotifications = collect();
+                    if (
+                        auth()->user()->isAdmin()
+                        && \Illuminate\Support\Facades\Schema::hasTable('notifications')
+                    ) {
+                        $pendingRegistrationNotifications = auth()->user()
+                            ->unreadNotifications()
+                            ->where('type', \App\Notifications\NewUserRegistrationNotification::class)
+                            ->latest()
+                            ->take(8)
+                            ->get();
+
+                        $pendingRegistrationCount = $pendingRegistrationNotifications->count();
+                    }
+                ?>
+
+                <div class="mb-6 flex items-center justify-end gap-3">
+                    <?php if(auth()->user()->isAdmin()): ?>
+                        <details class="relative">
+                            <summary class="museum-btn-secondary inline-flex list-none items-center gap-2 <?php echo e(request()->routeIs('admin.users.*') ? 'ring-2 ring-zinc-300' : ''); ?> cursor-pointer" title="Pending registration approvals" aria-label="Pending registration approvals">
+                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5"></path><path d="M10 17a2 2 0 0 0 4 0"></path></svg>
+                                <span class="inline-flex min-w-6 items-center justify-center rounded-full px-2 py-0.5 text-xs font-semibold text-white" style="background: var(--museum-accent);"><?php echo e($pendingRegistrationCount); ?></span>
+                            </summary>
+
+                            <div class="absolute right-0 z-50 mt-2 w-96 max-w-[90vw] rounded-xl border border-zinc-200 bg-white p-3 shadow-lg">
+                                <div class="mb-2 flex items-center justify-between">
+                                    <p class="text-sm font-semibold text-zinc-900">Pending Registrations</p>
+                                    <a href="<?php echo e(route('admin.users.index')); ?>" class="text-xs font-semibold" style="color: var(--museum-accent);">Manage</a>
+                                </div>
+
+                                <?php if($pendingRegistrationNotifications->isEmpty()): ?>
+                                    <p class="rounded-lg bg-zinc-50 px-3 py-2 text-xs text-zinc-500">No pending notifications.</p>
+                                <?php else: ?>
+                                    <div class="max-h-72 space-y-2 overflow-y-auto pr-1">
+                                        <?php $__currentLoopData = $pendingRegistrationNotifications; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $notification): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <a href="<?php echo e(route('admin.users.index', ['sort' => 'status', 'direction' => 'asc'])); ?>" class="block rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100">
+                                                <p class="font-semibold text-zinc-900"><?php echo e($notification->data['name'] ?? 'User'); ?></p>
+                                                <p class="truncate text-zinc-600"><?php echo e($notification->data['email'] ?? 'unknown email'); ?></p>
+                                                <?php if(!empty($notification->data['requested_role'])): ?>
+                                                    <p>Requested role: <span class="font-semibold"><?php echo e($notification->data['requested_role']); ?></span></p>
+                                                <?php endif; ?>
+                                                <p class="mt-1 text-zinc-500"><?php echo e($notification->created_at?->diffForHumans()); ?></p>
+                                            </a>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </details>
+                    <?php endif; ?>
+
+                    <a href="<?php echo e(route('profile.edit')); ?>" class="museum-btn-secondary inline-flex items-center gap-2">
+                        <?php if(auth()->user()->avatar_url): ?>
+                            <img src="<?php echo e(auth()->user()->avatar_url); ?>" alt="<?php echo e(auth()->user()->name); ?>" class="h-7 w-7 rounded-full object-cover">
+                        <?php else: ?>
+                            <span class="inline-flex h-7 w-7 items-center justify-center rounded-full text-xs font-semibold text-white" style="background: var(--museum-accent);"><?php echo e(strtoupper(substr(auth()->user()->name, 0, 2))); ?></span>
+                        <?php endif; ?>
+                        <span>Profile</span>
+                    </a>
+
+                    <form method="POST" action="<?php echo e(route('logout')); ?>">
+                        <?php echo csrf_field(); ?>
+                        <button type="submit" class="museum-btn-secondary">Logout</button>
+                    </form>
+                </div>
+            <?php endif; ?>
+
             <?php if(session('success')): ?>
                 <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700">
                     <?php echo e(session('success')); ?>
@@ -472,6 +553,7 @@
         <?php endif; ?>
         
         <?php if(auth()->guard()->check()): ?>
+            <a href="<?php echo e(route('profile.edit')); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('profile.*') ? 'active' : ''); ?>">My Profile</a>
             <form method="POST" action="<?php echo e(route('logout')); ?>" class="mt-8">
                 <?php echo csrf_field(); ?>
                 <button type="submit" class="w-full rounded-lg bg-zinc-900 px-4 py-3 text-white font-semibold transition hover:bg-rose-700">Logout</button>

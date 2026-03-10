@@ -25,6 +25,20 @@ class User extends Authenticatable
         'role',
         'role_id',
         'avatar_path',
+        'is_approved',
+        'approved_at',
+        'appearance_theme',
+        'appearance_density',
+        'appearance_accent_color',
+        'appearance_heading_font',
+        'appearance_body_font',
+        'notification_movement_alerts',
+        'notification_insurance_expiry',
+        'notification_loan_return_due',
+        'notification_restoration_due',
+        'notification_valuation_updates',
+        'notification_delivery_email',
+        'notification_delivery_browser',
         'password',
     ];
 
@@ -51,6 +65,15 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'approved_at' => 'datetime',
+            'is_approved' => 'boolean',
+            'notification_movement_alerts' => 'boolean',
+            'notification_insurance_expiry' => 'boolean',
+            'notification_loan_return_due' => 'boolean',
+            'notification_restoration_due' => 'boolean',
+            'notification_valuation_updates' => 'boolean',
+            'notification_delivery_email' => 'boolean',
+            'notification_delivery_browser' => 'boolean',
             'password' => 'hashed',
         ];
     }
@@ -86,5 +109,10 @@ class User extends Authenticatable
 
         return in_array($roleSlug, ['admin', 'owner'], true)
             || in_array((string) $this->role, ['admin', 'owner'], true);
+    }
+
+    public function isApproved(): bool
+    {
+        return (bool) ($this->is_approved ?? true);
     }
 }

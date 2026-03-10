@@ -22,12 +22,17 @@
         <div class="mb-8 border-b border-zinc-200">
     <nav class="flex flex-wrap gap-2 -mb-px" aria-label="Settings tabs">
         <?php
-            $tabs = [
-                ['key' => 'general',       'label' => 'General',        'icon' => '⚙️'],
-                ['key' => 'users-roles',   'label' => 'Users & Roles',  'icon' => '👥'],
-                ['key' => 'notifications', 'label' => 'Notifications',  'icon' => '🔔'],
-                ['key' => 'appearance',    'label' => 'Appearance',     'icon' => '🎨'],
-            ];
+            $tabs = ($canAccessAdminTabs ?? false)
+                ? [
+                    ['key' => 'general',       'label' => 'General',        'icon' => '⚙️'],
+                    ['key' => 'users-roles',   'label' => 'Users & Roles',  'icon' => '👥'],
+                    ['key' => 'notifications', 'label' => 'Notifications',  'icon' => '🔔'],
+                    ['key' => 'appearance',    'label' => 'Appearance',     'icon' => '🎨'],
+                ]
+                : [
+                    ['key' => 'notifications', 'label' => 'Notifications',  'icon' => '🔔'],
+                    ['key' => 'appearance',    'label' => 'Appearance',     'icon' => '🎨'],
+                ];
         ?>
 
         <?php $__currentLoopData = $tabs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tab): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
@@ -64,6 +69,7 @@
 
                 <form method="POST" action="<?php echo e(route('settings.update', ['section' => 'general'])); ?>" enctype="multipart/form-data" class="mt-5">
                     <?php echo csrf_field(); ?>
+                    <fieldset <?php if(!($canManageSettings ?? false)): echo 'disabled'; endif; ?> class="m-0 min-w-0 border-0 p-0">
                     <div class="grid gap-4 md:grid-cols-2">
                         <div class="space-y-4">
                             <label class="museum-field">
@@ -147,7 +153,10 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="museum-btn mt-5">Save Changes</button>
+                    <?php if($canManageSettings ?? false): ?>
+                        <button type="submit" class="museum-btn mt-5">Save Changes</button>
+                    <?php endif; ?>
+                    </fieldset>
                 </form>
             </article>
 
@@ -157,6 +166,7 @@
 
                 <form method="POST" action="<?php echo e(route('settings.update', ['section' => 'regional'])); ?>" class="mt-5">
                     <?php echo csrf_field(); ?>
+                    <fieldset <?php if(!($canManageSettings ?? false)): echo 'disabled'; endif; ?> class="m-0 min-w-0 border-0 p-0">
                     <div class="grid gap-4 md:grid-cols-2">
                         <label class="museum-field">
                             <span>Default Currency</span>
@@ -180,7 +190,10 @@
                         </label>
                     </div>
 
-                    <button type="submit" class="museum-btn mt-5">Save Changes</button>
+                    <?php if($canManageSettings ?? false): ?>
+                        <button type="submit" class="museum-btn mt-5">Save Changes</button>
+                    <?php endif; ?>
+                    </fieldset>
                 </form>
             </article>
 
@@ -215,6 +228,7 @@
 
                 <form method="POST" action="<?php echo e(route('settings.update', ['section' => 'backup'])); ?>" class="mt-4 grid gap-4 rounded-xl border border-zinc-200 bg-white p-4 md:grid-cols-3">
                     <?php echo csrf_field(); ?>
+                    <fieldset <?php if(!($canManageSettings ?? false)): echo 'disabled'; endif; ?> class="m-0 min-w-0 border-0 p-0 contents">
                     <label class="museum-field md:col-span-1">
                         <span>Auto Backup</span>
                         <input type="hidden" name="backup_auto_enabled" value="0">
@@ -230,19 +244,27 @@
                     </label>
 
                     <div class="md:col-span-3">
-                        <button style="margin-top:29px;" type="submit" class="museum-btn w-full">Save Auto Backup</button>
+                        <?php if($canManageSettings ?? false): ?>
+                            <button style="margin-top:29px;" type="submit" class="museum-btn w-full">Save Auto Backup</button>
+                        <?php endif; ?>
                     </div>
+                    </fieldset>
                 </form>
 
                 <div class="mt-4 flex flex-wrap items-center gap-2">
-                    <form method="POST" action="<?php echo e(route('settings.backup.generate')); ?>">
-                        <?php echo csrf_field(); ?>
-                        <button type="submit" class="museum-btn">Generate Backup</button>
-                    </form>
+                    <?php if($canManageSettings ?? false): ?>
+                        <form method="POST" action="<?php echo e(route('settings.backup.generate')); ?>">
+                            <?php echo csrf_field(); ?>
+                            <button type="submit" class="museum-btn">Generate Backup</button>
+                        </form>
 
-                    <?php if(!empty($backupMeta['has_file'])): ?>
-                        <a href="<?php echo e(route('settings.backup.download')); ?>" class="museum-btn-secondary">Download Backup</a>
+                        <?php if(!empty($backupMeta['has_file'])): ?>
+                            <a href="<?php echo e(route('settings.backup.download')); ?>" class="museum-btn-secondary">Download Backup</a>
+                        <?php else: ?>
+                            <button type="button" class="museum-btn-secondary opacity-60" disabled>Download Backup</button>
+                        <?php endif; ?>
                     <?php else: ?>
+                        <button type="button" class="museum-btn opacity-60" disabled>Generate Backup</button>
                         <button type="button" class="museum-btn-secondary opacity-60" disabled>Download Backup</button>
                     <?php endif; ?>
 
@@ -267,12 +289,17 @@
                                     <td class="px-4 py-3 text-right text-zinc-600"><?php echo e(number_format((int) $backup['size_kb'])); ?> KB</td>
                                     <td class="px-4 py-3">
                                         <div class="flex items-center justify-end gap-2">
-                                            <a href="<?php echo e(route('settings.backup.download', ['file' => $backup['file_name']])); ?>" class="museum-btn-secondary">Download</a>
-                                            <form method="POST" action="<?php echo e(route('settings.backup.delete')); ?>" onsubmit="return confirm('Delete this backup file?');">
-                                                <?php echo csrf_field(); ?>
-                                                <input type="hidden" name="file" value="<?php echo e($backup['file_name']); ?>">
-                                                <button type="submit" class="museum-btn-secondary text-rose-600">Delete</button>
-                                            </form>
+                                            <?php if($canManageSettings ?? false): ?>
+                                                <a href="<?php echo e(route('settings.backup.download', ['file' => $backup['file_name']])); ?>" class="museum-btn-secondary">Download</a>
+                                                <form method="POST" action="<?php echo e(route('settings.backup.delete')); ?>" onsubmit="return confirm('Delete this backup file?');">
+                                                    <?php echo csrf_field(); ?>
+                                                    <input type="hidden" name="file" value="<?php echo e($backup['file_name']); ?>">
+                                                    <button type="submit" class="museum-btn-secondary text-rose-600">Delete</button>
+                                                </form>
+                                            <?php else: ?>
+                                                <button type="button" class="museum-btn-secondary opacity-60" disabled>Download</button>
+                                                <button type="button" class="museum-btn-secondary opacity-60" disabled>Delete</button>
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>
@@ -346,7 +373,21 @@
                                         <?php endif; ?>
                                     </a>
                                 </th>
-                                <th class="py-2">Status</th>
+                                <th class="py-2">
+                                    <?php
+                                        $isUserStatusSort = ($userSortColumn ?? 'name') === 'status';
+                                        $nextUserStatusDirection = $isUserStatusSort && ($userDirection ?? 'asc') === 'asc' ? 'desc' : 'asc';
+                                    ?>
+                                    <a
+                                        href="<?php echo e(route('settings.index', array_merge(request()->query(), ['tab' => 'users-roles', 'user_sort' => 'status', 'user_direction' => $nextUserStatusDirection]))); ?>"
+                                        class="inline-flex items-center gap-1 hover:text-zinc-900"
+                                    >
+                                        <span>Status</span>
+                                        <?php if($isUserStatusSort): ?>
+                                            <span class="text-xs"><?php echo e(($userDirection ?? 'asc') === 'asc' ? '▲' : '▼'); ?></span>
+                                        <?php endif; ?>
+                                    </a>
+                                </th>
                                 <th class="py-2">Last Login</th>
                                 <th class="py-2 text-right">Actions</th>
                             </tr>
@@ -385,7 +426,13 @@
                                                 : 'background: color-mix(in srgb, var(--museum-accent) 14%, white); color: var(--museum-accent); border: 1px solid color-mix(in srgb, var(--museum-accent) 35%, white);'); ?>"
                                         ><?php echo e($roleLabel); ?></span>
                                     </td>
-                                    <td class="py-3"><span class="rounded-md bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">Active</span></td>
+                                    <td class="py-3">
+                                        <?php if($user->isApproved()): ?>
+                                            <span class="rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">Approved</span>
+                                        <?php else: ?>
+                                            <span class="rounded-md border px-2 py-0.5 text-[11px] font-semibold" style="border-color: color-mix(in srgb, var(--museum-accent) 35%, white); background: color-mix(in srgb, var(--museum-accent) 12%, white); color: var(--museum-accent);">Pending</span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td class="py-3 text-zinc-600"><?php echo e($lastLogin); ?></td>
                                     <td class="py-3 text-right">
                                         <?php if(auth()->check() && auth()->user()->isAdmin()): ?>
@@ -447,6 +494,7 @@
 
                 <form method="POST" action="<?php echo e(route('settings.update', ['section' => 'notifications'])); ?>" class="mt-5">
                     <?php echo csrf_field(); ?>
+                    <fieldset class="m-0 min-w-0 border-0 p-0">
                     <div class="space-y-3">
                         <label class="flex items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 cursor-pointer">
                             <div>
@@ -510,6 +558,7 @@
                         </div>
                         <button type="submit" class="mt-4 museum-btn">Save Preferences</button>
                     </div>
+                    </fieldset>
                 </form>
             </article>
         <?php elseif($activeTab === 'appearance'): ?>
@@ -519,6 +568,7 @@
 
                 <form method="POST" action="<?php echo e(route('settings.update', ['section' => 'appearance'])); ?>" class="mt-5 space-y-4">
                     <?php echo csrf_field(); ?>
+                    <fieldset class="m-0 min-w-0 border-0 p-0 space-y-4">
                     <?php
                         $accentCandidate = (string) old('accent_color', $appearanceSettings['accent_color'] ?? '#1c1917');
                         $selectedAccent = preg_match('/^#[0-9A-Fa-f]{6}$/', $accentCandidate) ? strtolower($accentCandidate) : '#1c1917';
@@ -594,6 +644,7 @@
                     </div>
 
                     <button type="submit" class="mt-2 museum-btn">Save Preferences</button>
+                    </fieldset>
                 </form>
             </article>
         <?php endif; ?>

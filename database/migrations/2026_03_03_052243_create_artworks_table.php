@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('artworks')) {
+            return;
+        }
+
         Schema::create('artworks', function (Blueprint $table) {
             $table->id();
             $table->foreignId('artist_id')->nullable()->constrained()->nullOnDelete();

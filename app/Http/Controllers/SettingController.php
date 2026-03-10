@@ -132,11 +132,17 @@ class SettingController extends Controller
 
     public function index(Request $request): View
     {
-        $allowedTabs = ['general', 'users-roles', 'notifications', 'appearance'];
+        $currentUser = $request->user();
+        $canManageSettings = (bool) ($currentUser?->isAdmin());
+        $canAccessAdminTabs = $canManageSettings;
+
+        $allowedTabs = $canAccessAdminTabs
+            ? ['general', 'users-roles', 'notifications', 'appearance']
+            : ['notifications', 'appearance'];
         $activeTab = (string) $request->string('tab', 'general');
 
         if (! in_array($activeTab, $allowedTabs, true)) {
-            $activeTab = 'general';
+            $activeTab = $canAccessAdminTabs ? 'general' : 'notifications';
         }
 
         $settings = $this->getSettingsMap();
@@ -169,6 +175,18 @@ class SettingController extends Controller
             'delivery_browser' => ($settings['delivery_browser'] ?? '0') === '1',
         ];
 
+        if ($currentUser) {
+            $notificationSettings = [
+                'movement_alerts' => $currentUser->notification_movement_alerts ?? $notificationSettings['movement_alerts'],
+                'insurance_expiry' => $currentUser->notification_insurance_expiry ?? $notificationSettings['insurance_expiry'],
+                'loan_return_due' => $currentUser->notification_loan_return_due ?? $notificationSettings['loan_return_due'],
+                'restoration_due' => $currentUser->notification_restoration_due ?? $notificationSettings['restoration_due'],
+                'valuation_updates' => $currentUser->notification_valuation_updates ?? $notificationSettings['valuation_updates'],
+                'delivery_email' => $currentUser->notification_delivery_email ?? $notificationSettings['delivery_email'],
+                'delivery_browser' => $currentUser->notification_delivery_browser ?? $notificationSettings['delivery_browser'],
+            ];
+        }
+
         $appearanceSettings = [
             'theme' => $settings['theme'] ?? 'light',
             'density' => $settings['density'] ?? 'comfortable',
@@ -176,6 +194,16 @@ class SettingController extends Controller
             'heading_font' => $settings['heading_font'] ?? 'cormorant',
             'body_font' => $settings['body_font'] ?? 'inter',
         ];
+
+        if ($currentUser) {
+            $appearanceSettings = [
+                'theme' => $currentUser->appearance_theme ?: $appearanceSettings['theme'],
+                'density' => $currentUser->appearance_density ?: $appearanceSettings['density'],
+                'accent_color' => $currentUser->appearance_accent_color ?: $appearanceSettings['accent_color'],
+                'heading_font' => $currentUser->appearance_heading_font ?: $appearanceSettings['heading_font'],
+                'body_font' => $currentUser->appearance_body_font ?: $appearanceSettings['body_font'],
+            ];
+        }
 
         $backupList = $this->listBackups($configuredTimezone);
         $backupSettings = [
@@ -190,7 +218,7 @@ class SettingController extends Controller
             'timezone' => $configuredTimezone,
         ];
 
-        $userSortColumn = in_array((string) $request->string('user_sort', 'name'), ['name', 'email', 'role'], true)
+        $userSortColumn = in_array((string) $request->string('user_sort', 'name'), ['name', 'email', 'role', 'status'], true)
             ? (string) $request->string('user_sort', 'name')
             : 'name';
         $userDirection = strtolower((string) $request->string('user_direction', 'asc')) === 'desc' ? 'desc' : 'asc';
@@ -204,6 +232,10 @@ class SettingController extends Controller
                         ->leftJoin('roles as sort_roles', 'sort_roles.id', '=', 'users.role_id')
                         ->select('users.*')
                         ->orderBy('sort_roles.name', $userDirection)
+                        ->orderBy('users.name');
+                } elseif ($userSortColumn === 'status') {
+                    $query
+                        ->orderBy('users.is_approved', $userDirection)
                         ->orderBy('users.name');
                 } else {
                     $query->orderBy($userSortColumn, $userDirection);
@@ -219,6 +251,8 @@ class SettingController extends Controller
 
         return view('settings.index', compact(
             'activeTab',
+            'canManageSettings',
+            'canAccessAdminTabs',
             'generalSettings',
             'regionalSettings',
             'notificationSettings',
@@ -235,6 +269,24 @@ class SettingController extends Controller
 
     public function update(Request $request, string $section): RedirectResponse
     {
+        $currentUser = $request->user();
+        $isAdmin = (bool) ($currentUser?->isAdmin());
+
+        $adminOnlySections = ['general', 'regional', 'backup'];
+        if (! $isAdmin && in_array($section, $adminOnlySections, true)) {
+            return redirect()
+                ->route('settings.index', ['tab' => 'appearance'])
+                ->withErrors(['settings' => 'Only admin users can change this settings section.']);
+        }
+
+        if (! $request->user()?->isAdmin()) {
+            if (! in_array($section, ['notifications', 'appearance'], true)) {
+                return redirect()
+                    ->route('settings.index', ['tab' => 'appearance'])
+                    ->withErrors(['settings' => 'Only admin users can change this settings section.']);
+            }
+        }
+
         if (! Schema::hasTable('settings')) {
             return redirect()
                 ->route('settings.index', ['tab' => 'general'])
@@ -307,7 +359,21 @@ class SettingController extends Controller
                     'delivery_browser' => $request->boolean('delivery_browser') ? '1' : '0',
                 ];
 
-                $this->saveSettings($payload);
+                if ($isAdmin) {
+                    $this->saveSettings($payload);
+                }
+
+                if ($currentUser) {
+                    $currentUser->update([
+                        'notification_movement_alerts' => $request->boolean('movement_alerts'),
+                        'notification_insurance_expiry' => $request->boolean('insurance_expiry'),
+                        'notification_loan_return_due' => $request->boolean('loan_return_due'),
+                        'notification_restoration_due' => $request->boolean('restoration_due'),
+                        'notification_valuation_updates' => $request->boolean('valuation_updates'),
+                        'notification_delivery_email' => $request->boolean('delivery_email'),
+                        'notification_delivery_browser' => $request->boolean('delivery_browser'),
+                    ]);
+                }
 
                 return redirect()
                     ->route('settings.index', ['tab' => 'notifications'])
@@ -324,7 +390,24 @@ class SettingController extends Controller
 
                 $validated['accent_color'] = strtolower((string) $validated['accent_color']);
 
-                $this->saveSettings($validated);
+                $currentUser = $request->user();
+                if (! $currentUser) {
+                    return redirect()
+                        ->route('settings.index', ['tab' => 'appearance'])
+                        ->withErrors(['settings' => 'Unable to update appearance preferences.']);
+                }
+
+                if ($currentUser->isAdmin()) {
+                    $this->saveSettings($validated);
+                }
+
+                $currentUser->update([
+                    'appearance_theme' => (string) $validated['theme'],
+                    'appearance_density' => (string) $validated['density'],
+                    'appearance_accent_color' => (string) $validated['accent_color'],
+                    'appearance_heading_font' => (string) $validated['heading_font'],
+                    'appearance_body_font' => (string) $validated['body_font'],
+                ]);
 
                 return redirect()
                     ->route('settings.index', ['tab' => 'appearance'])

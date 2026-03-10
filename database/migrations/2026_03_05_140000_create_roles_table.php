@@ -9,18 +9,20 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('roles', function (Blueprint $table) {
-            $table->id();
-            $table->string('name', 100);
-            $table->string('slug', 100)->unique();
-            $table->string('description')->nullable();
-            $table->json('permissions')->nullable();
-            $table->timestamps();
-        });
+        if (! Schema::hasTable('roles')) {
+            Schema::create('roles', function (Blueprint $table) {
+                $table->id();
+                $table->string('name', 100);
+                $table->string('slug', 100)->unique();
+                $table->string('description')->nullable();
+                $table->json('permissions')->nullable();
+                $table->timestamps();
+            });
+        }
 
         $now = now();
 
-        DB::table('roles')->insert([
+        DB::table('roles')->upsert([
             [
                 'name' => 'Owner',
                 'slug' => 'owner',
@@ -82,7 +84,7 @@ return new class extends Migration
                 'created_at' => $now,
                 'updated_at' => $now,
             ],
-        ]);
+        ], ['slug'], ['name', 'description', 'permissions', 'updated_at']);
     }
 
     public function down(): void

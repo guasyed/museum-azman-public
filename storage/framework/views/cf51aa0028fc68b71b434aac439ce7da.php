@@ -51,6 +51,24 @@
             </form>
         </article>
 
+        <?php if(($registrationNotifications ?? collect())->isNotEmpty()): ?>
+            <article class="museum-panel p-5">
+                <h3 class="museum-section-title text-base!">New Registration Notifications</h3>
+                <div class="mt-3 space-y-2">
+                    <?php $__currentLoopData = $registrationNotifications; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $notification): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700">
+                            <span class="font-semibold"><?php echo e($notification->data['name'] ?? 'User'); ?></span>
+                            <span class="text-zinc-600">(<?php echo e($notification->data['email'] ?? 'unknown email'); ?>)</span>
+                            <span>requested access and is pending approval.</span>
+                            <?php if(!empty($notification->data['requested_role'])): ?>
+                                <span class="font-medium">Requested role: <?php echo e($notification->data['requested_role']); ?></span>
+                            <?php endif; ?>
+                        </div>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </div>
+            </article>
+        <?php endif; ?>
+
         <article class="museum-panel p-0! overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full min-w-245 table-fixed text-sm">
@@ -101,6 +119,21 @@
                                     <?php endif; ?>
                                 </a>
                             </th>
+                            <th class="px-4 py-3" style="width:12%;">
+                                <?php
+                                    $isStatusSort = ($sortColumn ?? 'name') === 'status';
+                                    $nextStatusDirection = $isStatusSort && ($direction ?? 'asc') === 'asc' ? 'desc' : 'asc';
+                                ?>
+                                <a
+                                    href="<?php echo e(route('admin.users.index', ['sort' => 'status', 'direction' => $nextStatusDirection])); ?>"
+                                    class="inline-flex items-center gap-1 hover:text-zinc-900"
+                                >
+                                    <span>Status</span>
+                                    <?php if($isStatusSort): ?>
+                                        <span class="text-xs"><?php echo e(($direction ?? 'asc') === 'asc' ? '▲' : '▼'); ?></span>
+                                    <?php endif; ?>
+                                </a>
+                            </th>
                             <th class="px-4 py-3 text-right" style="width:20%;">Actions</th>
                         </tr>
                     </thead>
@@ -131,8 +164,22 @@
                                         : 'background: color-mix(in srgb, var(--museum-accent) 14%, white); color: var(--museum-accent); border: 1px solid color-mix(in srgb, var(--museum-accent) 35%, white);'); ?>"
                                 ><?php echo e($userRoleLabel); ?></span>
                             </td>
+                            <td class="px-4 py-3">
+                                <?php if($user->isApproved()): ?>
+                                    <span class="rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">Approved</span>
+                                <?php else: ?>
+                                    <span class="rounded-md border px-2 py-0.5 text-xs font-semibold" style="border-color: color-mix(in srgb, var(--museum-accent) 35%, white); background: color-mix(in srgb, var(--museum-accent) 12%, white); color: var(--museum-accent);">Pending</span>
+                                <?php endif; ?>
+                            </td>
                             <td class="px-4 py-3 text-right">
                                 <div class="flex items-center justify-end gap-2 whitespace-nowrap">
+                                    <?php if(! $user->isApproved()): ?>
+                                        <form method="POST" action="<?php echo e(route('admin.users.approve', $user)); ?>">
+                                            <?php echo csrf_field(); ?>
+                                            <?php echo method_field('PATCH'); ?>
+                                            <button type="submit" class="museum-btn-secondary">Approve</button>
+                                        </form>
+                                    <?php endif; ?>
                                     <a href="<?php echo e(route('admin.users.edit', $user)); ?>" class="museum-btn-secondary">Edit</a>
                                     <?php if(auth()->id() !== $user->id): ?>
                                         <form method="POST" action="<?php echo e(route('admin.users.destroy', $user)); ?>" onsubmit="return confirm('Delete this user? This action cannot be undone.');">
@@ -145,7 +192,7 @@
                             </td>
                         </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                        <tr><td colspan="4" class="px-4 py-4 text-zinc-500">No users found.</td></tr>
+                        <tr><td colspan="5" class="px-4 py-4 text-zinc-500">No users found.</td></tr>
                     <?php endif; ?>
                     </tbody>
                 </table>

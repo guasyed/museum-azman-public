@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Role;
 use App\Models\User;
+use App\Notifications\NewUserRegistrationNotification;
 use App\Services\ImageOptimizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -24,7 +26,7 @@ class AdminUserController extends Controller
         $direction = strtolower((string) request()->query('direction', 'asc')) === 'desc' ? 'desc' : 'asc';
 
         // Allowlist sortable columns to keep ordering predictable and safe.
-        $sortableColumns = ['name', 'email', 'role'];
+        $sortableColumns = ['name', 'email', 'role', 'status'];
         $sortColumn = in_array($sort, $sortableColumns, true) ? $sort : 'name';
 
         $usersQuery = User::query()->with('roleRelation');
@@ -35,14 +37,27 @@ class AdminUserController extends Controller
                 ->select('users.*')
                 ->orderBy('sort_roles.name', $direction)
                 ->orderBy('users.name');
+        } elseif ($sortColumn === 'status') {
+            $usersQuery
+                ->orderBy('users.is_approved', $direction)
+                ->orderBy('users.name');
         } else {
             $usersQuery->orderBy($sortColumn, $direction);
         }
 
         $users = $usersQuery->get();
         $roles = Role::query()->orderBy('name')->get();
+        $registrationNotifications = collect();
+        if (Schema::hasTable('notifications')) {
+            $registrationNotifications = request()->user()
+                ?->unreadNotifications()
+                ->where('type', NewUserRegistrationNotification::class)
+                ->latest()
+                ->take(8)
+                ->get() ?? collect();
+        }
 
-        return view('admin.users.index', compact('users', 'roles', 'sortColumn', 'direction'));
+        return view('admin.users.index', compact('users', 'roles', 'sortColumn', 'direction', 'registrationNotifications'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -66,6 +81,8 @@ class AdminUserController extends Controller
         }
 
         $validated['password'] = Hash::make($validated['password']);
+        $validated['is_approved'] = true;
+        $validated['approved_at'] = now();
 
         User::query()->create($validated);
 
@@ -115,6 +132,28 @@ class AdminUserController extends Controller
         $user->update($validated);
 
         return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
+    }
+
+    public function approve(User $user): RedirectResponse
+    {
+        if ($user->isApproved()) {
+            return redirect()->route('admin.users.index')->with('success', 'User is already approved.');
+        }
+
+        $user->forceFill([
+            'is_approved' => true,
+            'approved_at' => now(),
+        ])->save();
+
+        $currentAdmin = request()->user();
+        if ($currentAdmin && Schema::hasTable('notifications')) {
+            $currentAdmin->unreadNotifications()
+                ->where('type', NewUserRegistrationNotification::class)
+                ->where('data->user_id', $user->id)
+                ->update(['read_at' => now()]);
+        }
+
+        return redirect()->route('admin.users.index')->with('success', 'User approved successfully.');
     }
 
     public function destroy(User $user): RedirectResponse

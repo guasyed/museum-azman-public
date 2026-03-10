@@ -12,6 +12,10 @@ return new class extends Migration
             return;
         }
 
+        if (Schema::hasTable(config('bupple-engine.memory.database.table_name'))) {
+            return;
+        }
+
         Schema::create(config('bupple-engine.memory.database.table_name'), function (Blueprint $table) {
             $table->id();
             $table->string('parent_class');

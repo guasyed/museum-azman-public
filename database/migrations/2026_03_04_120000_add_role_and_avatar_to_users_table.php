@@ -8,16 +8,41 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (! Schema::hasTable('users')) {
+            return;
+        }
+
         Schema::table('users', function (Blueprint $table) {
-            $table->string('role', 32)->default('user')->after('email');
-            $table->string('avatar_path')->nullable()->after('role');
+            if (! Schema::hasColumn('users', 'role')) {
+                $table->string('role', 32)->default('user')->after('email');
+            }
+
+            if (! Schema::hasColumn('users', 'avatar_path')) {
+                $table->string('avatar_path')->nullable()->after('role');
+            }
         });
     }
 
     public function down(): void
     {
+        if (! Schema::hasTable('users')) {
+            return;
+        }
+
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['role', 'avatar_path']);
+            $toDrop = [];
+
+            if (Schema::hasColumn('users', 'role')) {
+                $toDrop[] = 'role';
+            }
+
+            if (Schema::hasColumn('users', 'avatar_path')) {
+                $toDrop[] = 'avatar_path';
+            }
+
+            if (! empty($toDrop)) {
+                $table->dropColumn($toDrop);
+            }
         });
     }
 };

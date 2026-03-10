@@ -9,9 +9,15 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->foreignId('role_id')->nullable()->after('role')->constrained('roles')->nullOnDelete();
-        });
+        if (! Schema::hasTable('users') || ! Schema::hasTable('roles')) {
+            return;
+        }
+
+        if (! Schema::hasColumn('users', 'role_id')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->foreignId('role_id')->nullable()->after('role')->constrained('roles')->nullOnDelete();
+            });
+        }
 
         $adminRoleId = DB::table('roles')->where('slug', 'admin')->value('id');
         $curatorRoleId = DB::table('roles')->where('slug', 'curator')->value('id');
@@ -29,6 +35,10 @@ return new class extends Migration
 
     public function down(): void
     {
+        if (! Schema::hasTable('users') || ! Schema::hasColumn('users', 'role_id')) {
+            return;
+        }
+
         Schema::table('users', function (Blueprint $table) {
             $table->dropConstrainedForeignId('role_id');
         });

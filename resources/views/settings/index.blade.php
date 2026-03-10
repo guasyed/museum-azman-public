@@ -13,12 +13,17 @@
         <div class="mb-8 border-b border-zinc-200">
     <nav class="flex flex-wrap gap-2 -mb-px" aria-label="Settings tabs">
         @php
-            $tabs = [
-                ['key' => 'general',       'label' => 'General',        'icon' => '⚙️'],
-                ['key' => 'users-roles',   'label' => 'Users & Roles',  'icon' => '👥'],
-                ['key' => 'notifications', 'label' => 'Notifications',  'icon' => '🔔'],
-                ['key' => 'appearance',    'label' => 'Appearance',     'icon' => '🎨'],
-            ];
+            $tabs = ($canAccessAdminTabs ?? false)
+                ? [
+                    ['key' => 'general',       'label' => 'General',        'icon' => '⚙️'],
+                    ['key' => 'users-roles',   'label' => 'Users & Roles',  'icon' => '👥'],
+                    ['key' => 'notifications', 'label' => 'Notifications',  'icon' => '🔔'],
+                    ['key' => 'appearance',    'label' => 'Appearance',     'icon' => '🎨'],
+                ]
+                : [
+                    ['key' => 'notifications', 'label' => 'Notifications',  'icon' => '🔔'],
+                    ['key' => 'appearance',    'label' => 'Appearance',     'icon' => '🎨'],
+                ];
         @endphp
 
         @foreach($tabs as $tab)
@@ -55,6 +60,7 @@
 
                 <form method="POST" action="{{ route('settings.update', ['section' => 'general']) }}" enctype="multipart/form-data" class="mt-5">
                     @csrf
+                    <fieldset @disabled(!($canManageSettings ?? false)) class="m-0 min-w-0 border-0 p-0">
                     <div class="grid gap-4 md:grid-cols-2">
                         <div class="space-y-4">
                             <label class="museum-field">
@@ -137,7 +143,10 @@
                         </div>
                     </div>
 
-                    <button type="submit" class="museum-btn mt-5">Save Changes</button>
+                    @if($canManageSettings ?? false)
+                        <button type="submit" class="museum-btn mt-5">Save Changes</button>
+                    @endif
+                    </fieldset>
                 </form>
             </article>
 
@@ -147,6 +156,7 @@
 
                 <form method="POST" action="{{ route('settings.update', ['section' => 'regional']) }}" class="mt-5">
                     @csrf
+                    <fieldset @disabled(!($canManageSettings ?? false)) class="m-0 min-w-0 border-0 p-0">
                     <div class="grid gap-4 md:grid-cols-2">
                         <label class="museum-field">
                             <span>Default Currency</span>
@@ -170,7 +180,10 @@
                         </label>
                     </div>
 
-                    <button type="submit" class="museum-btn mt-5">Save Changes</button>
+                    @if($canManageSettings ?? false)
+                        <button type="submit" class="museum-btn mt-5">Save Changes</button>
+                    @endif
+                    </fieldset>
                 </form>
             </article>
 
@@ -203,6 +216,7 @@
 
                 <form method="POST" action="{{ route('settings.update', ['section' => 'backup']) }}" class="mt-4 grid gap-4 rounded-xl border border-zinc-200 bg-white p-4 md:grid-cols-3">
                     @csrf
+                    <fieldset @disabled(!($canManageSettings ?? false)) class="m-0 min-w-0 border-0 p-0 contents">
                     <label class="museum-field md:col-span-1">
                         <span>Auto Backup</span>
                         <input type="hidden" name="backup_auto_enabled" value="0">
@@ -218,19 +232,27 @@
                     </label>
 
                     <div class="md:col-span-3">
-                        <button style="margin-top:29px;" type="submit" class="museum-btn w-full">Save Auto Backup</button>
+                        @if($canManageSettings ?? false)
+                            <button style="margin-top:29px;" type="submit" class="museum-btn w-full">Save Auto Backup</button>
+                        @endif
                     </div>
+                    </fieldset>
                 </form>
 
                 <div class="mt-4 flex flex-wrap items-center gap-2">
-                    <form method="POST" action="{{ route('settings.backup.generate') }}">
-                        @csrf
-                        <button type="submit" class="museum-btn">Generate Backup</button>
-                    </form>
+                    @if($canManageSettings ?? false)
+                        <form method="POST" action="{{ route('settings.backup.generate') }}">
+                            @csrf
+                            <button type="submit" class="museum-btn">Generate Backup</button>
+                        </form>
 
-                    @if(!empty($backupMeta['has_file']))
-                        <a href="{{ route('settings.backup.download') }}" class="museum-btn-secondary">Download Backup</a>
+                        @if(!empty($backupMeta['has_file']))
+                            <a href="{{ route('settings.backup.download') }}" class="museum-btn-secondary">Download Backup</a>
+                        @else
+                            <button type="button" class="museum-btn-secondary opacity-60" disabled>Download Backup</button>
+                        @endif
                     @else
+                        <button type="button" class="museum-btn opacity-60" disabled>Generate Backup</button>
                         <button type="button" class="museum-btn-secondary opacity-60" disabled>Download Backup</button>
                     @endif
 
@@ -255,12 +277,17 @@
                                     <td class="px-4 py-3 text-right text-zinc-600">{{ number_format((int) $backup['size_kb']) }} KB</td>
                                     <td class="px-4 py-3">
                                         <div class="flex items-center justify-end gap-2">
-                                            <a href="{{ route('settings.backup.download', ['file' => $backup['file_name']]) }}" class="museum-btn-secondary">Download</a>
-                                            <form method="POST" action="{{ route('settings.backup.delete') }}" onsubmit="return confirm('Delete this backup file?');">
-                                                @csrf
-                                                <input type="hidden" name="file" value="{{ $backup['file_name'] }}">
-                                                <button type="submit" class="museum-btn-secondary text-rose-600">Delete</button>
-                                            </form>
+                                            @if($canManageSettings ?? false)
+                                                <a href="{{ route('settings.backup.download', ['file' => $backup['file_name']]) }}" class="museum-btn-secondary">Download</a>
+                                                <form method="POST" action="{{ route('settings.backup.delete') }}" onsubmit="return confirm('Delete this backup file?');">
+                                                    @csrf
+                                                    <input type="hidden" name="file" value="{{ $backup['file_name'] }}">
+                                                    <button type="submit" class="museum-btn-secondary text-rose-600">Delete</button>
+                                                </form>
+                                            @else
+                                                <button type="button" class="museum-btn-secondary opacity-60" disabled>Download</button>
+                                                <button type="button" class="museum-btn-secondary opacity-60" disabled>Delete</button>
+                                            @endif
                                         </div>
                                     </td>
                                 </tr>
@@ -334,7 +361,21 @@
                                         @endif
                                     </a>
                                 </th>
-                                <th class="py-2">Status</th>
+                                <th class="py-2">
+                                    @php
+                                        $isUserStatusSort = ($userSortColumn ?? 'name') === 'status';
+                                        $nextUserStatusDirection = $isUserStatusSort && ($userDirection ?? 'asc') === 'asc' ? 'desc' : 'asc';
+                                    @endphp
+                                    <a
+                                        href="{{ route('settings.index', array_merge(request()->query(), ['tab' => 'users-roles', 'user_sort' => 'status', 'user_direction' => $nextUserStatusDirection])) }}"
+                                        class="inline-flex items-center gap-1 hover:text-zinc-900"
+                                    >
+                                        <span>Status</span>
+                                        @if($isUserStatusSort)
+                                            <span class="text-xs">{{ ($userDirection ?? 'asc') === 'asc' ? '▲' : '▼' }}</span>
+                                        @endif
+                                    </a>
+                                </th>
                                 <th class="py-2">Last Login</th>
                                 <th class="py-2 text-right">Actions</th>
                             </tr>
@@ -373,7 +414,13 @@
                                                 : 'background: color-mix(in srgb, var(--museum-accent) 14%, white); color: var(--museum-accent); border: 1px solid color-mix(in srgb, var(--museum-accent) 35%, white);' }}"
                                         >{{ $roleLabel }}</span>
                                     </td>
-                                    <td class="py-3"><span class="rounded-md bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">Active</span></td>
+                                    <td class="py-3">
+                                        @if($user->isApproved())
+                                            <span class="rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">Approved</span>
+                                        @else
+                                            <span class="rounded-md border px-2 py-0.5 text-[11px] font-semibold" style="border-color: color-mix(in srgb, var(--museum-accent) 35%, white); background: color-mix(in srgb, var(--museum-accent) 12%, white); color: var(--museum-accent);">Pending</span>
+                                        @endif
+                                    </td>
                                     <td class="py-3 text-zinc-600">{{ $lastLogin }}</td>
                                     <td class="py-3 text-right">
                                         @if(auth()->check() && auth()->user()->isAdmin())
@@ -435,6 +482,7 @@
 
                 <form method="POST" action="{{ route('settings.update', ['section' => 'notifications']) }}" class="mt-5">
                     @csrf
+                    <fieldset class="m-0 min-w-0 border-0 p-0">
                     <div class="space-y-3">
                         <label class="flex items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 cursor-pointer">
                             <div>
@@ -498,6 +546,7 @@
                         </div>
                         <button type="submit" class="mt-4 museum-btn">Save Preferences</button>
                     </div>
+                    </fieldset>
                 </form>
             </article>
         @elseif($activeTab === 'appearance')
@@ -507,6 +556,7 @@
 
                 <form method="POST" action="{{ route('settings.update', ['section' => 'appearance']) }}" class="mt-5 space-y-4">
                     @csrf
+                    <fieldset class="m-0 min-w-0 border-0 p-0 space-y-4">
                     @php
                         $accentCandidate = (string) old('accent_color', $appearanceSettings['accent_color'] ?? '#1c1917');
                         $selectedAccent = preg_match('/^#[0-9A-Fa-f]{6}$/', $accentCandidate) ? strtolower($accentCandidate) : '#1c1917';
@@ -582,6 +632,7 @@
                     </div>
 
                     <button type="submit" class="mt-2 museum-btn">Save Preferences</button>
+                    </fieldset>
                 </form>
             </article>
         @endif

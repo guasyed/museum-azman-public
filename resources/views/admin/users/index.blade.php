@@ -42,6 +42,24 @@
             </form>
         </article>
 
+        @if(($registrationNotifications ?? collect())->isNotEmpty())
+            <article class="museum-panel p-5">
+                <h3 class="museum-section-title text-base!">New Registration Notifications</h3>
+                <div class="mt-3 space-y-2">
+                    @foreach($registrationNotifications as $notification)
+                        <div class="rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-700">
+                            <span class="font-semibold">{{ $notification->data['name'] ?? 'User' }}</span>
+                            <span class="text-zinc-600">({{ $notification->data['email'] ?? 'unknown email' }})</span>
+                            <span>requested access and is pending approval.</span>
+                            @if(!empty($notification->data['requested_role']))
+                                <span class="font-medium">Requested role: {{ $notification->data['requested_role'] }}</span>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </article>
+        @endif
+
         <article class="museum-panel p-0! overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full min-w-245 table-fixed text-sm">
@@ -92,6 +110,21 @@
                                     @endif
                                 </a>
                             </th>
+                            <th class="px-4 py-3" style="width:12%;">
+                                @php
+                                    $isStatusSort = ($sortColumn ?? 'name') === 'status';
+                                    $nextStatusDirection = $isStatusSort && ($direction ?? 'asc') === 'asc' ? 'desc' : 'asc';
+                                @endphp
+                                <a
+                                    href="{{ route('admin.users.index', ['sort' => 'status', 'direction' => $nextStatusDirection]) }}"
+                                    class="inline-flex items-center gap-1 hover:text-zinc-900"
+                                >
+                                    <span>Status</span>
+                                    @if($isStatusSort)
+                                        <span class="text-xs">{{ ($direction ?? 'asc') === 'asc' ? '▲' : '▼' }}</span>
+                                    @endif
+                                </a>
+                            </th>
                             <th class="px-4 py-3 text-right" style="width:20%;">Actions</th>
                         </tr>
                     </thead>
@@ -122,8 +155,22 @@
                                         : 'background: color-mix(in srgb, var(--museum-accent) 14%, white); color: var(--museum-accent); border: 1px solid color-mix(in srgb, var(--museum-accent) 35%, white);' }}"
                                 >{{ $userRoleLabel }}</span>
                             </td>
+                            <td class="px-4 py-3">
+                                @if($user->isApproved())
+                                    <span class="rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">Approved</span>
+                                @else
+                                    <span class="rounded-md border px-2 py-0.5 text-xs font-semibold" style="border-color: color-mix(in srgb, var(--museum-accent) 35%, white); background: color-mix(in srgb, var(--museum-accent) 12%, white); color: var(--museum-accent);">Pending</span>
+                                @endif
+                            </td>
                             <td class="px-4 py-3 text-right">
                                 <div class="flex items-center justify-end gap-2 whitespace-nowrap">
+                                    @if(! $user->isApproved())
+                                        <form method="POST" action="{{ route('admin.users.approve', $user) }}">
+                                            @csrf
+                                            @method('PATCH')
+                                            <button type="submit" class="museum-btn-secondary">Approve</button>
+                                        </form>
+                                    @endif
                                     <a href="{{ route('admin.users.edit', $user) }}" class="museum-btn-secondary">Edit</a>
                                     @if(auth()->id() !== $user->id)
                                         <form method="POST" action="{{ route('admin.users.destroy', $user) }}" onsubmit="return confirm('Delete this user? This action cannot be undone.');">
@@ -136,7 +183,7 @@
                             </td>
                         </tr>
                     @empty
-                        <tr><td colspan="4" class="px-4 py-4 text-zinc-500">No users found.</td></tr>
+                        <tr><td colspan="5" class="px-4 py-4 text-zinc-500">No users found.</td></tr>
                     @endforelse
                     </tbody>
                 </table>

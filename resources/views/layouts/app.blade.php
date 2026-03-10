@@ -13,7 +13,7 @@
 
     <title>{{ $title ?? 'Museum Azman' }}</title>
     @php
-        $faviconHref = asset('favicon.ico').'?v=2';
+        $faviconHref = asset('icons/museum-azman.ico').'?v=3';
         $faviconType = 'image/x-icon';
 
         if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {

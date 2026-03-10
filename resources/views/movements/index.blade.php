@@ -5,7 +5,9 @@
                 <h2 class="museum-page-title">Movement Tracker</h2>
                 <p class="museum-page-subtitle">Track artwork movements, loans, and transfers</p>
             </div>
-            <a href="#record-movement" class="museum-btn">+ Record Movement</a>
+            @if($canRecordMovement ?? true)
+                <a href="#record-movement" class="museum-btn">+ Record Movement</a>
+            @endif
         </div>
 
         <div class="grid gap-4 md:grid-cols-3">
@@ -29,10 +31,13 @@
         <article class="museum-panel p-5">
             <div class="mb-4 flex items-center justify-between">
                 <h3 class="museum-section-title">Movement History</h3>
-                <span class="text-sm text-zinc-500">All Movements</span>
+                <span class="text-sm text-zinc-500">{{ ($isAssignedOnlyView ?? false) ? 'Assigned to You' : 'All Movements' }}</span>
             </div>
 
             <div class="overflow-x-auto">
+                @php
+                    $showActionsColumn = auth()->user()?->isAdmin() || ($isAssignedOnlyView ?? false);
+                @endphp
                 <table class="w-full min-w-[980px] text-sm">
                     <thead>
                     <tr class="border-b border-zinc-200 text-left text-zinc-600">
@@ -156,7 +161,7 @@
                                 @endif
                             </a>
                         </th>
-                        @if(auth()->user()?->isAdmin())
+                        @if($showActionsColumn)
                             <th class="py-2">Actions</th>
                         @endif
                     </tr>
@@ -176,6 +181,11 @@
                                 default => 'bg-zinc-100 text-zinc-700',
                             };
                         @endphp
+                        @php
+                            $canEditMovement = auth()->user()?->isAdmin()
+                                || (($isAssignedOnlyView ?? false)
+                                    && strtolower(trim((string) $movement->responsible_handler)) === strtolower(trim((string) auth()->user()?->name)));
+                        @endphp
                         <tr class="border-b border-zinc-100 align-top">
                             <td class="py-3">
                                 <p class="font-semibold">{{ $movement->artwork?->title }}</p>
@@ -188,7 +198,7 @@
                             <td class="py-3">{{ $movement->responsible_handler }}</td>
                             <td class="py-3"><span class="rounded-md border border-zinc-200 px-2 py-1">{{ $movement->reason }}</span></td>
                             <td class="py-3"><span class="rounded-lg px-2.5 py-1 text-xs font-semibold {{ $statusClass }}">{{ $status }}</span></td>
-                            @if(auth()->user()?->isAdmin())
+                            @if($canEditMovement)
                                 <td class="py-3">
                                     <a href="{{ route('movements.edit', $movement) }}" class="museum-btn-secondary px-3 py-1.5 text-xs">Edit</a>
                                 </td>
@@ -196,7 +206,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td class="py-4 text-zinc-500" colspan="{{ auth()->user()?->isAdmin() ? 9 : 8 }}">No movement records yet.</td>
+                            <td class="py-4 text-zinc-500" colspan="{{ $showActionsColumn ? 9 : 8 }}">No movement records yet.</td>
                         </tr>
                     @endforelse
                     </tbody>
@@ -221,6 +231,9 @@
                             'In Transit', 'Overdue' => 'bg-amber-100 text-amber-700',
                             default => 'bg-zinc-100 text-zinc-700',
                         };
+                        $canEditMovement = auth()->user()?->isAdmin()
+                            || (($isAssignedOnlyView ?? false)
+                                && strtolower(trim((string) $movement->responsible_handler)) === strtolower(trim((string) auth()->user()?->name)));
                     @endphp
                     <div class="rounded-xl border border-zinc-200 bg-white p-4">
                         <div class="mb-2 flex items-center justify-between">
@@ -261,7 +274,7 @@
                             </div>
                         @endif
 
-                        @if(auth()->user()?->isAdmin())
+                        @if($canEditMovement)
                             <div class="mt-3 flex justify-end">
                                 <a href="{{ route('movements.edit', $movement) }}" class="museum-btn-secondary px-3 py-1.5 text-xs">Edit Movement</a>
                             </div>
@@ -275,6 +288,7 @@
 
     </section>
 
+    @if($canRecordMovement ?? true)
     @php
         $initialArtworkId = (int) old('artwork_id', request()->integer('artwork'));
         $initialArtwork = $artworks->firstWhere('id', $initialArtworkId);
@@ -563,4 +577,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
     </script>
+    @endif
 </x-layout>

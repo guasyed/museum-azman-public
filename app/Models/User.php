@@ -111,6 +111,15 @@ class User extends Authenticatable
             || in_array((string) $this->role, ['admin', 'owner'], true);
     }
 
+    public function isLogisticsHandler(): bool
+    {
+        $roleSlug = optional($this->roleRelation)->slug;
+        $legacyRole = strtolower(trim((string) $this->role));
+
+        return $roleSlug === 'logistics-handler'
+            || in_array($legacyRole, ['logistics-handler', 'logistics handler', 'handler', 'movement handler', 'user handler', 'movement-tracker'], true);
+    }
+
     public function isApproved(): bool
     {
         return (bool) ($this->is_approved ?? true);

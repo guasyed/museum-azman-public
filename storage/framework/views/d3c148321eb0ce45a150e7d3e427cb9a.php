@@ -414,56 +414,84 @@
         <div class="mx-auto w-full max-w-350 p-6 lg:p-10">
             <?php if(auth()->guard()->check()): ?>
                 <?php
-                    $pendingRegistrationCount = 0;
+                    $notificationCount = 0;
+                    $userNotifications = collect();
                     $pendingRegistrationNotifications = collect();
-                    if (
-                        auth()->user()->isAdmin()
-                        && \Illuminate\Support\Facades\Schema::hasTable('notifications')
-                    ) {
-                        $pendingRegistrationNotifications = auth()->user()
+
+                    if (\Illuminate\Support\Facades\Schema::hasTable('notifications')) {
+                        $notificationCount = auth()->user()->unreadNotifications()->count();
+                        $notificationQuery = auth()->user()->notifications()->latest();
+                        $userNotifications = (clone $notificationQuery)->take(12)->get();
+
+                        if (auth()->user()->isAdmin()) {
+                            $pendingRegistrationNotifications = auth()->user()
                             ->unreadNotifications()
                             ->where('type', \App\Notifications\NewUserRegistrationNotification::class)
                             ->latest()
                             ->take(8)
                             ->get();
-
-                        $pendingRegistrationCount = $pendingRegistrationNotifications->count();
+                        }
                     }
                 ?>
 
                 <div class="mb-6 flex items-center justify-end gap-3">
-                    <?php if(auth()->user()->isAdmin()): ?>
-                        <details class="relative">
-                            <summary class="museum-btn-secondary inline-flex list-none items-center gap-2 <?php echo e(request()->routeIs('admin.users.*') ? 'ring-2 ring-zinc-300' : ''); ?> cursor-pointer" title="Pending registration approvals" aria-label="Pending registration approvals">
-                                <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5"></path><path d="M10 17a2 2 0 0 0 4 0"></path></svg>
-                                <span class="inline-flex min-w-6 items-center justify-center rounded-full px-2 py-0.5 text-xs font-semibold text-white" style="background: var(--museum-accent);"><?php echo e($pendingRegistrationCount); ?></span>
-                            </summary>
+                    <details class="relative" id="notification-details">
+                        <summary class="museum-btn-secondary inline-flex list-none items-center gap-2 cursor-pointer" title="Notifications" aria-label="Notifications">
+                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5"></path><path d="M10 17a2 2 0 0 0 4 0"></path></svg>
+                            <span id="notification-count-badge" class="inline-flex min-w-6 items-center justify-center rounded-full px-2 py-0.5 text-xs font-semibold text-white" style="background: var(--museum-accent);"><?php echo e($notificationCount); ?></span>
+                        </summary>
 
-                            <div class="absolute right-0 z-50 mt-2 w-96 max-w-[90vw] rounded-xl border border-zinc-200 bg-white p-3 shadow-lg">
-                                <div class="mb-2 flex items-center justify-between">
-                                    <p class="text-sm font-semibold text-zinc-900">Pending Registrations</p>
-                                    <a href="<?php echo e(route('admin.users.index')); ?>" class="text-xs font-semibold" style="color: var(--museum-accent);">Manage</a>
-                                </div>
-
-                                <?php if($pendingRegistrationNotifications->isEmpty()): ?>
-                                    <p class="rounded-lg bg-zinc-50 px-3 py-2 text-xs text-zinc-500">No pending notifications.</p>
-                                <?php else: ?>
-                                    <div class="max-h-72 space-y-2 overflow-y-auto pr-1">
-                                        <?php $__currentLoopData = $pendingRegistrationNotifications; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $notification): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                            <a href="<?php echo e(route('admin.users.index', ['sort' => 'status', 'direction' => 'asc'])); ?>" class="block rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-xs text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100">
-                                                <p class="font-semibold text-zinc-900"><?php echo e($notification->data['name'] ?? 'User'); ?></p>
-                                                <p class="truncate text-zinc-600"><?php echo e($notification->data['email'] ?? 'unknown email'); ?></p>
-                                                <?php if(!empty($notification->data['requested_role'])): ?>
-                                                    <p>Requested role: <span class="font-semibold"><?php echo e($notification->data['requested_role']); ?></span></p>
-                                                <?php endif; ?>
-                                                <p class="mt-1 text-zinc-500"><?php echo e($notification->created_at?->diffForHumans()); ?></p>
-                                            </a>
-                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                    </div>
-                                <?php endif; ?>
+                        <div class="absolute right-0 z-50 mt-2 rounded-xl border border-zinc-200 bg-white p-3 shadow-lg" style="width: 246px; max-width: 90vw;">
+                            <div class="mb-2 flex items-center justify-between">
+                                <p class="text-sm font-semibold text-zinc-900">Notifications</p>
                             </div>
-                        </details>
-                    <?php endif; ?>
+
+                            <?php if($userNotifications->isEmpty()): ?>
+                                <p class="rounded-lg bg-zinc-50 px-3 py-2 text-xs text-zinc-500">No notification history yet.</p>
+                            <?php else: ?>
+                                <div class="max-h-72 space-y-2 overflow-y-auto pr-1">
+                                    <?php $__currentLoopData = $userNotifications; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $notification): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <?php
+                                            $isRegistrationNotification = $notification->type === \App\Notifications\NewUserRegistrationNotification::class;
+                                            $notificationUrl = $notification->data['url'] ?? null;
+                                            if (! is_string($notificationUrl) || trim($notificationUrl) === '') {
+                                                $notificationUrl = $isRegistrationNotification
+                                                    ? route('admin.users.index', ['sort' => 'status', 'direction' => 'asc'])
+                                                    : route('movements.index');
+                                            }
+                                        ?>
+                                        <a href="<?php echo e($notificationUrl); ?>" class="block rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-3 text-[10px] text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100">
+                                            <p class="text-[10px] font-semibold leading-4 text-zinc-900"><?php echo e($notification->data['title'] ?? ($notification->data['name'] ?? 'Notification')); ?></p>
+                                            <p class="mt-1 text-[10px] leading-4 text-zinc-600"><?php echo e($notification->data['message'] ?? ($notification->data['email'] ?? 'Open to view details.')); ?></p>
+                                            <?php if(!empty($notification->data['updated_by'])): ?>
+                                                <p class="mt-1 text-[10px] font-medium text-zinc-500">Updated By</p>
+                                                <p class="text-[10px] font-semibold text-zinc-800"><?php echo e($notification->data['updated_by']); ?></p>
+                                            <?php endif; ?>
+                                            <?php if(!empty($notification->data['assigned_by'])): ?>
+                                                <p class="mt-1 text-[10px] font-medium text-zinc-500">Assigned By</p>
+                                                <p class="text-[10px] font-semibold text-zinc-800"><?php echo e($notification->data['assigned_by']); ?></p>
+                                            <?php endif; ?>
+                                            <?php if(!empty($notification->data['artwork_title'])): ?>
+                                                <p class="mt-1 text-[10px] font-medium text-zinc-500">Art Work</p>
+                                                <p class="text-[10px] font-semibold text-zinc-900"><?php echo e($notification->data['artwork_title']); ?></p>
+                                            <?php endif; ?>
+                                            <?php if(!empty($notification->data['requested_role'])): ?>
+                                                <p class="mt-1 text-[10px] font-medium text-zinc-500">Requested Role</p>
+                                                <p class="text-[10px] font-semibold text-zinc-900"><?php echo e($notification->data['requested_role']); ?></p>
+                                            <?php endif; ?>
+                                            <p class="mt-2 border-t border-zinc-200 pt-2 text-[10px] text-zinc-500"><?php echo e($notification->created_at?->diffForHumans()); ?></p>
+                                        </a>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                </div>
+                            <?php endif; ?>
+
+                            <?php if(auth()->user()->isAdmin() && $pendingRegistrationNotifications->isNotEmpty()): ?>
+                                <div class="mt-3 border-t border-zinc-200 pt-2">
+                                    <p class="text-xs font-semibold text-zinc-700">Pending registrations: <?php echo e($pendingRegistrationNotifications->count()); ?></p>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </details>
 
                     <a href="<?php echo e(route('profile.edit')); ?>" class="museum-btn-secondary inline-flex items-center gap-2">
                         <?php if(auth()->user()->avatar_url): ?>
@@ -506,8 +534,8 @@
 </div>
 
 <div
-    class="fixed right-4 top-1/2 z-50 flex -translate-y-1/2 flex-col gap-2 lg:right-6"
-    style="position:fixed; right:16px; top:50%; transform:translateY(-50%); z-index:2147483000; display:flex; flex-direction:column; gap:8px; pointer-events:auto;"
+    class="fixed right-0 top-1/2 z-50 flex -translate-y-1/2 flex-col gap-2"
+    style="position:fixed; right:0; top:50%; transform:translateY(-50%); z-index:2147483000; display:flex; flex-direction:column; gap:8px; pointer-events:auto;"
 >
     <button
         id="global-scroll-top-btn"
@@ -604,6 +632,8 @@
                 return;
             }
 
+            const scrollTolerance = 8;
+
             const bindHoverColor = (button) => {
                 const accent = getComputedStyle(document.body).getPropertyValue('--museum-accent').trim() || '#1c1917';
                 button.style.background = accent;
@@ -626,13 +656,55 @@
             bindHoverColor(scrollBottomBtn);
 
             const mainContainer = document.querySelector('main.overflow-y-auto');
-            const useMain = !!mainContainer && (mainContainer.scrollHeight - mainContainer.clientHeight > 1);
 
-            const getScrollTop = () => useMain ? mainContainer.scrollTop : window.scrollY;
-            const getScrollHeight = () => useMain
-                ? mainContainer.scrollHeight
-                : Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
-            const getClientHeight = () => useMain ? mainContainer.clientHeight : window.innerHeight;
+            const getMainMaxScroll = () => {
+                if (!mainContainer) {
+                    return 0;
+                }
+
+                return Math.max(mainContainer.scrollHeight - mainContainer.clientHeight, 0);
+            };
+
+            const getWindowMaxScroll = () => {
+                const scrollHeight = Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+                return Math.max(scrollHeight - window.innerHeight, 0);
+            };
+
+            const getActiveScroller = () => {
+                const mainMax = getMainMaxScroll();
+                const windowMax = getWindowMaxScroll();
+
+                if (mainContainer && mainMax > scrollTolerance && mainMax >= windowMax) {
+                    return 'main';
+                }
+
+                if (windowMax > scrollTolerance) {
+                    return 'window';
+                }
+
+                if (mainContainer && mainMax > scrollTolerance) {
+                    return 'main';
+                }
+
+                return 'none';
+            };
+
+            const getScrollTop = () => {
+                const active = getActiveScroller();
+                return active === 'main' ? (mainContainer?.scrollTop ?? 0) : window.scrollY;
+            };
+
+            const getScrollHeight = () => {
+                const active = getActiveScroller();
+                return active === 'main'
+                    ? (mainContainer?.scrollHeight ?? 0)
+                    : Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
+            };
+
+            const getClientHeight = () => {
+                const active = getActiveScroller();
+                return active === 'main' ? (mainContainer?.clientHeight ?? 0) : window.innerHeight;
+            };
 
             const syncVisibility = () => {
                 const top = getScrollTop();
@@ -641,15 +713,37 @@
                 const nearTop = top <= edgeThreshold;
                 const nearBottom = top >= Math.max(maxScroll - edgeThreshold, 0);
 
-                scrollTopBtn.classList.toggle('hidden', nearTop);
-                scrollTopBtn.classList.toggle('opacity-55', nearTop);
+                const activeScroller = getActiveScroller();
+                const hasMeaningfulScroll = activeScroller !== 'none' && maxScroll > scrollTolerance;
+                if (!hasMeaningfulScroll) {
+                    // No meaningful scrolling available.
+                    scrollTopBtn.style.display = 'none';
+                    scrollBottomBtn.style.display = 'none';
+                    return;
+                }
 
-                scrollBottomBtn.classList.toggle('hidden', nearBottom);
-                scrollBottomBtn.classList.toggle('opacity-55', nearBottom);
+                if (nearTop) {
+                    // Top page: hide up and show down.
+                    scrollTopBtn.style.display = 'none';
+                    scrollBottomBtn.style.display = 'inline-flex';
+                    return;
+                }
+
+                if (nearBottom) {
+                    // Bottom page: show up, hide down.
+                    scrollTopBtn.style.display = 'inline-flex';
+                    scrollBottomBtn.style.display = 'none';
+                    return;
+                }
+
+                // Middle area: show both.
+                scrollTopBtn.style.display = 'inline-flex';
+                scrollBottomBtn.style.display = 'inline-flex';
             };
 
             scrollTopBtn.addEventListener('click', () => {
-                if (useMain) {
+                const activeScroller = getActiveScroller();
+                if (activeScroller === 'main' && mainContainer) {
                     mainContainer.scrollTo({ top: 0, behavior: 'smooth' });
                 } else {
                     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -658,7 +752,8 @@
 
             scrollBottomBtn.addEventListener('click', () => {
                 const bottom = getScrollHeight();
-                if (useMain) {
+                const activeScroller = getActiveScroller();
+                if (activeScroller === 'main' && mainContainer) {
                     mainContainer.scrollTo({ top: bottom, behavior: 'smooth' });
                 } else {
                     window.scrollTo({ top: bottom, behavior: 'smooth' });
@@ -676,6 +771,45 @@
         };
 
         initGlobalScrollButtons();
+
+        const notificationDetails = document.getElementById('notification-details');
+        const notificationCountBadge = document.getElementById('notification-count-badge');
+        let markReadRequested = false;
+
+        notificationDetails?.addEventListener('toggle', () => {
+            if (!notificationDetails.open || markReadRequested) {
+                return;
+            }
+
+            const unreadCount = Number.parseInt(notificationCountBadge?.textContent ?? '0', 10);
+            if (!Number.isFinite(unreadCount) || unreadCount <= 0) {
+                return;
+            }
+
+            markReadRequested = true;
+
+            fetch("<?php echo e(route('notifications.mark-read')); ?>", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': "<?php echo e(csrf_token()); ?>",
+                    'Accept': 'application/json',
+                },
+                body: JSON.stringify({}),
+            })
+                .then((response) => {
+                    if (!response.ok) {
+                        throw new Error('Failed to mark notifications as read.');
+                    }
+
+                    if (notificationCountBadge) {
+                        notificationCountBadge.textContent = '0';
+                    }
+                })
+                .catch(() => {
+                    markReadRequested = false;
+                });
+        });
     });
 </script>
 <script>

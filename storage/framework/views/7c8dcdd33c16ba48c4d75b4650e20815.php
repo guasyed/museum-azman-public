@@ -14,7 +14,9 @@
                 <h2 class="museum-page-title">Movement Tracker</h2>
                 <p class="museum-page-subtitle">Track artwork movements, loans, and transfers</p>
             </div>
-            <a href="#record-movement" class="museum-btn">+ Record Movement</a>
+            <?php if($canRecordMovement ?? true): ?>
+                <a href="#record-movement" class="museum-btn">+ Record Movement</a>
+            <?php endif; ?>
         </div>
 
         <div class="grid gap-4 md:grid-cols-3">
@@ -38,10 +40,13 @@
         <article class="museum-panel p-5">
             <div class="mb-4 flex items-center justify-between">
                 <h3 class="museum-section-title">Movement History</h3>
-                <span class="text-sm text-zinc-500">All Movements</span>
+                <span class="text-sm text-zinc-500"><?php echo e(($isAssignedOnlyView ?? false) ? 'Assigned to You' : 'All Movements'); ?></span>
             </div>
 
             <div class="overflow-x-auto">
+                <?php
+                    $showActionsColumn = auth()->user()?->isAdmin() || ($isAssignedOnlyView ?? false);
+                ?>
                 <table class="w-full min-w-[980px] text-sm">
                     <thead>
                     <tr class="border-b border-zinc-200 text-left text-zinc-600">
@@ -165,7 +170,7 @@
                                 <?php endif; ?>
                             </a>
                         </th>
-                        <?php if(auth()->user()?->isAdmin()): ?>
+                        <?php if($showActionsColumn): ?>
                             <th class="py-2">Actions</th>
                         <?php endif; ?>
                     </tr>
@@ -185,6 +190,11 @@
                                 default => 'bg-zinc-100 text-zinc-700',
                             };
                         ?>
+                        <?php
+                            $canEditMovement = auth()->user()?->isAdmin()
+                                || (($isAssignedOnlyView ?? false)
+                                    && strtolower(trim((string) $movement->responsible_handler)) === strtolower(trim((string) auth()->user()?->name)));
+                        ?>
                         <tr class="border-b border-zinc-100 align-top">
                             <td class="py-3">
                                 <p class="font-semibold"><?php echo e($movement->artwork?->title); ?></p>
@@ -197,7 +207,7 @@
                             <td class="py-3"><?php echo e($movement->responsible_handler); ?></td>
                             <td class="py-3"><span class="rounded-md border border-zinc-200 px-2 py-1"><?php echo e($movement->reason); ?></span></td>
                             <td class="py-3"><span class="rounded-lg px-2.5 py-1 text-xs font-semibold <?php echo e($statusClass); ?>"><?php echo e($status); ?></span></td>
-                            <?php if(auth()->user()?->isAdmin()): ?>
+                            <?php if($canEditMovement): ?>
                                 <td class="py-3">
                                     <a href="<?php echo e(route('movements.edit', $movement)); ?>" class="museum-btn-secondary px-3 py-1.5 text-xs">Edit</a>
                                 </td>
@@ -205,7 +215,7 @@
                         </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
-                            <td class="py-4 text-zinc-500" colspan="<?php echo e(auth()->user()?->isAdmin() ? 9 : 8); ?>">No movement records yet.</td>
+                            <td class="py-4 text-zinc-500" colspan="<?php echo e($showActionsColumn ? 9 : 8); ?>">No movement records yet.</td>
                         </tr>
                     <?php endif; ?>
                     </tbody>
@@ -230,6 +240,9 @@
                             'In Transit', 'Overdue' => 'bg-amber-100 text-amber-700',
                             default => 'bg-zinc-100 text-zinc-700',
                         };
+                        $canEditMovement = auth()->user()?->isAdmin()
+                            || (($isAssignedOnlyView ?? false)
+                                && strtolower(trim((string) $movement->responsible_handler)) === strtolower(trim((string) auth()->user()?->name)));
                     ?>
                     <div class="rounded-xl border border-zinc-200 bg-white p-4">
                         <div class="mb-2 flex items-center justify-between">
@@ -270,7 +283,7 @@
                             </div>
                         <?php endif; ?>
 
-                        <?php if(auth()->user()?->isAdmin()): ?>
+                        <?php if($canEditMovement): ?>
                             <div class="mt-3 flex justify-end">
                                 <a href="<?php echo e(route('movements.edit', $movement)); ?>" class="museum-btn-secondary px-3 py-1.5 text-xs">Edit Movement</a>
                             </div>
@@ -284,6 +297,7 @@
 
     </section>
 
+    <?php if($canRecordMovement ?? true): ?>
     <?php
         $initialArtworkId = (int) old('artwork_id', request()->integer('artwork'));
         $initialArtwork = $artworks->firstWhere('id', $initialArtworkId);
@@ -572,6 +586,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
     </script>
+    <?php endif; ?>
  <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginal23a33f287873b564aaf305a1526eada4)): ?>

@@ -49,6 +49,14 @@ Route::middleware('auth')->group(function () {
 	Route::get('profile', [ProfileController::class, 'edit'])->name('profile.edit');
 	Route::put('profile', [ProfileController::class, 'update'])->name('profile.update');
 	Route::put('profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+	Route::post('notifications/mark-read', function (\Illuminate\Http\Request $request) {
+		$user = $request->user();
+		if ($user && \Illuminate\Support\Facades\Schema::hasTable('notifications')) {
+			$user->unreadNotifications->markAsRead();
+		}
+
+		return response()->json(['status' => 'ok']);
+	})->name('notifications.mark-read');
 
 	Route::get('/', DashboardController::class)->name('dashboard');
 	Route::get('artworks/suggestions', [ArtworkController::class, 'suggestions'])->name('artworks.suggestions');
@@ -56,8 +64,8 @@ Route::middleware('auth')->group(function () {
 	Route::resource('artworks', ArtworkController::class);
 	Route::get('movements', [MovementController::class, 'index'])->name('movements.index');
 	Route::post('movements', [MovementController::class, 'store'])->name('movements.store');
-	Route::get('movements/{movement}/edit', [MovementController::class, 'edit'])->name('movements.edit')->middleware('admin');
-	Route::put('movements/{movement}', [MovementController::class, 'update'])->name('movements.update')->middleware('admin');
+	Route::get('movements/{movement}/edit', [MovementController::class, 'edit'])->name('movements.edit');
+	Route::put('movements/{movement}', [MovementController::class, 'update'])->name('movements.update');
 	Route::get('locations', [LocationController::class, 'index'])->name('locations.index');
 	Route::get('locations/create', [LocationController::class, 'create'])->name('locations.create')->middleware('admin');
 	Route::post('locations', [LocationController::class, 'store'])->name('locations.store')->middleware('admin');

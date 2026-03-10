@@ -50,7 +50,9 @@ class ArtworkController extends Controller
             q: $filters['q'],
             qLower: $filters['qLower'],
             selectedRegion: $filters['selectedRegion'],
-            selectedStatus: $filters['selectedStatus']
+            selectedStatus: $filters['selectedStatus'],
+            sortColumn: $filters['sortColumn'],
+            direction: $filters['direction']
         )
             ->with([
                 'artist',
@@ -68,6 +70,8 @@ class ArtworkController extends Controller
             'regionOptions' => $regionOptions,
             'statusOptions' => $statusOptions,
             'view' => $filters['view'],
+            'sortColumn' => $filters['sortColumn'],
+            'direction' => $filters['direction'],
         ]);
     }
 
@@ -89,7 +93,9 @@ class ArtworkController extends Controller
 			q: $filters['q'],
 			qLower: $filters['qLower'],
 			selectedRegion: $filters['selectedRegion'],
-			selectedStatus: $filters['selectedStatus']
+            selectedStatus: $filters['selectedStatus'],
+            sortColumn: $filters['sortColumn'],
+            direction: $filters['direction']
 		)
 			->with([
 				'artist',
@@ -485,6 +491,12 @@ class ArtworkController extends Controller
             'view' => in_array((string) $request->string('view'), ['grid', 'table'], true)
                 ? (string) $request->string('view')
                 : 'grid',
+            'sortColumn' => in_array((string) $request->string('sort', 'created_at'), ['created_at', 'title', 'current_valuation'], true)
+                ? (string) $request->string('sort', 'created_at')
+                : 'created_at',
+            'direction' => strtolower((string) $request->string('direction', 'desc')) === 'asc'
+                ? 'asc'
+                : 'desc',
         ];
     }
 
@@ -492,7 +504,9 @@ class ArtworkController extends Controller
         string $q,
         string $qLower,
         string $selectedRegion,
-        string $selectedStatus
+        string $selectedStatus,
+        string $sortColumn,
+        string $direction
     ): Builder {
         return Artwork::query()
             ->when($q !== '', function ($query) use ($qLower) {
@@ -511,7 +525,10 @@ class ArtworkController extends Controller
             ->when(
                 $selectedStatus !== '',
                 fn ($query) => $query->where('status', $selectedStatus)
-            );
+            )
+            ->when($sortColumn === 'title', fn ($query) => $query->orderBy('title', $direction))
+                ->when($sortColumn === 'current_valuation', fn ($query) => $query->orderBy('current_valuation', $direction))
+            ->when($sortColumn === 'created_at', fn ($query) => $query->orderBy('created_at', $direction));
     }
 
     private function payload(StoreArtworkRequest|UpdateArtworkRequest $request): array

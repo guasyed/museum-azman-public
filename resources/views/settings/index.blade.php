@@ -282,9 +282,51 @@
                     <table class="w-full min-w-245 text-sm">
                         <thead>
                             <tr class="border-b border-zinc-200 text-left text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                                <th class="py-2">Name</th>
-                                <th class="py-2">Email</th>
-                                <th class="py-2">Role</th>
+                                <th class="py-2">
+                                    @php
+                                        $isUserNameSort = ($userSortColumn ?? 'name') === 'name';
+                                        $nextUserNameDirection = $isUserNameSort && ($userDirection ?? 'asc') === 'asc' ? 'desc' : 'asc';
+                                    @endphp
+                                    <a
+                                        href="{{ route('settings.index', array_merge(request()->query(), ['tab' => 'users-roles', 'user_sort' => 'name', 'user_direction' => $nextUserNameDirection])) }}"
+                                        class="inline-flex items-center gap-1 hover:text-zinc-900"
+                                    >
+                                        <span>Name</span>
+                                        @if($isUserNameSort)
+                                            <span class="text-xs">{{ ($userDirection ?? 'asc') === 'asc' ? '▲' : '▼' }}</span>
+                                        @endif
+                                    </a>
+                                </th>
+                                <th class="py-2">
+                                    @php
+                                        $isUserEmailSort = ($userSortColumn ?? 'name') === 'email';
+                                        $nextUserEmailDirection = $isUserEmailSort && ($userDirection ?? 'asc') === 'asc' ? 'desc' : 'asc';
+                                    @endphp
+                                    <a
+                                        href="{{ route('settings.index', array_merge(request()->query(), ['tab' => 'users-roles', 'user_sort' => 'email', 'user_direction' => $nextUserEmailDirection])) }}"
+                                        class="inline-flex items-center gap-1 hover:text-zinc-900"
+                                    >
+                                        <span>Email</span>
+                                        @if($isUserEmailSort)
+                                            <span class="text-xs">{{ ($userDirection ?? 'asc') === 'asc' ? '▲' : '▼' }}</span>
+                                        @endif
+                                    </a>
+                                </th>
+                                <th class="py-2">
+                                    @php
+                                        $isUserRoleSort = ($userSortColumn ?? 'name') === 'role';
+                                        $nextUserRoleDirection = $isUserRoleSort && ($userDirection ?? 'asc') === 'asc' ? 'desc' : 'asc';
+                                    @endphp
+                                    <a
+                                        href="{{ route('settings.index', array_merge(request()->query(), ['tab' => 'users-roles', 'user_sort' => 'role', 'user_direction' => $nextUserRoleDirection])) }}"
+                                        class="inline-flex items-center gap-1 hover:text-zinc-900"
+                                    >
+                                        <span>Role</span>
+                                        @if($isUserRoleSort)
+                                            <span class="text-xs">{{ ($userDirection ?? 'asc') === 'asc' ? '▲' : '▼' }}</span>
+                                        @endif
+                                    </a>
+                                </th>
                                 <th class="py-2">Status</th>
                                 <th class="py-2">Last Login</th>
                                 <th class="py-2 text-right">Actions</th>

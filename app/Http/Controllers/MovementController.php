@@ -8,13 +8,53 @@ use App\Models\Location;
 use App\Models\Movement;
 use App\Models\Status;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class MovementController extends Controller
 {
-    public function index(): View
+    public function index(Request $request): View
     {
-        $movements = Movement::query()->with('artwork.artist')->latest('date_out')->get();
+        $sort = (string) $request->string('sort', 'date_out');
+        $direction = strtolower((string) $request->string('direction', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $sortColumn = in_array($sort, [
+            'artwork_title',
+            'from_location',
+            'to_location',
+            'date_out',
+            'expected_return_date',
+            'responsible_handler',
+            'reason',
+            'status',
+        ], true) ? $sort : 'date_out';
+
+        $movementsQuery = Movement::query()->with('artwork.artist');
+
+        if ($sortColumn === 'artwork_title') {
+            $movementsQuery
+                ->leftJoin('artworks', 'artworks.id', '=', 'movements.artwork_id')
+                ->select('movements.*')
+                ->orderBy('artworks.title', $direction)
+                ->orderByDesc('movements.id');
+        } else {
+            $columnMap = [
+                'from_location' => 'from_location',
+                'to_location' => 'to_location',
+                'date_out' => 'date_out',
+                'expected_return_date' => 'expected_return_date',
+                'responsible_handler' => 'responsible_handler',
+                'reason' => 'reason',
+                'status' => 'status',
+            ];
+
+            $orderColumn = $columnMap[$sortColumn] ?? 'date_out';
+
+            $movementsQuery
+                ->orderBy($orderColumn, $direction)
+                ->orderByDesc('id');
+        }
+
+        $movements = $movementsQuery->get();
         $artworks = Artwork::query()->with(['artist', 'location'])->orderBy('title')->get();
         $statusOptions = Status::allowedNames();
         $locationOptions = Location::query()
@@ -33,7 +73,7 @@ class MovementController extends Controller
 
         $activeMovements = $movements->whereIn('status', ['In Stage', 'On Loan', 'Under Restoration']);
 
-        return view('movements.index', compact('movements', 'artworks', 'stats', 'activeMovements', 'locationOptions', 'statusOptions'));
+        return view('movements.index', compact('movements', 'artworks', 'stats', 'activeMovements', 'locationOptions', 'statusOptions', 'sortColumn', 'direction'));
     }
 
     public function store(StoreMovementRequest $request): RedirectResponse

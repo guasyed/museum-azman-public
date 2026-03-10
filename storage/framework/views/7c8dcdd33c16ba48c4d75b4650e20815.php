@@ -45,14 +45,126 @@
                 <table class="w-full min-w-[980px] text-sm">
                     <thead>
                     <tr class="border-b border-zinc-200 text-left text-zinc-600">
-                        <th class="py-2">Artwork</th>
-                        <th class="py-2">From</th>
-                        <th class="py-2">To</th>
-                        <th class="py-2">Date Out</th>
-                        <th class="py-2">Expected Return</th>
-                        <th class="py-2">Handler</th>
-                        <th class="py-2">Reason</th>
-                        <th class="py-2">Status</th>
+                        <th class="py-2">
+                            <?php
+                                $isArtworkSort = ($sortColumn ?? 'date_out') === 'artwork_title';
+                                $nextArtworkDirection = $isArtworkSort && ($direction ?? 'desc') === 'asc' ? 'desc' : 'asc';
+                            ?>
+                            <a
+                                href="<?php echo e(route('movements.index', array_merge(request()->query(), ['sort' => 'artwork_title', 'direction' => $nextArtworkDirection]))); ?>"
+                                class="inline-flex items-center gap-1 hover:text-zinc-900"
+                            >
+                                <span>Artwork</span>
+                                <?php if($isArtworkSort): ?>
+                                    <span class="text-xs"><?php echo e(($direction ?? 'desc') === 'asc' ? '▲' : '▼'); ?></span>
+                                <?php endif; ?>
+                            </a>
+                        </th>
+                        <th class="py-2">
+                            <?php
+                                $isFromSort = ($sortColumn ?? 'date_out') === 'from_location';
+                                $nextFromDirection = $isFromSort && ($direction ?? 'desc') === 'asc' ? 'desc' : 'asc';
+                            ?>
+                            <a
+                                href="<?php echo e(route('movements.index', array_merge(request()->query(), ['sort' => 'from_location', 'direction' => $nextFromDirection]))); ?>"
+                                class="inline-flex items-center gap-1 hover:text-zinc-900"
+                            >
+                                <span>From</span>
+                                <?php if($isFromSort): ?>
+                                    <span class="text-xs"><?php echo e(($direction ?? 'desc') === 'asc' ? '▲' : '▼'); ?></span>
+                                <?php endif; ?>
+                            </a>
+                        </th>
+                        <th class="py-2">
+                            <?php
+                                $isToSort = ($sortColumn ?? 'date_out') === 'to_location';
+                                $nextToDirection = $isToSort && ($direction ?? 'desc') === 'asc' ? 'desc' : 'asc';
+                            ?>
+                            <a
+                                href="<?php echo e(route('movements.index', array_merge(request()->query(), ['sort' => 'to_location', 'direction' => $nextToDirection]))); ?>"
+                                class="inline-flex items-center gap-1 hover:text-zinc-900"
+                            >
+                                <span>To</span>
+                                <?php if($isToSort): ?>
+                                    <span class="text-xs"><?php echo e(($direction ?? 'desc') === 'asc' ? '▲' : '▼'); ?></span>
+                                <?php endif; ?>
+                            </a>
+                        </th>
+                        <th class="py-2">
+                            <?php
+                                $isDateOutSort = ($sortColumn ?? 'date_out') === 'date_out';
+                                $nextDateOutDirection = $isDateOutSort && ($direction ?? 'desc') === 'desc' ? 'asc' : 'desc';
+                            ?>
+                            <a
+                                href="<?php echo e(route('movements.index', array_merge(request()->query(), ['sort' => 'date_out', 'direction' => $nextDateOutDirection]))); ?>"
+                                class="inline-flex items-center gap-1 hover:text-zinc-900"
+                            >
+                                <span>Date Out</span>
+                                <?php if($isDateOutSort): ?>
+                                    <span class="text-xs"><?php echo e(($direction ?? 'desc') === 'asc' ? '▲' : '▼'); ?></span>
+                                <?php endif; ?>
+                            </a>
+                        </th>
+                        <th class="py-2">
+                            <?php
+                                $isExpectedSort = ($sortColumn ?? 'date_out') === 'expected_return_date';
+                                $nextExpectedDirection = $isExpectedSort && ($direction ?? 'desc') === 'asc' ? 'desc' : 'asc';
+                            ?>
+                            <a
+                                href="<?php echo e(route('movements.index', array_merge(request()->query(), ['sort' => 'expected_return_date', 'direction' => $nextExpectedDirection]))); ?>"
+                                class="inline-flex items-center gap-1 hover:text-zinc-900"
+                            >
+                                <span>Expected Return</span>
+                                <?php if($isExpectedSort): ?>
+                                    <span class="text-xs"><?php echo e(($direction ?? 'desc') === 'asc' ? '▲' : '▼'); ?></span>
+                                <?php endif; ?>
+                            </a>
+                        </th>
+                        <th class="py-2">
+                            <?php
+                                $isHandlerSort = ($sortColumn ?? 'date_out') === 'responsible_handler';
+                                $nextHandlerDirection = $isHandlerSort && ($direction ?? 'desc') === 'asc' ? 'desc' : 'asc';
+                            ?>
+                            <a
+                                href="<?php echo e(route('movements.index', array_merge(request()->query(), ['sort' => 'responsible_handler', 'direction' => $nextHandlerDirection]))); ?>"
+                                class="inline-flex items-center gap-1 hover:text-zinc-900"
+                            >
+                                <span>Handler</span>
+                                <?php if($isHandlerSort): ?>
+                                    <span class="text-xs"><?php echo e(($direction ?? 'desc') === 'asc' ? '▲' : '▼'); ?></span>
+                                <?php endif; ?>
+                            </a>
+                        </th>
+                        <th class="py-2">
+                            <?php
+                                $isReasonSort = ($sortColumn ?? 'date_out') === 'reason';
+                                $nextReasonDirection = $isReasonSort && ($direction ?? 'desc') === 'asc' ? 'desc' : 'asc';
+                            ?>
+                            <a
+                                href="<?php echo e(route('movements.index', array_merge(request()->query(), ['sort' => 'reason', 'direction' => $nextReasonDirection]))); ?>"
+                                class="inline-flex items-center gap-1 hover:text-zinc-900"
+                            >
+                                <span>Reason</span>
+                                <?php if($isReasonSort): ?>
+                                    <span class="text-xs"><?php echo e(($direction ?? 'desc') === 'asc' ? '▲' : '▼'); ?></span>
+                                <?php endif; ?>
+                            </a>
+                        </th>
+                        <th class="py-2">
+                            <?php
+                                $isStatusSort = ($sortColumn ?? 'date_out') === 'status';
+                                $nextStatusDirection = $isStatusSort && ($direction ?? 'desc') === 'asc' ? 'desc' : 'asc';
+                            ?>
+                            <a
+                                href="<?php echo e(route('movements.index', array_merge(request()->query(), ['sort' => 'status', 'direction' => $nextStatusDirection]))); ?>"
+                                class="inline-flex items-center gap-1 hover:text-zinc-900"
+                            >
+                                <span>Status</span>
+                                <?php if($isStatusSort): ?>
+                                    <span class="text-xs"><?php echo e(($direction ?? 'desc') === 'asc' ? '▲' : '▼'); ?></span>
+                                <?php endif; ?>
+                            </a>
+                        </th>
                         <?php if(auth()->user()?->isAdmin()): ?>
                             <th class="py-2">Actions</th>
                         <?php endif; ?>

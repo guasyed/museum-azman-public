@@ -27,6 +27,8 @@
 
         <form method="GET" class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <input type="hidden" name="view" value="{{ $view }}">
+            <input type="hidden" name="sort" value="{{ $sortColumn ?? 'name' }}">
+            <input type="hidden" name="direction" value="{{ $direction ?? 'asc' }}">
             <div class="flex-1">
                 <input
                     type="text"
@@ -52,7 +54,9 @@
                         href="{{ route('locations.index', [
                             'q' => $q,
                             'type' => $selectedType,
-                            'view' => 'grid'
+                            'view' => 'grid',
+                            'sort' => $sortColumn ?? 'name',
+                            'direction' => $direction ?? 'asc',
                         ]) }}"
                         class="inline-flex items-center justify-center size-9 rounded-md transition-colors
                         {{ $view === 'grid'
@@ -75,7 +79,9 @@
                         href="{{ route('locations.index', [
                             'q' => $q,
                             'type' => $selectedType,
-                            'view' => 'list'
+                            'view' => 'list',
+                            'sort' => $sortColumn ?? 'name',
+                            'direction' => $direction ?? 'asc',
                         ]) }}"
                         class="inline-flex items-center justify-center size-9 rounded-md transition-colors
                         {{ $view === 'list'
@@ -105,8 +111,36 @@
                     <table class="w-full min-w-295 text-sm">
                         <thead>
                             <tr class="border-b border-zinc-200 text-left text-sm font-semibold text-zinc-800">
-                                <th class="px-4 py-3">Location</th>
-                                <th class="px-4 py-3">Type</th>
+                                <th class="px-4 py-3">
+                                    @php
+                                        $isNameSort = ($sortColumn ?? 'name') === 'name';
+                                        $nextNameDirection = $isNameSort && ($direction ?? 'asc') === 'asc' ? 'desc' : 'asc';
+                                    @endphp
+                                    <a
+                                        href="{{ route('locations.index', array_merge(request()->query(), ['sort' => 'name', 'direction' => $nextNameDirection])) }}"
+                                        class="inline-flex items-center gap-1 hover:text-zinc-900"
+                                    >
+                                        <span>Location</span>
+                                        @if($isNameSort)
+                                            <span class="text-xs">{{ ($direction ?? 'asc') === 'asc' ? '▲' : '▼' }}</span>
+                                        @endif
+                                    </a>
+                                </th>
+                                <th class="px-4 py-3">
+                                    @php
+                                        $isTypeSort = ($sortColumn ?? 'name') === 'type';
+                                        $nextTypeDirection = $isTypeSort && ($direction ?? 'asc') === 'asc' ? 'desc' : 'asc';
+                                    @endphp
+                                    <a
+                                        href="{{ route('locations.index', array_merge(request()->query(), ['sort' => 'type', 'direction' => $nextTypeDirection])) }}"
+                                        class="inline-flex items-center gap-1 hover:text-zinc-900"
+                                    >
+                                        <span>Type</span>
+                                        @if($isTypeSort)
+                                            <span class="text-xs">{{ ($direction ?? 'asc') === 'asc' ? '▲' : '▼' }}</span>
+                                        @endif
+                                    </a>
+                                </th>
                                 <th class="px-4 py-3">Address</th>
                                 <th class="px-4 py-3 text-right">Artworks</th>
                                 <th class="px-4 py-3 text-right">Insured Value</th>

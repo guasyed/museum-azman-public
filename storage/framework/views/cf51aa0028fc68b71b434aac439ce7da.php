@@ -56,9 +56,51 @@
                 <table class="w-full min-w-245 text-sm">
                     <thead>
                         <tr class="border-b border-zinc-200 text-left text-zinc-600">
-                            <th class="px-4 py-3">User</th>
-                            <th class="px-4 py-3">Email</th>
-                            <th class="px-4 py-3">Role</th>
+                            <th class="px-4 py-3">
+                                <?php
+                                    $isNameSort = ($sortColumn ?? 'name') === 'name';
+                                    $nextNameDirection = $isNameSort && ($direction ?? 'asc') === 'asc' ? 'desc' : 'asc';
+                                ?>
+                                <a
+                                    href="<?php echo e(route('admin.users.index', ['sort' => 'name', 'direction' => $nextNameDirection])); ?>"
+                                    class="inline-flex items-center gap-1 hover:text-zinc-900"
+                                >
+                                    <span>User</span>
+                                    <?php if($isNameSort): ?>
+                                        <span class="text-xs"><?php echo e(($direction ?? 'asc') === 'asc' ? '▲' : '▼'); ?></span>
+                                    <?php endif; ?>
+                                </a>
+                            </th>
+                            <th class="px-4 py-3">
+                                <?php
+                                    $isEmailSort = ($sortColumn ?? 'name') === 'email';
+                                    $nextEmailDirection = $isEmailSort && ($direction ?? 'asc') === 'asc' ? 'desc' : 'asc';
+                                ?>
+                                <a
+                                    href="<?php echo e(route('admin.users.index', ['sort' => 'email', 'direction' => $nextEmailDirection])); ?>"
+                                    class="inline-flex items-center gap-1 hover:text-zinc-900"
+                                >
+                                    <span>Email</span>
+                                    <?php if($isEmailSort): ?>
+                                        <span class="text-xs"><?php echo e(($direction ?? 'asc') === 'asc' ? '▲' : '▼'); ?></span>
+                                    <?php endif; ?>
+                                </a>
+                            </th>
+                            <th class="px-4 py-3">
+                                <?php
+                                    $isRoleSort = ($sortColumn ?? 'name') === 'role';
+                                    $nextRoleDirection = $isRoleSort && ($direction ?? 'asc') === 'asc' ? 'desc' : 'asc';
+                                ?>
+                                <a
+                                    href="<?php echo e(route('admin.users.index', ['sort' => 'role', 'direction' => $nextRoleDirection])); ?>"
+                                    class="inline-flex items-center gap-1 hover:text-zinc-900"
+                                >
+                                    <span>Role</span>
+                                    <?php if($isRoleSort): ?>
+                                        <span class="text-xs"><?php echo e(($direction ?? 'asc') === 'asc' ? '▲' : '▼'); ?></span>
+                                    <?php endif; ?>
+                                </a>
+                            </th>
                             <th class="px-4 py-3">Actions</th>
                         </tr>
                     </thead>

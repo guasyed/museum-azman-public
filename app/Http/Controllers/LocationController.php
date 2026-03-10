@@ -39,6 +39,10 @@ class LocationController extends Controller
 
     public function index(Request $request): View
     {
+        $sort = (string) $request->string('sort', 'name');
+        $direction = strtolower((string) $request->string('direction', 'asc')) === 'desc' ? 'desc' : 'asc';
+        $sortColumn = in_array($sort, ['name', 'type'], true) ? $sort : 'name';
+
         $all = Location::query()
             ->with(['artworks:id,location_id,current_valuation'])
             ->withCount('artworks')
@@ -77,6 +81,10 @@ class LocationController extends Controller
                     || str_contains(strtolower((string) ($loc->address ?? '')), strtolower($q));
             }))
             ->when($selectedType !== '' && $selectedType !== 'All Types', fn (Collection $c) => $c->where('display_type', $selectedType))
+            ->when($sortColumn === 'name' && $direction === 'asc', fn (Collection $c) => $c->sortBy(fn ($loc) => strtolower((string) $loc->name)))
+            ->when($sortColumn === 'name' && $direction === 'desc', fn (Collection $c) => $c->sortByDesc(fn ($loc) => strtolower((string) $loc->name)))
+            ->when($sortColumn === 'type' && $direction === 'asc', fn (Collection $c) => $c->sortBy(fn ($loc) => strtolower((string) $loc->display_type)))
+            ->when($sortColumn === 'type' && $direction === 'desc', fn (Collection $c) => $c->sortByDesc(fn ($loc) => strtolower((string) $loc->display_type)))
             ->values();
 
         $stats = [
@@ -94,7 +102,7 @@ class LocationController extends Controller
             'Exhibition Venue',
         ]);
 
-        return view('locations.index', compact('locations', 'stats', 'typeOptions', 'q', 'selectedType', 'view'));
+        return view('locations.index', compact('locations', 'stats', 'typeOptions', 'q', 'selectedType', 'view', 'sortColumn', 'direction'));
     }
 
     public function show(Location $location): View

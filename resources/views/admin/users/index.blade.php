@@ -62,8 +62,36 @@
                                     @endif
                                 </a>
                             </th>
-                            <th class="px-4 py-3">Email</th>
-                            <th class="px-4 py-3">Role</th>
+                            <th class="px-4 py-3">
+                                @php
+                                    $isEmailSort = ($sortColumn ?? 'name') === 'email';
+                                    $nextEmailDirection = $isEmailSort && ($direction ?? 'asc') === 'asc' ? 'desc' : 'asc';
+                                @endphp
+                                <a
+                                    href="{{ route('admin.users.index', ['sort' => 'email', 'direction' => $nextEmailDirection]) }}"
+                                    class="inline-flex items-center gap-1 hover:text-zinc-900"
+                                >
+                                    <span>Email</span>
+                                    @if($isEmailSort)
+                                        <span class="text-xs">{{ ($direction ?? 'asc') === 'asc' ? '▲' : '▼' }}</span>
+                                    @endif
+                                </a>
+                            </th>
+                            <th class="px-4 py-3">
+                                @php
+                                    $isRoleSort = ($sortColumn ?? 'name') === 'role';
+                                    $nextRoleDirection = $isRoleSort && ($direction ?? 'asc') === 'asc' ? 'desc' : 'asc';
+                                @endphp
+                                <a
+                                    href="{{ route('admin.users.index', ['sort' => 'role', 'direction' => $nextRoleDirection]) }}"
+                                    class="inline-flex items-center gap-1 hover:text-zinc-900"
+                                >
+                                    <span>Role</span>
+                                    @if($isRoleSort)
+                                        <span class="text-xs">{{ ($direction ?? 'asc') === 'asc' ? '▲' : '▼' }}</span>
+                                    @endif
+                                </a>
+                            </th>
                             <th class="px-4 py-3">Actions</th>
                         </tr>
                     </thead>

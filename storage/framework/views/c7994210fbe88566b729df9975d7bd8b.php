@@ -73,6 +73,8 @@
             'region' => $selectedRegion !== '' ? $selectedRegion : null,
             'status' => $selectedStatus !== '' ? $selectedStatus : null,
             'view' => $view,
+            'sort' => $sortColumn ?? 'created_at',
+            'direction' => $direction ?? 'desc',
             'page' => $artworks->currentPage(),
         ];
         $canManageArtworks = auth()->check() && auth()->user()->isAdmin();
@@ -173,7 +175,7 @@
                     </div>
 
                     <a
-                        href="<?php echo e(route('artworks.index', ['view' => $view])); ?>"
+                        href="<?php echo e(route('artworks.index', ['view' => $view, 'sort' => $sortColumn ?? 'created_at', 'direction' => $direction ?? 'desc'])); ?>"
                         class="inline-flex items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-100"
                     >
                         Reset
@@ -182,6 +184,8 @@
             </div>
 
             <input type="hidden" name="view" value="<?php echo e($view); ?>">
+            <input type="hidden" name="sort" value="<?php echo e($sortColumn ?? 'created_at'); ?>">
+            <input type="hidden" name="direction" value="<?php echo e($direction ?? 'desc'); ?>">
         </form>
 
         <div id="artwork-results"></div>
@@ -192,11 +196,39 @@
                     <table class="w-full min-w-245 text-sm">
                         <thead>
                             <tr class="border-b border-zinc-200 text-left font-semibold text-zinc-800">
-                                <th class="px-4 py-3">Artwork</th>
+                                <th class="px-4 py-3">
+                                    <?php
+                                        $isTitleSort = ($sortColumn ?? 'created_at') === 'title';
+                                        $nextTitleDirection = $isTitleSort && ($direction ?? 'desc') === 'asc' ? 'desc' : 'asc';
+                                    ?>
+                                    <a
+                                        href="<?php echo e(route('artworks.index', array_merge(request()->query(), ['sort' => 'title', 'direction' => $nextTitleDirection]))); ?>"
+                                        class="inline-flex items-center gap-1 hover:text-zinc-900"
+                                    >
+                                        <span>Artwork</span>
+                                        <?php if($isTitleSort): ?>
+                                            <span class="text-xs"><?php echo e(($direction ?? 'desc') === 'asc' ? '▲' : '▼'); ?></span>
+                                        <?php endif; ?>
+                                    </a>
+                                </th>
                                 <th class="px-4 py-3">Artist</th>
                                 <th class="px-4 py-3">Region</th>
                                 <th class="px-4 py-3">Medium</th>
-                                <th class="px-4 py-3 text-right">Value</th>
+                                <th class="px-4 py-3 text-right">
+                                    <?php
+                                        $isValueSort = ($sortColumn ?? 'created_at') === 'current_valuation';
+                                        $nextValueDirection = $isValueSort && ($direction ?? 'desc') === 'asc' ? 'desc' : 'asc';
+                                    ?>
+                                    <a
+                                        href="<?php echo e(route('artworks.index', array_merge(request()->query(), ['sort' => 'current_valuation', 'direction' => $nextValueDirection]))); ?>"
+                                        class="inline-flex items-center gap-1 hover:text-zinc-900"
+                                    >
+                                        <span>Value</span>
+                                        <?php if($isValueSort): ?>
+                                            <span class="text-xs"><?php echo e(($direction ?? 'desc') === 'asc' ? '▲' : '▼'); ?></span>
+                                        <?php endif; ?>
+                                    </a>
+                                </th>
                                 <th class="px-4 py-3 text-right">Status</th>
                                 <?php if($canManageArtworks): ?>
                                     <th class="px-4 py-3 text-right">Action</th>
@@ -305,7 +337,7 @@
         <?php endif; ?>
 
         <div id="artwork-pagination" class="collection-pagination sticky bottom-0 z-20 -mx-6 bg-[#f6f5f4]/95 px-6 pb-3 pt-2 backdrop-blur supports-backdrop-filter:bg-[#f6f5f4]/85 lg:-mx-10 lg:px-10">
-            <?php echo e($artworks->appends(['scroll_to_results' => 1])->fragment('artwork-results')->links('pagination::bootstrap-5')); ?>
+            <?php echo e($artworks->appends(array_merge(request()->query(), ['scroll_to_results' => 1]))->fragment('artwork-results')->links('pagination::bootstrap-5')); ?>
 
         </div>
 

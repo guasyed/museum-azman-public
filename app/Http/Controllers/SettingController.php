@@ -187,8 +187,27 @@ class SettingController extends Controller
             'timezone' => $configuredTimezone,
         ];
 
+        $userSortColumn = in_array((string) $request->string('user_sort', 'name'), ['name', 'email', 'role'], true)
+            ? (string) $request->string('user_sort', 'name')
+            : 'name';
+        $userDirection = strtolower((string) $request->string('user_direction', 'asc')) === 'desc' ? 'desc' : 'asc';
+
         $users = $activeTab === 'users-roles'
-            ? User::query()->with('roleRelation')->orderBy('name')->get()
+            ? (function () use ($userSortColumn, $userDirection) {
+                $query = User::query()->with('roleRelation');
+
+                if ($userSortColumn === 'role') {
+                    $query
+                        ->leftJoin('roles as sort_roles', 'sort_roles.id', '=', 'users.role_id')
+                        ->select('users.*')
+                        ->orderBy('sort_roles.name', $userDirection)
+                        ->orderBy('users.name');
+                } else {
+                    $query->orderBy($userSortColumn, $userDirection);
+                }
+
+                return $query->get();
+            })()
             : collect();
 
         $roles = $activeTab === 'users-roles'
@@ -205,7 +224,9 @@ class SettingController extends Controller
             'backupMeta',
             'backupList',
             'users',
-            'roles'
+            'roles',
+            'userSortColumn',
+            'userDirection'
         ));
     }
 

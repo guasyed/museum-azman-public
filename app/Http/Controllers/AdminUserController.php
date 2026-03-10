@@ -24,13 +24,22 @@ class AdminUserController extends Controller
         $direction = strtolower((string) request()->query('direction', 'asc')) === 'desc' ? 'desc' : 'asc';
 
         // Allowlist sortable columns to keep ordering predictable and safe.
-        $sortableColumns = ['name', 'email'];
+        $sortableColumns = ['name', 'email', 'role'];
         $sortColumn = in_array($sort, $sortableColumns, true) ? $sort : 'name';
 
-        $users = User::query()
-            ->with('roleRelation')
-            ->orderBy($sortColumn, $direction)
-            ->get();
+        $usersQuery = User::query()->with('roleRelation');
+
+        if ($sortColumn === 'role') {
+            $usersQuery
+                ->leftJoin('roles as sort_roles', 'sort_roles.id', '=', 'users.role_id')
+                ->select('users.*')
+                ->orderBy('sort_roles.name', $direction)
+                ->orderBy('users.name');
+        } else {
+            $usersQuery->orderBy($sortColumn, $direction);
+        }
+
+        $users = $usersQuery->get();
         $roles = Role::query()->orderBy('name')->get();
 
         return view('admin.users.index', compact('users', 'roles', 'sortColumn', 'direction'));

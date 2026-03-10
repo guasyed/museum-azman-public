@@ -85,10 +85,13 @@
                 </div>
             </form>
 
+            @php
+                $activeSortButtonStyle = 'background: var(--museum-accent); color: #fff; border-color: var(--museum-accent);';
+            @endphp
             <div class="flex items-center gap-2">
-                <a href="{{ route('artists.index', array_merge(request()->query(), ['sort' => 'value'])) }}" class="museum-btn-secondary {{ $sort === 'value' ? 'bg-zinc-900 text-white! border-zinc-900 hover:bg-zinc-800' : '' }}">Sort by Value</a>
-                <a href="{{ route('artists.index', array_merge(request()->query(), ['sort' => 'works'])) }}" class="museum-btn-secondary {{ $sort === 'works' ? 'bg-zinc-900 text-white! border-zinc-900 hover:bg-zinc-800' : '' }}">Sort by Works</a>
-                <a href="{{ route('artists.index', array_merge(request()->query(), ['sort' => 'name'])) }}" class="museum-btn-secondary {{ $sort === 'name' ? 'bg-zinc-900 text-white! border-zinc-900 hover:bg-zinc-800' : '' }}">Sort by Name</a>
+                <a href="{{ route('artists.index', array_merge(request()->query(), ['sort' => 'value'])) }}" class="museum-btn-secondary" style="{{ $sort === 'value' ? $activeSortButtonStyle : '' }}">Sort by Value</a>
+                <a href="{{ route('artists.index', array_merge(request()->query(), ['sort' => 'works'])) }}" class="museum-btn-secondary" style="{{ $sort === 'works' ? $activeSortButtonStyle : '' }}">Sort by Works</a>
+                <a href="{{ route('artists.index', array_merge(request()->query(), ['sort' => 'name'])) }}" class="museum-btn-secondary" style="{{ $sort === 'name' ? $activeSortButtonStyle : '' }}">Sort by Name</a>
                 <a href="{{ route('artists.index') }}" class="museum-btn-secondary">Reset</a>
             </div>
         </div>
@@ -101,8 +104,8 @@
 
             <div class="overflow-x-auto rounded-2xl border border-zinc-200 bg-white">
                 <table class="w-full min-w-[1080px] text-sm">
-                    <thead class="sticky top-0 z-10 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/70">
-                        <tr class="border-b border-zinc-200 text-left text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                    <thead class="sticky top-0 z-10 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/70" style="color: color-mix(in srgb, var(--museum-accent) 78%, #374151);">
+                        <tr class="border-b border-zinc-200 text-left text-xs font-semibold uppercase tracking-wide">
                             <th class="px-4 py-3">Artist</th>
                             <th class="px-4 py-3">Nationality</th>
                             <th class="px-4 py-3">Birth</th>
@@ -138,7 +141,10 @@
 
                                 {{-- Nationality --}}
                                 <td class="px-4 py-3">
-                                    <span class="inline-flex items-center rounded-lg border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs font-semibold text-zinc-700">
+                                    <span
+                                        class="inline-flex items-center rounded-lg px-2 py-1 text-xs font-semibold"
+                                        style="background: color-mix(in srgb, var(--museum-accent) 14%, white); color: var(--museum-accent); border: 1px solid color-mix(in srgb, var(--museum-accent) 35%, white);"
+                                    >
                                         {{ $artist->country ?: 'Unknown' }}
                                     </span>
                                 </td>
@@ -173,7 +179,8 @@
                                 <td class="px-4 py-3 text-right">
                                     <button
                                         type="button"
-                                        class="inline-flex items-center gap-2 rounded-xl border border-zinc-200 bg-white px-3 py-2 text-xs font-semibold text-zinc-800 shadow-sm transition hover:border-zinc-300 hover:bg-zinc-50 group-hover:shadow js-open-artist-modal"
+                                        class="inline-flex items-center gap-2 rounded-xl border bg-white px-3 py-2 text-xs font-semibold shadow-sm transition group-hover:shadow js-open-artist-modal"
+                                        style="border-color: color-mix(in srgb, var(--museum-accent) 38%, white); color: var(--museum-accent);"
                                         data-artist-id="{{ $artist->id }}"
                                         aria-label="View {{ $artist->name }}"
                                         

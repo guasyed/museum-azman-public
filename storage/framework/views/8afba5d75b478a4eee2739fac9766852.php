@@ -8,6 +8,11 @@
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
 <?php $component->withAttributes(['title' => 'Settings - Museum Azman']); ?>
+    <style>
+        .settings-tab:hover {
+            color: var(--museum-accent);
+        }
+    </style>
     <section class="space-y-6">
         <div>
             <h2 class="museum-page-title">Settings</h2>
@@ -31,16 +36,18 @@
             <a
                 href="<?php echo e(route('settings.index', ['tab' => $tab['key']])); ?>"
                 class="
+                    settings-tab
                     inline-flex items-center gap-2
                     px-4 py-3
                     border-b-2
                     text-sm font-semibold
                     transition-colors
                     <?php echo e($isActive
-                        ? 'border-zinc-900 text-zinc-900'
-                        : 'border-transparent text-zinc-500 hover:text-zinc-900'); ?>
+                        ? 'border-current'
+                        : 'border-transparent text-zinc-500'); ?>
 
                 "
+                style="<?php echo e($isActive ? 'color: var(--museum-accent);' : ''); ?>"
                 aria-current="<?php echo e($isActive ? 'page' : 'false'); ?>"
             >
                 <span class="text-base leading-none"><?php echo e($tab['icon']); ?></span>
@@ -206,7 +213,7 @@
                     </div>
                 </div>
 
-                <form method="POST" action="<?php echo e(route('settings.update', ['section' => 'backup'])); ?>" class="mt-4 grid gap-4 rounded-xl border border-zinc-200 bg-white p-4 md:grid-cols-3 md:items-end">
+                <form method="POST" action="<?php echo e(route('settings.update', ['section' => 'backup'])); ?>" class="mt-4 grid gap-4 rounded-xl border border-zinc-200 bg-white p-4 md:grid-cols-3">
                     <?php echo csrf_field(); ?>
                     <label class="museum-field md:col-span-1">
                         <span>Auto Backup</span>
@@ -222,8 +229,8 @@
                         <input type="time" name="backup_auto_time" value="<?php echo e(old('backup_auto_time', $backupSettings['time'] ?? '03:00')); ?>" required>
                     </label>
 
-                    <div class="md:col-span-1">
-                        <button type="submit" class="museum-btn w-full md:w-auto">Save Auto Backup</button>
+                    <div class="md:col-span-3">
+                        <button style="margin-top:29px;" type="submit" class="museum-btn w-full">Save Auto Backup</button>
                     </div>
                 </form>
 
@@ -356,9 +363,7 @@
 
                                     $rawRole = strtolower((string) optional($user->roleRelation)->slug);
                                     $roleLabel = $user->role_label;
-                                    $roleClass = in_array($rawRole, ['admin', 'owner'], true)
-                                        ? 'bg-zinc-900 text-white'
-                                        : 'bg-zinc-100 text-zinc-700';
+                                    $isPrivilegedRole = in_array($rawRole, ['admin', 'owner'], true);
 
                                     $lastLogin = $user->updated_at
                                         ? $user->updated_at->format('Y-m-d h:i A')
@@ -367,12 +372,19 @@
                                 <tr class="border-b border-zinc-200 last:border-b-0">
                                     <td class="py-3">
                                         <div class="flex items-center gap-2">
-                                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-zinc-900 text-[10px] font-semibold text-white"><?php echo e($initials); ?></span>
+                                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold text-white" style="background: var(--museum-accent);"><?php echo e($initials); ?></span>
                                             <span class="font-medium text-zinc-900"><?php echo e($user->name); ?></span>
                                         </div>
                                     </td>
                                     <td class="py-3 text-zinc-600"><?php echo e($user->email); ?></td>
-                                    <td class="py-3"><span class="rounded-md px-2 py-0.5 text-[11px] font-semibold <?php echo e($roleClass); ?>"><?php echo e($roleLabel); ?></span></td>
+                                    <td class="py-3">
+                                        <span
+                                            class="rounded-md px-2 py-0.5 text-[11px] font-semibold"
+                                            style="<?php echo e($isPrivilegedRole
+                                                ? 'background: var(--museum-accent); color: #fff;'
+                                                : 'background: color-mix(in srgb, var(--museum-accent) 14%, white); color: var(--museum-accent); border: 1px solid color-mix(in srgb, var(--museum-accent) 35%, white);'); ?>"
+                                        ><?php echo e($roleLabel); ?></span>
+                                    </td>
                                     <td class="py-3"><span class="rounded-md bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">Active</span></td>
                                     <td class="py-3 text-zinc-600"><?php echo e($lastLogin); ?></td>
                                     <td class="py-3 text-right">
@@ -507,6 +519,19 @@
 
                 <form method="POST" action="<?php echo e(route('settings.update', ['section' => 'appearance'])); ?>" class="mt-5 space-y-4">
                     <?php echo csrf_field(); ?>
+                    <?php
+                        $accentCandidate = (string) old('accent_color', $appearanceSettings['accent_color'] ?? '#1c1917');
+                        $selectedAccent = preg_match('/^#[0-9A-Fa-f]{6}$/', $accentCandidate) ? strtolower($accentCandidate) : '#1c1917';
+                        $selectedHeadingFont = old('heading_font', $appearanceSettings['heading_font'] ?? 'cormorant');
+                        $selectedBodyFont = old('body_font', $appearanceSettings['body_font'] ?? 'inter');
+                        $fontOptions = [
+                            'cormorant' => 'Cormorant Garamond',
+                            'playfair' => 'Playfair Display',
+                            'lora' => 'Lora',
+                            'inter' => 'Inter',
+                            'manrope' => 'Manrope',
+                        ];
+                    ?>
                     <div>
                         <p class="font-semibold text-zinc-800">Theme</p>
                         <select name="theme" class="mt-2 w-full rounded-xl border border-zinc-300 bg-white px-4 py-2.5">
@@ -527,25 +552,43 @@
 
                     <div>
                         <p class="font-semibold text-zinc-800">Typography</p>
-                        <div class="mt-2 space-y-2">
+                        <div class="mt-2 grid gap-3 md:grid-cols-2">
+                            <label class="museum-field">
+                                <span class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Headings & Titles</span>
+                                <select name="heading_font">
+                                    <?php $__currentLoopData = $fontOptions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $fontValue => $fontLabel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($fontValue); ?>" <?php if($selectedHeadingFont === $fontValue): echo 'selected'; endif; ?>><?php echo e($fontLabel); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                </select>
+                            </label>
+                            <label class="museum-field">
+                                <span class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Body Text</span>
+                                <select name="body_font">
+                                    <?php $__currentLoopData = $fontOptions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $fontValue => $fontLabel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($fontValue); ?>" <?php if($selectedBodyFont === $fontValue): echo 'selected'; endif; ?>><?php echo e($fontLabel); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                </select>
+                            </label>
+                        </div>
+                        <div class="mt-3 space-y-2">
                             <div class="flex items-center justify-between rounded-lg bg-zinc-100 px-3 py-2 text-sm">
                                 <span class="text-zinc-600">Headings & Titles</span>
-                                <span class="text-zinc-500">Cormorant Garamond</span>
+                                <span class="text-zinc-500"><?php echo e($fontOptions[$selectedHeadingFont] ?? 'Cormorant Garamond'); ?></span>
                             </div>
                             <div class="flex items-center justify-between rounded-lg bg-zinc-100 px-3 py-2 text-sm">
                                 <span class="text-zinc-600">Body Text</span>
-                                <span class="text-zinc-500">Inter</span>
+                                <span class="text-zinc-500"><?php echo e($fontOptions[$selectedBodyFont] ?? 'Inter'); ?></span>
                             </div>
                         </div>
                     </div>
 
                     <div class="border-t border-zinc-200 pt-4">
                         <p class="font-semibold text-zinc-800">Accent Color</p>
-                        <div class="mt-3 inline-flex items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">
-                            <span class="h-9 w-9 rounded-lg bg-[#1c1917]"></span>
+                        <div class="mt-3 flex items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">
+                            <input type="color" name="accent_color" value="<?php echo e($selectedAccent); ?>" class="h-10 w-14 cursor-pointer rounded border border-zinc-300 bg-white p-1">
                             <div>
-                                <p class="font-semibold text-zinc-900">Dark Luxury</p>
-                                <p class="text-xs text-zinc-500">#1c1917</p>
+                                <p class="font-semibold text-zinc-900">Custom Accent</p>
+                                <p class="text-xs text-zinc-500">Selected: <?php echo e(strtoupper($selectedAccent)); ?></p>
                             </div>
                         </div>
                     </div>

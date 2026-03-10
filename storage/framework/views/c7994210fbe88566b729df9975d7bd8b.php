@@ -148,7 +148,8 @@
                     <div class="inline-flex rounded-xl border border-zinc-300 bg-white p-1">
                         <a
                             href="<?php echo e(route('artworks.index', array_merge(request()->query(), ['view' => 'grid']))); ?>"
-                            class="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold <?php echo e($view === 'grid' ? 'bg-zinc-900 text-white' : 'text-zinc-600'); ?>"
+                            class="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold <?php echo e($view === 'grid' ? 'text-white' : 'text-zinc-600'); ?>"
+                            style="<?php echo e($view === 'grid' ? 'background: var(--museum-accent);' : ''); ?>"
                         >
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                                 <rect width="7" height="7" x="3" y="3" rx="1"></rect>
@@ -160,7 +161,8 @@
                         </a>
                         <a
                             href="<?php echo e(route('artworks.index', array_merge(request()->query(), ['view' => 'table']))); ?>"
-                            class="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold <?php echo e($view === 'table' ? 'bg-zinc-900 text-white' : 'text-zinc-600'); ?>"
+                            class="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold <?php echo e($view === 'table' ? 'text-white' : 'text-zinc-600'); ?>"
+                            style="<?php echo e($view === 'table' ? 'background: var(--museum-accent);' : ''); ?>"
                         >
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="8" x2="21" y1="6" y2="6"></line>
@@ -176,7 +178,8 @@
 
                     <a
                         href="<?php echo e(route('artworks.index', ['view' => $view, 'sort' => $sortColumn ?? 'created_at', 'direction' => $direction ?? 'desc'])); ?>"
-                        class="inline-flex items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-100"
+                        class="inline-flex items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 transition"
+                        style="border-color: color-mix(in srgb, var(--museum-accent) 38%, white); color: var(--museum-accent);"
                     >
                         Reset
                     </a>

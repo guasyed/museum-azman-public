@@ -320,6 +320,7 @@
                             placeholder="Search artwork by title or artist..."
                             autocomplete="off"
                             spellcheck="false"
+                            style="width:50%"
                         >
                         <input type="hidden" name="artwork_id" id="movement-artwork-id" value="<?php echo e(old('artwork_id', request()->query('artwork'))); ?>">
                         <div

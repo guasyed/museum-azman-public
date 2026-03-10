@@ -44,10 +44,10 @@
 
         <article class="museum-panel p-0! overflow-hidden">
             <div class="overflow-x-auto">
-                <table class="w-full min-w-245 text-sm">
+                <table class="w-full min-w-245 table-fixed text-sm">
                     <thead>
                         <tr class="border-b border-zinc-200 text-left text-zinc-600">
-                            <th class="px-4 py-3">
+                            <th class="px-4 py-3" style="width:30%;">
                                 @php
                                     $isNameSort = ($sortColumn ?? 'name') === 'name';
                                     $nextNameDirection = $isNameSort && ($direction ?? 'asc') === 'asc' ? 'desc' : 'asc';
@@ -62,7 +62,7 @@
                                     @endif
                                 </a>
                             </th>
-                            <th class="px-4 py-3">
+                            <th class="px-4 py-3" style="width:36%;">
                                 @php
                                     $isEmailSort = ($sortColumn ?? 'name') === 'email';
                                     $nextEmailDirection = $isEmailSort && ($direction ?? 'asc') === 'asc' ? 'desc' : 'asc';
@@ -77,7 +77,7 @@
                                     @endif
                                 </a>
                             </th>
-                            <th class="px-4 py-3">
+                            <th class="px-4 py-3" style="width:14%;">
                                 @php
                                     $isRoleSort = ($sortColumn ?? 'name') === 'role';
                                     $nextRoleDirection = $isRoleSort && ($direction ?? 'asc') === 'asc' ? 'desc' : 'asc';
@@ -92,7 +92,7 @@
                                     @endif
                                 </a>
                             </th>
-                            <th class="px-4 py-3">Actions</th>
+                            <th class="px-4 py-3 text-right" style="width:20%;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -103,24 +103,27 @@
                                     @if($user->avatar_url)
                                         <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="h-9 w-9 rounded-full object-cover">
                                     @else
-                                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-zinc-900 text-xs font-semibold text-white">{{ strtoupper(substr($user->name, 0, 2)) }}</span>
+                                        <span class="inline-flex h-9 w-9 items-center justify-center rounded-full text-xs font-semibold text-white" style="background: var(--museum-accent);">{{ strtoupper(substr($user->name, 0, 2)) }}</span>
                                     @endif
-                                    <span class="font-semibold text-zinc-900">{{ $user->name }}</span>
+                                    <span class="truncate font-semibold text-zinc-900">{{ $user->name }}</span>
                                 </div>
                             </td>
-                            <td class="px-4 py-3 text-zinc-600">{{ $user->email }}</td>
+                            <td class="px-4 py-3 text-zinc-600"><span class="block truncate">{{ $user->email }}</span></td>
                             <td class="px-4 py-3">
                                 @php
                                     $userRoleSlug = optional($user->roleRelation)->slug;
                                     $userRoleLabel = $user->role_label;
-                                    $userRoleClass = in_array($userRoleSlug, ['owner', 'admin'], true)
-                                        ? 'bg-zinc-900 text-white'
-                                        : 'bg-zinc-100 text-zinc-700';
+                                    $isPrivilegedRole = in_array($userRoleSlug, ['owner', 'admin'], true);
                                 @endphp
-                                <span class="rounded-md px-2 py-0.5 text-xs font-semibold {{ $userRoleClass }}">{{ $userRoleLabel }}</span>
+                                <span
+                                    class="rounded-md px-2 py-0.5 text-xs font-semibold"
+                                    style="{{ $isPrivilegedRole
+                                        ? 'background: var(--museum-accent); color: #fff;'
+                                        : 'background: color-mix(in srgb, var(--museum-accent) 14%, white); color: var(--museum-accent); border: 1px solid color-mix(in srgb, var(--museum-accent) 35%, white);' }}"
+                                >{{ $userRoleLabel }}</span>
                             </td>
-                            <td class="px-4 py-3">
-                                <div class="flex items-center gap-2">
+                            <td class="px-4 py-3 text-right">
+                                <div class="flex items-center justify-end gap-2 whitespace-nowrap">
                                     <a href="{{ route('admin.users.edit', $user) }}" class="museum-btn-secondary">Edit</a>
                                     @if(auth()->id() !== $user->id)
                                         <form method="POST" action="{{ route('admin.users.destroy', $user) }}" onsubmit="return confirm('Delete this user? This action cannot be undone.');">

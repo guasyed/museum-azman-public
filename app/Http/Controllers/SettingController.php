@@ -172,6 +172,9 @@ class SettingController extends Controller
         $appearanceSettings = [
             'theme' => $settings['theme'] ?? 'light',
             'density' => $settings['density'] ?? 'comfortable',
+            'accent_color' => $settings['accent_color'] ?? '#1c1917',
+            'heading_font' => $settings['heading_font'] ?? 'cormorant',
+            'body_font' => $settings['body_font'] ?? 'inter',
         ];
 
         $backupList = $this->listBackups($configuredTimezone);
@@ -314,7 +317,12 @@ class SettingController extends Controller
                 $validated = $request->validate([
                     'theme' => ['required', 'in:light,dark'],
                     'density' => ['required', 'in:comfortable,compact,spacious'],
+                    'accent_color' => ['required', 'regex:/^#[0-9A-Fa-f]{6}$/'],
+                    'heading_font' => ['required', 'in:cormorant,playfair,lora,inter,manrope'],
+                    'body_font' => ['required', 'in:inter,manrope,lora,playfair,cormorant'],
                 ]);
+
+                $validated['accent_color'] = strtolower((string) $validated['accent_color']);
 
                 $this->saveSettings($validated);
 

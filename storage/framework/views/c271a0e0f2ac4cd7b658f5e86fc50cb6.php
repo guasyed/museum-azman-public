@@ -36,6 +36,8 @@
 
         <form method="GET" class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <input type="hidden" name="view" value="<?php echo e($view); ?>">
+            <input type="hidden" name="sort" value="<?php echo e($sortColumn ?? 'name'); ?>">
+            <input type="hidden" name="direction" value="<?php echo e($direction ?? 'asc'); ?>">
             <div class="flex-1">
                 <input
                     type="text"
@@ -62,12 +64,15 @@
                         href="<?php echo e(route('locations.index', [
                             'q' => $q,
                             'type' => $selectedType,
-                            'view' => 'grid'
+                            'view' => 'grid',
+                            'sort' => $sortColumn ?? 'name',
+                            'direction' => $direction ?? 'asc',
                         ])); ?>"
                         class="inline-flex items-center justify-center size-9 rounded-md transition-colors
                         <?php echo e($view === 'grid'
-                            ? 'bg-zinc-900 text-white border border-zinc-900'
+                            ? 'text-white border'
                             : 'border bg-background text-foreground hover:bg-accent hover:text-accent-foreground'); ?>"
+                        style="<?php echo e($view === 'grid' ? 'background: var(--museum-accent); border-color: var(--museum-accent);' : ''); ?>"
                         title="Grid View"
                     >
                         <svg class="size-4"
@@ -85,12 +90,15 @@
                         href="<?php echo e(route('locations.index', [
                             'q' => $q,
                             'type' => $selectedType,
-                            'view' => 'list'
+                            'view' => 'list',
+                            'sort' => $sortColumn ?? 'name',
+                            'direction' => $direction ?? 'asc',
                         ])); ?>"
                         class="inline-flex items-center justify-center size-9 rounded-md transition-colors
                         <?php echo e($view === 'list'
-                            ? 'bg-zinc-900 text-white border border-zinc-900'
+                            ? 'text-white border'
                             : 'border bg-background text-foreground hover:bg-accent hover:text-accent-foreground'); ?>"
+                        style="<?php echo e($view === 'list' ? 'background: var(--museum-accent); border-color: var(--museum-accent);' : ''); ?>"
                         title="List View"
                     >
                         <svg class="size-4"
@@ -115,8 +123,36 @@
                     <table class="w-full min-w-295 text-sm">
                         <thead>
                             <tr class="border-b border-zinc-200 text-left text-sm font-semibold text-zinc-800">
-                                <th class="px-4 py-3">Location</th>
-                                <th class="px-4 py-3">Type</th>
+                                <th class="px-4 py-3">
+                                    <?php
+                                        $isNameSort = ($sortColumn ?? 'name') === 'name';
+                                        $nextNameDirection = $isNameSort && ($direction ?? 'asc') === 'asc' ? 'desc' : 'asc';
+                                    ?>
+                                    <a
+                                        href="<?php echo e(route('locations.index', array_merge(request()->query(), ['sort' => 'name', 'direction' => $nextNameDirection]))); ?>"
+                                        class="inline-flex items-center gap-1 hover:text-zinc-900"
+                                    >
+                                        <span>Location</span>
+                                        <?php if($isNameSort): ?>
+                                            <span class="text-xs"><?php echo e(($direction ?? 'asc') === 'asc' ? '▲' : '▼'); ?></span>
+                                        <?php endif; ?>
+                                    </a>
+                                </th>
+                                <th class="px-4 py-3">
+                                    <?php
+                                        $isTypeSort = ($sortColumn ?? 'name') === 'type';
+                                        $nextTypeDirection = $isTypeSort && ($direction ?? 'asc') === 'asc' ? 'desc' : 'asc';
+                                    ?>
+                                    <a
+                                        href="<?php echo e(route('locations.index', array_merge(request()->query(), ['sort' => 'type', 'direction' => $nextTypeDirection]))); ?>"
+                                        class="inline-flex items-center gap-1 hover:text-zinc-900"
+                                    >
+                                        <span>Type</span>
+                                        <?php if($isTypeSort): ?>
+                                            <span class="text-xs"><?php echo e(($direction ?? 'asc') === 'asc' ? '▲' : '▼'); ?></span>
+                                        <?php endif; ?>
+                                    </a>
+                                </th>
                                 <th class="px-4 py-3">Address</th>
                                 <th class="px-4 py-3 text-right">Artworks</th>
                                 <th class="px-4 py-3 text-right">Insured Value</th>
@@ -129,7 +165,7 @@
                             <tr class="border-b border-zinc-200 text-sm">
                                 <td class="px-4 py-3.5">
                                     <div class="flex items-center gap-3">
-                                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 text-white">
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-xl text-white" style="background: var(--museum-accent);">
                                             <svg class="size-5" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                                                 <path d="M3 9.5L12 3l9 6.5"></path>
                                                 <path d="M5.5 10.5V20h13V10.5"></path>
@@ -189,7 +225,7 @@
                 <?php $__empty_1 = true; $__currentLoopData = $locations; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $location): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <article class="museum-panel p-5">
                         <div class="flex items-start gap-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 text-white">⌂</div>
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl text-white" style="background: var(--museum-accent);">⌂</div>
                             <div>
                                 <h3 class="museum-card-title"><?php echo e($location->name); ?></h3>
                                 <span class="mt-2 inline-flex rounded-lg px-2.5 py-1 text-xs font-semibold <?php echo e($location->type_badge_class); ?>"><?php echo e($location->display_type); ?></span>
@@ -215,12 +251,12 @@
                         </div>
 
                         <div class="mt-3 flex items-center gap-2">
-                            <a href="<?php echo e(route('locations.show', $location)); ?>" class="museum-btn-secondary flex-1 text-center">View Details</a>
+                            <a href="<?php echo e(route('locations.show', $location)); ?>" class="museum-btn-secondary flex-1 text-center" style="border-color: color-mix(in srgb, var(--museum-accent) 45%, white); color: var(--museum-accent);">View Details</a>
                             <?php if($location->map_url): ?>
-                                <a href="<?php echo e($location->map_url); ?>" target="_blank" rel="noopener noreferrer" class="museum-btn-secondary">Map</a>
+                                <a href="<?php echo e($location->map_url); ?>" target="_blank" rel="noopener noreferrer" class="museum-btn-secondary" style="border-color: color-mix(in srgb, var(--museum-accent) 45%, white); color: var(--museum-accent);">Map</a>
                             <?php endif; ?>
                             <?php if(auth()->check() && auth()->user()->isAdmin()): ?>
-                                <a href="<?php echo e(route('locations.edit', $location)); ?>" class="museum-btn-secondary">✎</a>
+                                <a href="<?php echo e(route('locations.edit', $location)); ?>" class="museum-btn-secondary" style="border-color: color-mix(in srgb, var(--museum-accent) 45%, white); color: var(--museum-accent);">✎</a>
                             <?php endif; ?>
                         </div>
                     </article>

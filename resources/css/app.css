@@ -20,7 +20,7 @@
 }
 
 body.museum-shell {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--museum-font-body, 'Inter', sans-serif);
     font-size: var(--museum-size-body);
     line-height: 1.45;
     -webkit-font-smoothing: antialiased;
@@ -31,23 +31,25 @@ body.museum-shell {
 }
 
 .font-display {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--museum-font-heading, 'Inter', sans-serif);
 }
 
 .museum-brand-title {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--museum-font-heading, 'Inter', sans-serif);
     font-size: var(--museum-size-brand);
     line-height: 1.1;
     font-weight: 700;
     letter-spacing: -0.01em;
+    color: var(--museum-accent);
 }
 
 .museum-page-title {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--museum-font-heading, 'Inter', sans-serif);
     font-size: var(--museum-size-page-title);
     line-height: 1.08;
     font-weight: 700;
     letter-spacing: -0.015em;
+    color: var(--museum-accent);
 }
 
 .museum-page-subtitle {
@@ -59,15 +61,16 @@ body.museum-shell {
 }
 
 .museum-section-title {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--museum-font-heading, 'Inter', sans-serif);
     font-size: var(--museum-size-section-title);
     line-height: 1.2;
     font-weight: 700;
     letter-spacing: -0.012em;
+    color: var(--museum-accent);
 }
 
 .museum-card-title {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--museum-font-heading, 'Inter', sans-serif);
     font-size: var(--museum-size-card-title);
     line-height: 1.2;
     font-weight: 700;
@@ -96,7 +99,7 @@ body.museum-shell {
 
 .museum-stat-value {
     @apply mt-3 text-[2.15rem] font-semibold leading-none;
-    font-family: 'Inter', sans-serif;
+    font-family: var(--museum-font-heading, 'Inter', sans-serif);
 }
 
 .museum-btn {
@@ -148,13 +151,13 @@ body.museum-shell {
 .museum-stat-card p {
     @apply font-medium text-zinc-600;
     font-size: var(--museum-size-stat-label);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--museum-font-body, 'Inter', sans-serif);
 }
 
 .museum-stat-card strong {
     @apply mt-3 block font-semibold leading-none;
     font-size: var(--museum-size-stat-value);
-    font-family: 'Inter', sans-serif;
+    font-family: var(--museum-font-heading, 'Inter', sans-serif);
 }
 
 .museum-dashboard-compact .museum-page-title {

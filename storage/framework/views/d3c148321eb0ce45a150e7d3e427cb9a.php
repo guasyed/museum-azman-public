@@ -3,8 +3,41 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <?php
+        $uiTheme = 'light';
+        $uiDensity = 'comfortable';
+        $uiAccent = '#1c1917';
+        $uiHeadingFontKey = 'cormorant';
+        $uiBodyFontKey = 'inter';
+        $fontFamilies = [
+            'cormorant' => "'Cormorant Garamond', serif",
+            'playfair' => "'Playfair Display', serif",
+            'lora' => "'Lora', serif",
+            'inter' => "'Inter', sans-serif",
+            'manrope' => "'Manrope', sans-serif",
+        ];
+        if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {
+            $appearanceSettings = \App\Models\Setting::query()
+                ->whereIn('key', ['theme', 'density', 'accent_color', 'heading_font', 'body_font'])
+                ->pluck('value', 'key');
+	
+            $themeValue = (string) ($appearanceSettings->get('theme') ?? 'light');
+            $densityValue = (string) ($appearanceSettings->get('density') ?? 'comfortable');
+            $accentValue = (string) ($appearanceSettings->get('accent_color') ?? '#1c1917');
+            $headingFontValue = (string) ($appearanceSettings->get('heading_font') ?? 'cormorant');
+            $bodyFontValue = (string) ($appearanceSettings->get('body_font') ?? 'inter');
+	
+            $uiTheme = in_array($themeValue, ['light', 'dark'], true) ? $themeValue : 'light';
+            $uiDensity = in_array($densityValue, ['comfortable', 'compact', 'spacious'], true) ? $densityValue : 'comfortable';
+            $uiAccent = preg_match('/^#[0-9A-Fa-f]{6}$/', $accentValue) ? strtolower($accentValue) : '#1c1917';
+            $uiHeadingFontKey = array_key_exists($headingFontValue, $fontFamilies) ? $headingFontValue : 'cormorant';
+            $uiBodyFontKey = array_key_exists($bodyFontValue, $fontFamilies) ? $bodyFontValue : 'inter';
+        }
+        $uiHeadingFontFamily = $fontFamilies[$uiHeadingFontKey];
+        $uiBodyFontFamily = $fontFamilies[$uiBodyFontKey];
+    ?>
 	<link rel="manifest" href="<?php echo e(asset('manifest.json')); ?>">
-	<meta name="theme-color" content="#f7f7f6">
+    <meta name="theme-color" content="<?php echo e($uiTheme === 'dark' ? '#111827' : '#f7f7f6'); ?>">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -41,7 +74,7 @@
     <link rel="alternate icon" href="<?php echo e($faviconHref); ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=Lora:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.7/build/css/intlTelInput.css">
     <?php
         $host = strtolower((string) request()->getHost());
@@ -57,6 +90,83 @@
     <?php endif; ?>
 
     <style>
+        body.museum-shell {
+            --museum-accent: <?php echo e($uiAccent); ?>;
+            --museum-font-heading: <?php echo $uiHeadingFontFamily; ?>;
+            --museum-font-body: <?php echo $uiBodyFontFamily; ?>;
+        }
+
+        body.museum-shell .museum-btn {
+            background: var(--museum-accent) !important;
+            border-color: var(--museum-accent) !important;
+        }
+
+        body.museum-shell .museum-btn:hover {
+            filter: brightness(0.92);
+        }
+
+        body.museum-shell .museum-page-title,
+        body.museum-shell .museum-section-title,
+        body.museum-shell .museum-brand-title {
+            color: var(--museum-accent) !important;
+        }
+
+        body.museum-shell.museum-theme-dark {
+            background: #0b1020 !important;
+            color: #e5e7eb;
+        }
+
+        body.museum-shell.museum-theme-dark .museum-panel,
+        body.museum-shell.museum-theme-dark .museum-card,
+        body.museum-shell.museum-theme-dark .museum-stat-card,
+        body.museum-shell.museum-theme-dark aside,
+        body.museum-shell.museum-theme-dark header,
+        body.museum-shell.museum-theme-dark .museum-modal {
+            background: #111827 !important;
+            border-color: #374151 !important;
+            color: #e5e7eb;
+        }
+
+        body.museum-shell.museum-theme-dark .museum-page-subtitle,
+        body.museum-shell.museum-theme-dark .text-zinc-600,
+        body.museum-shell.museum-theme-dark .text-zinc-500 {
+            color: #9ca3af !important;
+        }
+
+        body.museum-shell.museum-theme-dark .museum-field input,
+        body.museum-shell.museum-theme-dark .museum-field select,
+        body.museum-shell.museum-theme-dark .museum-field textarea {
+            background: #0f172a !important;
+            border-color: #4b5563 !important;
+            color: #e5e7eb !important;
+        }
+
+        body.museum-shell.museum-density-compact .museum-panel,
+        body.museum-shell.museum-density-compact .museum-card,
+        body.museum-shell.museum-density-compact .museum-stat-card {
+            padding: 0.75rem !important;
+        }
+
+        body.museum-shell.museum-density-compact .museum-field input,
+        body.museum-shell.museum-density-compact .museum-field select,
+        body.museum-shell.museum-density-compact .museum-field textarea {
+            padding-top: 0.4rem !important;
+            padding-bottom: 0.4rem !important;
+        }
+
+        body.museum-shell.museum-density-spacious .museum-panel,
+        body.museum-shell.museum-density-spacious .museum-card,
+        body.museum-shell.museum-density-spacious .museum-stat-card {
+            padding: 1.5rem !important;
+        }
+
+        body.museum-shell.museum-density-spacious .museum-field input,
+        body.museum-shell.museum-density-spacious .museum-field select,
+        body.museum-shell.museum-density-spacious .museum-field textarea {
+            padding-top: 0.75rem !important;
+            padding-bottom: 0.75rem !important;
+        }
+
         /* Mobile Navigation Overlay */
         .mobile-nav {
             display: none;
@@ -85,14 +195,14 @@
         }
 
         .mobile-nav-link:hover {
-            background-color: #e0ecff;
-            color: #1d4ed8;
+            background-color: color-mix(in srgb, var(--museum-accent) 16%, white);
+            color: var(--museum-accent);
         }
 
         .mobile-nav-link.active {
-            color: #1d4ed8;
+            color: var(--museum-accent);
             font-weight: 700;
-            background-color: #dbeafe;
+            background-color: color-mix(in srgb, var(--museum-accent) 20%, white);
         }
 
         .museum-nav-item {
@@ -100,8 +210,14 @@
         }
 
         .museum-nav-item:hover {
-            background-color: #e0ecff;
-            color: #1d4ed8;
+            background-color: color-mix(in srgb, var(--museum-accent) 16%, white);
+            color: var(--museum-accent);
+        }
+
+        .museum-nav-item.active {
+            background-color: color-mix(in srgb, var(--museum-accent) 20%, white) !important;
+            border-color: color-mix(in srgb, var(--museum-accent) 38%, white) !important;
+            color: var(--museum-accent) !important;
         }
 
         .logout-menu-item {
@@ -123,7 +239,7 @@
 			.museum-brand-title {
 				font-size: 1.4rem;
 				font-weight: 700;
-				color: #18181b;
+                color: var(--museum-accent);
 			}
 			
 			/* Logo image styling */
@@ -166,7 +282,7 @@
 		}
     </style>
 </head>
-<body class="museum-shell bg-[#f6f5f4]">
+<body class="museum-shell museum-theme-<?php echo e($uiTheme); ?> museum-density-<?php echo e($uiDensity); ?> bg-[#f6f5f4]">
 
 <header class="sticky top-0 z-40 flex items-center justify-between border-b border-zinc-200 bg-[#f7f7f6] p-4 lg:hidden">
     <div class="flex items-center gap-3">
@@ -214,7 +330,8 @@
             <div class="space-y-3 px-4 pt-4">
                 <div class="rounded-xl border border-zinc-200 bg-white px-3 py-2">
                     <p class="text-xs font-semibold text-zinc-900"><?php echo e(auth()->user()->name); ?></p>
-                    <p class="text-[11px] text-zinc-500"><?php echo e(auth()->user()->email); ?> • <?php echo e(ucfirst((string) auth()->user()->role)); ?></p>
+                    <p class="truncate text-[11px] leading-4 text-zinc-500"><?php echo e(auth()->user()->email); ?></p>
+                    <p class="text-[11px] leading-4 text-zinc-500"><?php echo e(ucfirst((string) auth()->user()->role)); ?></p>
                 </div>
             </div>
         <?php endif; ?>
@@ -314,8 +431,8 @@
     <button
         id="global-scroll-top-btn"
         type="button"
-        class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-zinc-900 bg-zinc-900 text-white shadow-lg transition hover:bg-blue-600"
-        style="width:40px; height:40px; border-radius:9999px; border:1px solid #18181b; background:#18181b; color:#fff; box-shadow:0 6px 16px rgba(0,0,0,.25); cursor:pointer;"
+        class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border text-white shadow-lg transition"
+        style="width:40px; height:40px; border-radius:9999px; border:1px solid var(--museum-accent); background:var(--museum-accent); color:#fff; box-shadow:0 6px 16px rgba(0,0,0,.25); cursor:pointer;"
         title="Back to top"
         aria-label="Back to top"
     >
@@ -324,8 +441,8 @@
     <button
         id="global-scroll-bottom-btn"
         type="button"
-        class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-zinc-900 bg-zinc-900 text-white shadow-lg transition hover:bg-blue-600"
-        style="width:40px; height:40px; border-radius:9999px; border:1px solid #18181b; background:#18181b; color:#fff; box-shadow:0 6px 16px rgba(0,0,0,.25); cursor:pointer;"
+        class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border text-white shadow-lg transition"
+        style="width:40px; height:40px; border-radius:9999px; border:1px solid var(--museum-accent); background:var(--museum-accent); color:#fff; box-shadow:0 6px 16px rgba(0,0,0,.25); cursor:pointer;"
         title="Go to bottom"
         aria-label="Go to bottom"
     >
@@ -406,21 +523,20 @@
             }
 
             const bindHoverColor = (button) => {
-                const baseBg = '#18181b';
-                const hoverBg = '#2563eb';
+                const accent = getComputedStyle(document.body).getPropertyValue('--museum-accent').trim() || '#1c1917';
+                button.style.background = accent;
+                button.style.borderColor = accent;
 
                 button.addEventListener('mouseenter', () => {
                     if (button.disabled) {
                         return;
                     }
 
-                    button.style.background = hoverBg;
-                    button.style.borderColor = hoverBg;
+                    button.style.filter = 'brightness(0.9)';
                 });
 
                 button.addEventListener('mouseleave', () => {
-                    button.style.background = baseBg;
-                    button.style.borderColor = baseBg;
+                    button.style.filter = 'none';
                 });
             };
 
@@ -428,25 +544,20 @@
             bindHoverColor(scrollBottomBtn);
 
             const mainContainer = document.querySelector('main.overflow-y-auto');
-            const mainScrollable = !!mainContainer && (mainContainer.scrollHeight - mainContainer.clientHeight > 2);
-            const useMain = mainScrollable;
-            let hasScrolledOnce = false;
+            const useMain = !!mainContainer && (mainContainer.scrollHeight - mainContainer.clientHeight > 1);
 
             const getScrollTop = () => useMain ? mainContainer.scrollTop : window.scrollY;
-            const getScrollHeight = () => useMain ? mainContainer.scrollHeight : document.documentElement.scrollHeight;
+            const getScrollHeight = () => useMain
+                ? mainContainer.scrollHeight
+                : Math.max(document.documentElement.scrollHeight, document.body.scrollHeight);
             const getClientHeight = () => useMain ? mainContainer.clientHeight : window.innerHeight;
 
             const syncVisibility = () => {
                 const top = getScrollTop();
                 const maxScroll = Math.max(getScrollHeight() - getClientHeight(), 0);
-                const nearTop = top < 120;
-                const nearBottom = top >= maxScroll - 120;
-
-                if (!hasScrolledOnce && nearTop) {
-                    scrollTopBtn.classList.add('hidden');
-                    scrollBottomBtn.classList.add('hidden');
-                    return;
-                }
+                const edgeThreshold = 24;
+                const nearTop = top <= edgeThreshold;
+                const nearBottom = top >= Math.max(maxScroll - edgeThreshold, 0);
 
                 scrollTopBtn.classList.toggle('hidden', nearTop);
                 scrollTopBtn.classList.toggle('opacity-55', nearTop);
@@ -472,11 +583,12 @@
                 }
             });
 
-            const bindTarget = useMain ? mainContainer : window;
-            bindTarget.addEventListener('scroll', () => {
-                hasScrolledOnce = true;
-                syncVisibility();
-            }, { passive: true });
+            const onScroll = () => syncVisibility();
+
+            if (mainContainer) {
+                mainContainer.addEventListener('scroll', onScroll, { passive: true });
+            }
+            window.addEventListener('scroll', onScroll, { passive: true });
             window.addEventListener('resize', syncVisibility);
             syncVisibility();
         };

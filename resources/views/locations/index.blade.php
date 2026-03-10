@@ -60,8 +60,9 @@
                         ]) }}"
                         class="inline-flex items-center justify-center size-9 rounded-md transition-colors
                         {{ $view === 'grid'
-                            ? 'bg-zinc-900 text-white border border-zinc-900'
+                            ? 'text-white border'
                             : 'border bg-background text-foreground hover:bg-accent hover:text-accent-foreground' }}"
+                        style="{{ $view === 'grid' ? 'background: var(--museum-accent); border-color: var(--museum-accent);' : '' }}"
                         title="Grid View"
                     >
                         <svg class="size-4"
@@ -85,8 +86,9 @@
                         ]) }}"
                         class="inline-flex items-center justify-center size-9 rounded-md transition-colors
                         {{ $view === 'list'
-                            ? 'bg-zinc-900 text-white border border-zinc-900'
+                            ? 'text-white border'
                             : 'border bg-background text-foreground hover:bg-accent hover:text-accent-foreground' }}"
+                        style="{{ $view === 'list' ? 'background: var(--museum-accent); border-color: var(--museum-accent);' : '' }}"
                         title="List View"
                     >
                         <svg class="size-4"
@@ -153,7 +155,7 @@
                             <tr class="border-b border-zinc-200 text-sm">
                                 <td class="px-4 py-3.5">
                                     <div class="flex items-center gap-3">
-                                        <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 text-white">
+                                        <div class="flex h-10 w-10 items-center justify-center rounded-xl text-white" style="background: var(--museum-accent);">
                                             <svg class="size-5" fill="none" stroke="currentColor" stroke-width="1.9" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                                                 <path d="M3 9.5L12 3l9 6.5"></path>
                                                 <path d="M5.5 10.5V20h13V10.5"></path>
@@ -212,7 +214,7 @@
                 @forelse($locations as $location)
                     <article class="museum-panel p-5">
                         <div class="flex items-start gap-3">
-                            <div class="flex h-10 w-10 items-center justify-center rounded-xl bg-zinc-900 text-white">⌂</div>
+                            <div class="flex h-10 w-10 items-center justify-center rounded-xl text-white" style="background: var(--museum-accent);">⌂</div>
                             <div>
                                 <h3 class="museum-card-title">{{ $location->name }}</h3>
                                 <span class="mt-2 inline-flex rounded-lg px-2.5 py-1 text-xs font-semibold {{ $location->type_badge_class }}">{{ $location->display_type }}</span>
@@ -237,12 +239,12 @@
                         </div>
 
                         <div class="mt-3 flex items-center gap-2">
-                            <a href="{{ route('locations.show', $location) }}" class="museum-btn-secondary flex-1 text-center">View Details</a>
+                            <a href="{{ route('locations.show', $location) }}" class="museum-btn-secondary flex-1 text-center" style="border-color: color-mix(in srgb, var(--museum-accent) 45%, white); color: var(--museum-accent);">View Details</a>
                             @if($location->map_url)
-                                <a href="{{ $location->map_url }}" target="_blank" rel="noopener noreferrer" class="museum-btn-secondary">Map</a>
+                                <a href="{{ $location->map_url }}" target="_blank" rel="noopener noreferrer" class="museum-btn-secondary" style="border-color: color-mix(in srgb, var(--museum-accent) 45%, white); color: var(--museum-accent);">Map</a>
                             @endif
                             @if(auth()->check() && auth()->user()->isAdmin())
-                                <a href="{{ route('locations.edit', $location) }}" class="museum-btn-secondary">✎</a>
+                                <a href="{{ route('locations.edit', $location) }}" class="museum-btn-secondary" style="border-color: color-mix(in srgb, var(--museum-accent) 45%, white); color: var(--museum-accent);">✎</a>
                             @endif
                         </div>
                     </article>

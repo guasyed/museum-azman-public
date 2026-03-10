@@ -1,0 +1,318 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../**/*.blade.php';
+@source '../**/*.js';
+
+:root {
+    --museum-ink: #1c1917;
+    --museum-soft: #f7f6f4;
+    --museum-card: #ffffff;
+    --museum-size-brand: 1.35rem;
+    --museum-size-page-title: clamp(1.55rem, 2.6vw, 2.05rem);
+    --museum-size-page-subtitle: 0.86rem;
+    --museum-size-section-title: 1.08rem;
+    --museum-size-card-title: 1rem;
+    --museum-size-stat-label: 0.8rem;
+    --museum-size-stat-value: 1.2rem;
+    --museum-size-body: 0.78rem;
+}
+
+body.museum-shell {
+    font-family: 'Inter', sans-serif;
+    font-size: var(--museum-size-body);
+    line-height: 1.45;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    background: #f6f5f4;
+    color: var(--museum-ink);
+}
+
+.font-display {
+    font-family: 'Inter', sans-serif;
+}
+
+.museum-brand-title {
+    font-family: 'Inter', sans-serif;
+    font-size: var(--museum-size-brand);
+    line-height: 1.1;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.museum-page-title {
+    font-family: 'Inter', sans-serif;
+    font-size: var(--museum-size-page-title);
+    line-height: 1.08;
+    font-weight: 700;
+    letter-spacing: -0.015em;
+}
+
+.museum-page-subtitle {
+    margin-top: 0.5rem;
+    font-size: var(--museum-size-page-subtitle);
+    line-height: 1.45;
+    color: #6b6b68;
+    font-weight: 500;
+}
+
+.museum-section-title {
+    font-family: 'Inter', sans-serif;
+    font-size: var(--museum-size-section-title);
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -0.012em;
+}
+
+.museum-card-title {
+    font-family: 'Inter', sans-serif;
+    font-size: var(--museum-size-card-title);
+    line-height: 1.2;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+.museum-nav-item {
+    @apply flex items-center gap-3 rounded-xl border border-transparent px-3 py-2.5 text-[0.88rem] font-semibold text-zinc-600 transition;
+}
+
+.museum-nav-item.active {
+    @apply border-zinc-300 bg-zinc-100 text-zinc-900;
+}
+
+.museum-card {
+    @apply rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm;
+}
+
+.museum-panel {
+    @apply rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm;
+}
+
+.museum-stat-label {
+    @apply text-[0.95rem] font-medium text-zinc-500;
+}
+
+.museum-stat-value {
+    @apply mt-3 text-[2.15rem] font-semibold leading-none;
+    font-family: 'Inter', sans-serif;
+}
+
+.museum-btn {
+    @apply inline-flex items-center justify-center rounded-xl bg-zinc-900 px-3.5 py-2 text-sm font-semibold text-white transition hover:bg-zinc-700;
+}
+
+.museum-btn-secondary {
+    @apply inline-flex items-center justify-center rounded-xl border border-zinc-300 px-3.5 py-1.75 text-sm font-semibold text-zinc-700 transition hover:bg-zinc-100;
+}
+
+.museum-btn-danger {
+    @apply inline-flex items-center justify-center rounded-xl bg-rose-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-600;
+}
+
+.museum-pill {
+    @apply inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700;
+}
+
+.museum-field {
+    @apply flex flex-col gap-2;
+}
+
+.museum-field > span {
+    @apply text-sm font-semibold text-zinc-700;
+}
+
+.museum-field input,
+.museum-field select,
+.museum-field textarea {
+    @apply rounded-xl border border-zinc-300 bg-white px-3.5 py-2 text-zinc-900 outline-none transition focus:border-zinc-500 focus:ring-2 focus:ring-zinc-200;
+}
+
+.museum-detail {
+    @apply rounded-xl border border-zinc-200 bg-zinc-50 p-3;
+}
+
+.museum-detail span {
+    @apply text-xs uppercase tracking-wide text-zinc-500;
+}
+
+.museum-detail strong {
+    @apply mt-1 block text-base;
+}
+
+.museum-stat-card {
+    @apply rounded-2xl border border-zinc-300 bg-[#f7f7f6] p-4;
+}
+
+.museum-stat-card p {
+    @apply font-medium text-zinc-600;
+    font-size: var(--museum-size-stat-label);
+    font-family: 'Inter', sans-serif;
+}
+
+.museum-stat-card strong {
+    @apply mt-3 block font-semibold leading-none;
+    font-size: var(--museum-size-stat-value);
+    font-family: 'Inter', sans-serif;
+}
+
+.museum-dashboard-compact .museum-page-title {
+    font-size: clamp(1.7rem, 2.6vw, 2.2rem);
+    line-height: 1.05;
+}
+
+.museum-dashboard-compact .museum-page-subtitle {
+    font-size: 0.9rem;
+}
+
+.museum-dashboard-compact .museum-stat-card {
+    @apply p-3.5;
+}
+
+.museum-dashboard-compact .museum-stat-card p {
+    font-size: 0.82rem;
+}
+
+.museum-dashboard-compact .museum-stat-card strong {
+    font-size: clamp(1.2rem, 1.7vw, 1.55rem);
+    margin-top: 0.4rem;
+}
+
+.museum-dashboard-compact .museum-panel {
+    @apply p-4;
+}
+
+.museum-dashboard-compact .museum-section-title {
+    font-size: 1.02rem;
+}
+
+.museum-dashboard-compact .dashboard-geo-chart {
+    height: clamp(240px, 33vh, 310px);
+}
+
+.museum-dashboard-compact .museum-panel strong.text-xl {
+    font-size: 1.3rem;
+}
+
+@media (max-width: 1024px) {
+    :root {
+        --museum-size-brand: 1.25rem;
+        --museum-size-page-title: clamp(1.4rem, 5vw, 1.8rem);
+        --museum-size-page-subtitle: 0.8rem;
+        --museum-size-section-title: 1rem;
+        --museum-size-card-title: 0.95rem;
+        --museum-size-stat-label: 0.75rem;
+        --museum-size-stat-value: 1.45rem;
+        --museum-size-body: 0.78rem;
+    }
+}
+
+.museum-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: rgba(24, 24, 24, 0.5);
+    backdrop-filter: blur(3px);
+}
+
+.museum-modal-overlay:target,
+.museum-modal-overlay.is-open {
+    display: flex;
+}
+
+.museum-modal {
+    position: relative;
+    width: min(700px, 100%);
+    max-height: calc(100vh - 3rem);
+    overflow: auto;
+    border: 1px solid #d5d5d4;
+    border-radius: 16px;
+    background: #f5f5f4;
+    padding: 2rem 2.25rem 2.1rem;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22);
+}
+
+.museum-modal-close {
+    position: absolute;
+    top: 0.9rem;
+    right: 1rem;
+    border: none;
+    background: transparent;
+    color: #6b6b6a;
+    font-size: 1.9rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.museum-modal .museum-field > span {
+    font-size: 0.95rem;
+    line-height: 1.2;
+    font-weight: 700;
+    color: #1e1d1c;
+}
+
+.museum-modal .museum-field input,
+.museum-modal .museum-field select,
+.museum-modal .museum-field textarea {
+    border-color: #e9e8e7;
+    background: #f0f0ef;
+    border-radius: 10px;
+    font-size: 0.92rem;
+    padding: 0.66rem 0.9rem;
+}
+
+.museum-modal .museum-field textarea {
+    min-height: 80px;
+}
+
+.museum-modal-cancel {
+    border-radius: 10px;
+    min-width: 96px;
+}
+
+.museum-modal-submit {
+    border-radius: 10px;
+    min-width: 180px;
+}
+
+.pagination {
+    --bs-pagination-padding-x: 0.8rem;
+    --bs-pagination-padding-y: 0.45rem;
+    --bs-pagination-font-size: 0.9rem;
+    --bs-pagination-color: #3f3f46;
+    --bs-pagination-bg: #ffffff;
+    --bs-pagination-border-color: #d4d4d8;
+    --bs-pagination-border-radius: 0.6rem;
+    --bs-pagination-hover-color: #18181b;
+    --bs-pagination-hover-bg: #f4f4f5;
+    --bs-pagination-hover-border-color: #a1a1aa;
+    --bs-pagination-focus-color: #18181b;
+    --bs-pagination-focus-bg: #f4f4f5;
+    --bs-pagination-focus-box-shadow: 0 0 0 0.2rem rgba(63, 63, 70, 0.18);
+    --bs-pagination-active-color: #ffffff;
+    --bs-pagination-active-bg: #18181b;
+    --bs-pagination-active-border-color: #18181b;
+    --bs-pagination-disabled-color: #a1a1aa;
+    --bs-pagination-disabled-bg: #ffffff;
+    --bs-pagination-disabled-border-color: #e4e4e7;
+    gap: 0.35rem;
+}
+
+.pagination .page-link {
+    border-radius: 0.6rem;
+    font-weight: 600;
+    line-height: 1.2;
+}
+
+.pagination .page-item.active .page-link {
+    box-shadow: 0 3px 10px rgba(24, 24, 27, 0.2);
+}
+
+.pagination .page-item.disabled .page-link {
+    opacity: 0.7;
+}

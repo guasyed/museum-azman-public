@@ -1,0 +1,152 @@
+<x-layout title="Edit User - Museum Azman">
+    <section class="space-y-6">
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <h2 class="museum-page-title">Edit User</h2>
+                <p class="museum-page-subtitle">Update profile picture and account details</p>
+            </div>
+            <a href="{{ route('admin.users.index') }}" class="museum-btn-secondary">Back to Users</a>
+        </div>
+
+        <article class="museum-panel p-5">
+            <form id="edit-user-form" action="{{ route('admin.users.update', $user) }}" method="POST" enctype="multipart/form-data" class="grid gap-4 md:grid-cols-2">
+                @csrf
+                @method('PUT')
+
+                <div class="md:col-span-2 flex items-center gap-4">
+                    @if($user->avatar_url)
+                        <img src="{{ $user->avatar_url }}" alt="{{ $user->name }}" class="h-16 w-16 rounded-full object-cover">
+                    @else
+                        <span class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-zinc-900 text-lg font-semibold text-white">{{ strtoupper(substr($user->name, 0, 2)) }}</span>
+                    @endif
+                    <label class="museum-field flex-1">
+                        <span>Profile Picture</span>
+                        <input id="edit-avatar-input" type="file" name="avatar" accept="image/*,.webp">
+                    </label>
+                </div>
+
+                <label class="museum-field">
+                    <span>Name</span>
+                    <input type="text" name="name" value="{{ old('name', $user->name) }}" required>
+                </label>
+
+                <label class="museum-field">
+                    <span>Email</span>
+                    <input type="email" name="email" value="{{ old('email', $user->email) }}" required>
+                </label>
+
+                <label class="museum-field">
+                    <span>Role</span>
+                    <select name="role_id" required>
+                        @foreach($roles as $role)
+                            <option value="{{ $role->id }}" @selected((string) old('role_id', $user->role_id) === (string) $role->id)>{{ $role->name }}</option>
+                        @endforeach
+                    </select>
+                </label>
+
+                <label class="museum-field">
+                    <span>New Password (optional)</span>
+                    <input type="password" name="password">
+                </label>
+
+                <div class="md:col-span-2">
+                    <button type="submit" class="museum-btn">Save User</button>
+                </div>
+            </form>
+        </article>
+    </section>
+
+    <script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('edit-user-form');
+    const input = document.getElementById('edit-avatar-input');
+
+    if (!form || !input) {
+        return;
+    }
+
+    const toFile = (blob, originalName) => {
+        const extension = blob.type === 'image/png' ? 'png' : 'jpg';
+        const base = (originalName || 'avatar').replace(/\.[^/.]+$/, '');
+        return new File([blob], `${base}.${extension}`, { type: blob.type, lastModified: Date.now() });
+    };
+
+    const loadImage = (file) => new Promise((resolve, reject) => {
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+            URL.revokeObjectURL(url);
+            resolve(img);
+        };
+        img.onerror = (error) => {
+            URL.revokeObjectURL(url);
+            reject(error);
+        };
+        img.src = url;
+    });
+
+    const canvasToBlob = (canvas, mime, quality) => new Promise((resolve) => {
+        canvas.toBlob((blob) => resolve(blob), mime, quality);
+    });
+
+    const compressAvatar = async (file) => {
+        if (!file || !file.type.startsWith('image/')) {
+            return file;
+        }
+
+        if (file.size <= 2 * 1024 * 1024) {
+            return file;
+        }
+
+        const image = await loadImage(file);
+        const maxSide = 1400;
+        const ratio = Math.min(maxSide / Math.max(image.width, 1), maxSide / Math.max(image.height, 1), 1);
+        const width = Math.max(1, Math.round(image.width * ratio));
+        const height = Math.max(1, Math.round(image.height * ratio));
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+
+        const context = canvas.getContext('2d');
+        if (!context) {
+            return file;
+        }
+
+        context.drawImage(image, 0, 0, width, height);
+
+        const png = await canvasToBlob(canvas, 'image/png', 0.9);
+        const jpeg = await canvasToBlob(canvas, 'image/jpeg', 0.82);
+
+        const candidates = [png, jpeg].filter((blob) => blob instanceof Blob);
+        const best = candidates.sort((a, b) => a.size - b.size)[0];
+
+        if (!best || best.size >= file.size) {
+            return file;
+        }
+
+        return toFile(best, file.name);
+    };
+
+    form.addEventListener('submit', async (event) => {
+        const currentFile = input.files && input.files[0] ? input.files[0] : null;
+        if (!currentFile) {
+            return;
+        }
+
+        event.preventDefault();
+
+        try {
+            const compressed = await compressAvatar(currentFile);
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(compressed);
+            input.files = dataTransfer.files;
+        } catch (error) {
+            console.error(error);
+        }
+
+        form.submit();
+    });
+});
+    </script>
+</x-layout>

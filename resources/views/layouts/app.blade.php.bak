@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{{ $title ?? 'Museum Azman' }}</title>
+    @php
+        $faviconHref = asset('favicon.ico').'?v=2';
+        $faviconType = 'image/x-icon';
+
+        if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {
+            $savedLogoPath = \App\Models\Setting::query()
+                ->where('key', 'organization_logo_path')
+                ->value('value');
+
+            if (is_string($savedLogoPath) && trim($savedLogoPath) !== '' && \Illuminate\Support\Facades\Storage::disk('public')->exists($savedLogoPath)) {
+                $extension = strtolower(pathinfo($savedLogoPath, PATHINFO_EXTENSION));
+                $faviconTypes = [
+                    'svg' => 'image/svg+xml',
+                    'png' => 'image/png',
+                    'jpg' => 'image/jpeg',
+                    'jpeg' => 'image/jpeg',
+                    'webp' => 'image/webp',
+                    'ico' => 'image/x-icon',
+                ];
+
+                $faviconType = $faviconTypes[$extension] ?? 'image/png';
+                $faviconHref = asset('storage/'.ltrim($savedLogoPath, '/')).'?v='.(string) \Illuminate\Support\Facades\Storage::disk('public')->lastModified($savedLogoPath);
+            }
+        }
+    @endphp
+    <link rel="icon" type="{{ $faviconType }}" href="{{ $faviconHref }}">
+    <link rel="alternate icon" href="{{ $faviconHref }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.7/build/css/intlTelInput.css">
+    @php
+        $host = strtolower((string) request()->getHost());
+        $isTunnelHost = str_contains($host, 'pinggy') || str_contains($host, 'ngrok') || str_contains($host, 'loca.lt');
+        $isSettingsRoute = request()->routeIs('settings.*');
+    @endphp
+
+    @if($isTunnelHost && $isSettingsRoute)
+        <link rel="stylesheet" href="{{ \Illuminate\Support\Facades\Vite::asset('resources/css/app.css') }}">
+        <script type="module" src="{{ \Illuminate\Support\Facades\Vite::asset('resources/js/app.js') }}"></script>
+    @else
+        @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @endif
+</head>
+<body class="museum-shell">
+<div class="min-h-screen lg:grid lg:grid-cols-[260px_1fr]">
+    @php
+        $brandTitle = 'Art Collection';
+        $brandLogoUrl = null;
+
+        if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {
+            $brandingSettings = \App\Models\Setting::query()
+                ->whereIn('key', ['organization_name', 'organization_logo_path'])
+                ->pluck('value', 'key');
+
+            $savedOrganization = $brandingSettings->get('organization_name');
+            $savedLogoPath = $brandingSettings->get('organization_logo_path');
+
+            if (is_string($savedOrganization) && trim($savedOrganization) !== '') {
+                $brandTitle = trim($savedOrganization);
+            }
+
+            if (is_string($savedLogoPath) && trim($savedLogoPath) !== '' && \Illuminate\Support\Facades\Storage::disk('public')->exists($savedLogoPath)) {
+                $brandLogoUrl = asset('storage/'.ltrim($savedLogoPath, '/'));
+            }
+        }
+    @endphp
+
+    <aside class="flex min-h-screen flex-col border-r border-zinc-200 bg-[#f7f7f6]">
+        <div class="border-b border-zinc-200 p-6">
+            <div class="flex items-center gap-3">
+                @if($brandLogoUrl)
+                    <img src="{{ $brandLogoUrl }}" alt="{{ $brandTitle }} logo" class="h-10 w-10 rounded-lg object-cover border border-zinc-300" style="width:30%; height:auto;">
+                @endif
+                <p class="museum-brand-title">{{ $brandTitle }}</p>
+            </div>
+        </div>
+
+        <nav class="flex-1 space-y-1 p-4 text-sm">
+            <a href="{{ route('dashboard') }}" class="museum-nav-item flex items-center gap-3 {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <rect width="7" height="9" x="3" y="3" rx="1"></rect>
+                    <rect width="7" height="5" x="14" y="3" rx="1"></rect>
+                    <rect width="7" height="9" x="14" y="12" rx="1"></rect>
+                    <rect width="7" height="5" x="3" y="16" rx="1"></rect>
+                </svg>
+                <span>Dashboard</span>
+            </a>
+
+            <a href="{{ route('artworks.index') }}" class="museum-nav-item {{ request()->routeIs('artworks.*') ? 'active' : '' }}">
+                <svg class="lucide lucide-palette w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle>
+                    <circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle>
+                    <circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle>
+                    <circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle>
+                    <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125 a1.64 1.64 0 0 1 1.668-1.668h1.996 c3.051 0 5.555-2.503 5.555-5.554 C21.965 6.012 17.461 2 12 2z"></path>
+                </svg>
+                <span>Collection</span>
+            </a>
+
+            <a href="{{ route('movements.index') }}" class="museum-nav-item {{ request()->routeIs('movements.*') ? 'active' : '' }}">
+                <svg class="lucide lucide-truck w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path>
+                    <path d="M15 18H9"></path>
+                    <path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"></path>
+                    <circle cx="17" cy="18" r="2"></circle>
+                    <circle cx="7" cy="18" r="2"></circle>
+                </svg>
+                <span>Movement Tracker</span>
+            </a>
+
+            <a href="{{ route('locations.index') }}" class="museum-nav-item {{ request()->routeIs('locations.*') ? 'active' : '' }}">
+                <svg class="lucide lucide-map-pin w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path>
+                    <circle cx="12" cy="10" r="3"></circle>
+                </svg>
+                <span>Locations</span>
+            </a>
+
+            <a href="{{ route('artists.index') }}" class="museum-nav-item {{ request()->routeIs('artists.*') ? 'active' : '' }}">
+                <svg class="lucide lucide-users w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                <span>Artists</span>
+            </a>
+
+            <a href="{{ route('reports.index') }}" class="museum-nav-item {{ request()->routeIs('reports.*') ? 'active' : '' }}">
+                <svg class="lucide lucide-chart-column w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 3v16a2 2 0 0 0 2 2h16"></path>
+                    <path d="M18 17V9"></path>
+                    <path d="M13 17V5"></path>
+                    <path d="M8 17v-3"></path>
+                </svg>
+                <span>Reports & Analytics</span>
+            </a>
+
+            <a href="{{ route('settings.index') }}" class="museum-nav-item {{ request()->routeIs('settings.*') ? 'active' : '' }}">
+                <svg class="lucide lucide-settings w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path>
+                    <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                <span>Settings</span>
+            </a>
+
+            @if(auth()->check() && auth()->user()->isAdmin())
+                <a href="{{ route('admin.users.index') }}" class="museum-nav-item {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="8.5" cy="7" r="4"></circle>
+                        <path d="M20 8v6"></path>
+                        <path d="M23 11h-6"></path>
+                    </svg>
+                    <span>Manage Users</span>
+                </a>
+            @endif
+        </nav>
+
+        <div class="mt-auto space-y-3 px-6 pb-6 pt-6">
+            @auth
+                <div class="rounded-xl border border-zinc-200 bg-white px-3 py-2">
+                    <p class="text-xs font-semibold text-zinc-900">{{ auth()->user()->name }}</p>
+                    <p class="text-[11px] text-zinc-500">{{ auth()->user()->email }} • {{ ucfirst(auth()->user()->role) }}</p>
+                </div>
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit" class="museum-btn-secondary w-full justify-center">Logout</button>
+                </form>
+            @endauth
+
+            <p class="text-xs text-zinc-500">Art Collection Management System<br>v1.0</p>
+        </div>
+    </aside>
+
+    <main class="bg-[#f6f5f4]">
+        <div class="mx-auto w-full max-w-[1400px] p-6 lg:p-10">
+            @if (session('success'))
+                <div class="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700">
+                    {{ session('success') }}
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="mb-6 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-rose-700">
+                    <p class="font-semibold">Please fix the following:</p>
+                    <ul class="mt-1 list-disc pl-5">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            {{ $slot }}
+        </div>
+    </main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.7/build/js/intlTelInput.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const input = document.querySelector("#phone_number");
+        if (!input || !window.intlTelInput) {
+            return;
+        }
+
+        window.intlTelInput(input, {
+            initialCountry: "my",
+            separateDialCode: true,
+            preferredCountries: ["my","sg","id","bn"],
+            utilsScript: "https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.7/build/js/utils.js"
+        });
+    });
+</script>
+</body>
+</html>

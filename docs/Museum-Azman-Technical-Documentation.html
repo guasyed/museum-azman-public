@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Museum Azman Technical Documentation</title>
-  <link rel="icon" type="image/x-icon" href="/icons/museum-azman.ico?v=4">
-  <link rel="alternate icon" href="/icons/museum-azman.ico?v=4">
+  <link rel="icon" type="image/x-icon" href="/icons/favicon.ico?v=4">
+  <link rel="alternate icon" href="/icons/favicon.ico?v=4">
   <link rel="apple-touch-icon" href="/icons/icon192.png?v=4">
   <style>
     :root {
@@ -223,7 +223,7 @@
     </div>
     <h1>Museum Azman Technical Documentation</h1>
     <p class="meta">
-      <strong>Version:</strong> 1.1<br>
+      <strong>Version:</strong> 1.2<br>
       <strong>Date:</strong> 2026-03-10<br>
       <strong>System:</strong> Museum Azman (Laravel 12)
     </p>
@@ -424,6 +424,24 @@ $this-&gt;saveSettings([
   Route::get('users', [AdminUserController::class, 'index'])-&gt;name('users.index');
   Route::post('users', [AdminUserController::class, 'store'])-&gt;name('users.store');
 });</code></pre>
+
+    <h3>6.10 Sorting and Table UX</h3>
+    <p>
+      Listing modules support query-based sorting with controller allowlists and clickable table headers.
+    </p>
+    <ul>
+      <li><code>/admin/users</code>: <code>name</code>, <code>email</code>, <code>role</code></li>
+      <li><code>/settings?tab=users-roles</code>: <code>name</code>, <code>email</code>, <code>role</code></li>
+      <li><code>/artworks?view=table</code>: <code>title</code>, <code>current_valuation</code>, <code>created_at</code> (default)</li>
+      <li><code>/locations?view=list</code>: <code>name</code>, <code>type</code></li>
+      <li><code>/movements</code>: <code>artwork_title</code>, <code>from_location</code>, <code>to_location</code>, <code>date_out</code>, <code>expected_return_date</code>, <code>responsible_handler</code>, <code>reason</code>, <code>status</code></li>
+    </ul>
+    <ul>
+      <li>Query params: <code>sort</code> and <code>direction</code> (<code>asc</code>/<code>desc</code>)</li>
+      <li>Active sort indicator in headers: <code>▲</code> / <code>▼</code></li>
+      <li>Filter state and view mode are preserved while switching sort</li>
+      <li>Related-field sorting uses controlled joins with base-table selection</li>
+    </ul>
 
     <h2 id="model">7. Data Model</h2>
     <ul>

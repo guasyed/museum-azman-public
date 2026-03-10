@@ -363,7 +363,19 @@
 
                 <label class="museum-field">
                     <span>Responsible Handler <em class="text-rose-500 not-italic">*</em></span>
-                    <input name="responsible_handler" value="{{ old('responsible_handler') }}" placeholder="e.g., Crown Fine Art" required>
+                    @php
+                        $selectedHandler = old('responsible_handler');
+                        $handlerOptionsList = collect($handlerOptions ?? [])->values();
+                    @endphp
+                    <select name="responsible_handler" required>
+                        <option value="">Select handler</option>
+                        @foreach($handlerOptionsList as $handlerName)
+                            <option value="{{ $handlerName }}" @selected($selectedHandler === $handlerName)>{{ $handlerName }}</option>
+                        @endforeach
+                        @if($selectedHandler && !$handlerOptionsList->contains($selectedHandler))
+                            <option value="{{ $selectedHandler }}" selected>{{ $selectedHandler }}</option>
+                        @endif
+                    </select>
                 </label>
 
                 <label class="museum-field">

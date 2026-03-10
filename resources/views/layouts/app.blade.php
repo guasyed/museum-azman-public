@@ -306,8 +306,8 @@
 </div>
 
 <div
-    class="fixed bottom-20 right-4 z-50 flex flex-col gap-2 lg:bottom-6 lg:right-6"
-    style="position:fixed; right:16px; bottom:16px; z-index:2147483000; display:flex; flex-direction:column; gap:8px; pointer-events:auto;"
+    class="fixed right-4 top-1/2 z-50 flex -translate-y-1/2 flex-col gap-2 lg:right-6"
+    style="position:fixed; right:16px; top:50%; transform:translateY(-50%); z-index:2147483000; display:flex; flex-direction:column; gap:8px; pointer-events:auto;"
 >
     <button
         id="global-scroll-top-btn"
@@ -428,6 +428,7 @@
             const mainContainer = document.querySelector('main.overflow-y-auto');
             const mainScrollable = !!mainContainer && (mainContainer.scrollHeight - mainContainer.clientHeight > 2);
             const useMain = mainScrollable;
+            let hasScrolledOnce = false;
 
             const getScrollTop = () => useMain ? mainContainer.scrollTop : window.scrollY;
             const getScrollHeight = () => useMain ? mainContainer.scrollHeight : document.documentElement.scrollHeight;
@@ -438,6 +439,12 @@
                 const maxScroll = Math.max(getScrollHeight() - getClientHeight(), 0);
                 const nearTop = top < 120;
                 const nearBottom = top >= maxScroll - 120;
+
+                if (!hasScrolledOnce && nearTop) {
+                    scrollTopBtn.classList.add('hidden');
+                    scrollBottomBtn.classList.add('hidden');
+                    return;
+                }
 
                 scrollTopBtn.classList.toggle('hidden', nearTop);
                 scrollTopBtn.classList.toggle('opacity-55', nearTop);
@@ -464,7 +471,10 @@
             });
 
             const bindTarget = useMain ? mainContainer : window;
-            bindTarget.addEventListener('scroll', syncVisibility, { passive: true });
+            bindTarget.addEventListener('scroll', () => {
+                hasScrolledOnce = true;
+                syncVisibility();
+            }, { passive: true });
             window.addEventListener('resize', syncVisibility);
             syncVisibility();
         };

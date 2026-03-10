@@ -116,4 +116,22 @@ class AdminUserController extends Controller
 
         return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
     }
+
+    public function destroy(User $user): RedirectResponse
+    {
+        $currentUserId = request()->user()?->id;
+        if ($currentUserId !== null && (int) $currentUserId === (int) $user->id) {
+            return redirect()->route('admin.users.index')->withErrors([
+                'users' => 'You cannot delete your own account.',
+            ]);
+        }
+
+        if ($user->avatar_path) {
+            Storage::disk('public')->delete($user->avatar_path);
+        }
+
+        $user->delete();
+
+        return redirect()->route('admin.users.index')->with('success', 'User deleted successfully.');
+    }
 }

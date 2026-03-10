@@ -120,7 +120,16 @@
                                 <span class="rounded-md px-2 py-0.5 text-xs font-semibold {{ $userRoleClass }}">{{ $userRoleLabel }}</span>
                             </td>
                             <td class="px-4 py-3">
-                                <a href="{{ route('admin.users.edit', $user) }}" class="museum-btn-secondary">Edit</a>
+                                <div class="flex items-center gap-2">
+                                    <a href="{{ route('admin.users.edit', $user) }}" class="museum-btn-secondary">Edit</a>
+                                    @if(auth()->id() !== $user->id)
+                                        <form method="POST" action="{{ route('admin.users.destroy', $user) }}" onsubmit="return confirm('Delete this user? This action cannot be undone.');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="museum-btn-secondary text-rose-700 hover:text-rose-800">Delete</button>
+                                        </form>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                     @empty

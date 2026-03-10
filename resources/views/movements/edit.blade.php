@@ -29,7 +29,9 @@
                     $selectedTo = old('to_location', $movement->to_location);
                     $selectedReason = old('reason', $movement->reason);
                     $selectedStatus = old('status', $movement->status);
+                    $selectedHandler = old('responsible_handler', $movement->responsible_handler);
                     $locationOptionsList = collect($locationOptions);
+                    $handlerOptionsList = collect($handlerOptions ?? [])->values();
                     $reasonOptionsList = collect($reasonOptions)->sort()->values();
                     $statusOptionsList = collect($statusOptions)->sort()->values();
                 @endphp
@@ -72,7 +74,15 @@
 
                 <label class="museum-field">
                     <span>Responsible Handler <em class="text-rose-500 not-italic">*</em></span>
-                    <input name="responsible_handler" value="{{ old('responsible_handler', $movement->responsible_handler) }}" required>
+                    <select name="responsible_handler" required>
+                        <option value="">Select handler</option>
+                        @foreach($handlerOptionsList as $handlerName)
+                            <option value="{{ $handlerName }}" @selected($selectedHandler === $handlerName)>{{ $handlerName }}</option>
+                        @endforeach
+                        @if($selectedHandler && !$handlerOptionsList->contains($selectedHandler))
+                            <option value="{{ $selectedHandler }}" selected>{{ $selectedHandler }}</option>
+                        @endif
+                    </select>
                 </label>
 
                 <label class="museum-field">

@@ -1,6 +1,6 @@
 # Museum Azman Technical Documentation
 
-Version: 1.1  
+Version: 1.2  
 Date: 2026-03-10  
 System: Museum Azman (Laravel 12)
 
@@ -309,6 +309,22 @@ if ($request->hasFile('avatar')) {
 $validated['password'] = Hash::make($validated['password']);
 User::query()->create($validated);
 ```
+
+### 6.10 Sorting and Table UX
+The listing modules support query-based sorting with strict allowlists in controllers and clickable table headers in Blade views.
+
+Implemented sortable columns:
+- `Admin Users` (`/admin/users`): `name`, `email`, `role`
+- `Settings > Users & Roles` (`/settings?tab=users-roles`): `name`, `email`, `role`
+- `Collection` table view (`/artworks?view=table`): `title`, `current_valuation`, `created_at` (default)
+- `Locations` list view (`/locations?view=list`): `name`, `type`
+- `Movement History` (`/movements`): `artwork_title`, `from_location`, `to_location`, `date_out`, `expected_return_date`, `responsible_handler`, `reason`, `status`
+
+Sorting conventions:
+- Query parameters: `sort` and `direction` (`asc` or `desc`)
+- Active sort indicator: arrow marker in header (`▲` or `▼`)
+- Existing filters and view mode are preserved when changing sort order
+- Related model sort fields (for example role/artwork title) are handled via controlled joins with `select(base_table.*)`
 
 ## 7. Data Model
 Primary models and relationships:

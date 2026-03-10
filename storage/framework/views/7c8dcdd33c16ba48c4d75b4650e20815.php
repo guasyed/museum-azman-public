@@ -372,7 +372,19 @@
 
                 <label class="museum-field">
                     <span>Responsible Handler <em class="text-rose-500 not-italic">*</em></span>
-                    <input name="responsible_handler" value="<?php echo e(old('responsible_handler')); ?>" placeholder="e.g., Crown Fine Art" required>
+                    <?php
+                        $selectedHandler = old('responsible_handler');
+                        $handlerOptionsList = collect($handlerOptions ?? [])->values();
+                    ?>
+                    <select name="responsible_handler" required>
+                        <option value="">Select handler</option>
+                        <?php $__currentLoopData = $handlerOptionsList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $handlerName): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($handlerName); ?>" <?php if($selectedHandler === $handlerName): echo 'selected'; endif; ?>><?php echo e($handlerName); ?></option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                        <?php if($selectedHandler && !$handlerOptionsList->contains($selectedHandler)): ?>
+                            <option value="<?php echo e($selectedHandler); ?>" selected><?php echo e($selectedHandler); ?></option>
+                        <?php endif; ?>
+                    </select>
                 </label>
 
                 <label class="museum-field">

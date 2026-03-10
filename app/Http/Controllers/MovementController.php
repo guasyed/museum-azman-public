@@ -7,6 +7,7 @@ use App\Models\Artwork;
 use App\Models\Location;
 use App\Models\Movement;
 use App\Models\Status;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -57,6 +58,13 @@ class MovementController extends Controller
         $movements = $movementsQuery->get();
         $artworks = Artwork::query()->with(['artist', 'location'])->orderBy('title')->get();
         $statusOptions = Status::allowedNames();
+        $handlerOptions = User::query()
+            ->with('roleRelation')
+            ->whereHas('roleRelation', fn ($query) => $query->where('slug', 'logistics-handler'))
+            ->orderBy('name')
+            ->pluck('name')
+            ->filter(fn ($name) => is_string($name) && trim($name) !== '')
+            ->values();
         $locationOptions = Location::query()
             ->whereNotNull('name')
             ->where('name', '!=', '')
@@ -73,7 +81,7 @@ class MovementController extends Controller
 
         $activeMovements = $movements->whereIn('status', ['In Stage', 'On Loan', 'Under Restoration']);
 
-        return view('movements.index', compact('movements', 'artworks', 'stats', 'activeMovements', 'locationOptions', 'statusOptions', 'sortColumn', 'direction'));
+        return view('movements.index', compact('movements', 'artworks', 'stats', 'activeMovements', 'locationOptions', 'statusOptions', 'handlerOptions', 'sortColumn', 'direction'));
     }
 
     public function store(StoreMovementRequest $request): RedirectResponse
@@ -100,8 +108,15 @@ class MovementController extends Controller
 
         $reasonOptions = ['Loan', 'Exhibition', 'Storage', 'Restoration', 'Sale Prep'];
         $statusOptions = Status::allowedNames();
+        $handlerOptions = User::query()
+            ->with('roleRelation')
+            ->whereHas('roleRelation', fn ($query) => $query->where('slug', 'logistics-handler'))
+            ->orderBy('name')
+            ->pluck('name')
+            ->filter(fn ($name) => is_string($name) && trim($name) !== '')
+            ->values();
 
-        return view('movements.edit', compact('movement', 'artworks', 'locationOptions', 'reasonOptions', 'statusOptions'));
+        return view('movements.edit', compact('movement', 'artworks', 'locationOptions', 'reasonOptions', 'statusOptions', 'handlerOptions'));
     }
 
     public function update(StoreMovementRequest $request, Movement $movement): RedirectResponse

@@ -81,11 +81,36 @@
             padding: 1rem 0;
             color: #18181b;
             border-bottom: 1px solid #e4e4e7;
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .mobile-nav-link:hover {
+            background-color: #e0ecff;
+            color: #1d4ed8;
         }
 
         .mobile-nav-link.active {
-            color: #18181b;
+            color: #1d4ed8;
             font-weight: 700;
+            background-color: #dbeafe;
+        }
+
+        .museum-nav-item {
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .museum-nav-item:hover {
+            background-color: #e0ecff;
+            color: #1d4ed8;
+        }
+
+        .logout-menu-item {
+            color: #b91c1c;
+        }
+
+        .logout-menu-item:hover {
+            background-color: #ffe4e6;
+            color: #9f1239;
         }
 
         @media (max-width: 1024px) {
@@ -191,10 +216,6 @@
                     <p class="text-xs font-semibold text-zinc-900"><?php echo e(auth()->user()->name); ?></p>
                     <p class="text-[11px] text-zinc-500"><?php echo e(auth()->user()->email); ?> • <?php echo e(ucfirst((string) auth()->user()->role)); ?></p>
                 </div>
-                <form method="POST" action="<?php echo e(route('logout')); ?>">
-                    <?php echo csrf_field(); ?>
-                    <button type="submit" class="museum-btn-secondary w-full justify-center">Logout</button>
-                </form>
             </div>
         <?php endif; ?>
 
@@ -246,8 +267,17 @@
             <?php endif; ?>
         </nav>
 
-        <div class="mt-auto px-6 pb-6 pt-6">
-            <p class="text-xs text-zinc-500">Management System v1.0</p>
+        <div class="mt-auto px-4 pb-6 pt-6 space-y-3">
+            <?php if(auth()->guard()->check()): ?>
+                <form method="POST" action="<?php echo e(route('logout')); ?>">
+                    <?php echo csrf_field(); ?>
+                    <button type="submit" class="museum-nav-item logout-menu-item flex w-full items-center gap-3 text-left" style="cursor: pointer">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                        <span>Logout</span>
+                    </button>
+                </form>
+            <?php endif; ?>
+            <p class="px-2 text-xs text-zinc-500">Management System v1.0</p>
         </div>
     </aside>
 
@@ -327,7 +357,7 @@
         <?php if(auth()->guard()->check()): ?>
             <form method="POST" action="<?php echo e(route('logout')); ?>" class="mt-8">
                 <?php echo csrf_field(); ?>
-                <button type="submit" class="w-full rounded-lg bg-zinc-900 px-4 py-3 text-white font-semibold">Logout</button>
+                <button type="submit" class="w-full rounded-lg bg-zinc-900 px-4 py-3 text-white font-semibold transition hover:bg-rose-700">Logout</button>
             </form>
         <?php endif; ?>
     </nav>

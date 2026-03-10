@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Status;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreMovementRequest extends FormRequest
 {
@@ -21,7 +23,7 @@ class StoreMovementRequest extends FormRequest
             'expected_return_date' => ['nullable', 'date'],
             'responsible_handler' => ['required', 'string', 'max:255'],
             'reason' => ['required', 'string', 'max:100'],
-            'status' => ['required', 'string', 'max:50'],
+            'status' => ['required', 'string', 'max:50', Rule::in(Status::allowedNames())],
             'notes' => ['nullable', 'string'],
             'condition_report' => ['nullable', 'string'],
         ];

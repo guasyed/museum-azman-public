@@ -424,8 +424,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusClass = (status) => {
         const key = String(status || '').toLowerCase();
         if (key === 'on display') return 'bg-zinc-900 text-white';
-        if (key === 'in storage') return 'bg-blue-100 text-blue-700';
+        if (key === 'in stage') return 'bg-blue-100 text-blue-700';
         if (key === 'on loan') return 'bg-violet-100 text-violet-700';
+        if (key === 'under restoration') return 'bg-amber-100 text-amber-700';
+        if (key === 'in storage') return 'bg-blue-100 text-blue-700';
         if (key === 'in transit') return 'bg-amber-100 text-amber-700';
         return 'bg-zinc-100 text-zinc-700';
     };

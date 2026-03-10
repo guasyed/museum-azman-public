@@ -10,19 +10,19 @@
 
         <div class="grid gap-4 md:grid-cols-3">
             <div class="museum-stat-card">
-                <p>In Transit</p>
-                <strong class="text-amber-600">{{ $stats['in_transit'] }}</strong>
-                <span class="mt-1 block text-zinc-600">Currently moving</span>
+                <p>In Stage</p>
+                <strong class="text-blue-600">{{ $stats['in_stage'] }}</strong>
+                <span class="mt-1 block text-zinc-600">Works staged for display</span>
             </div>
             <div class="museum-stat-card">
-                <p>Scheduled</p>
-                <strong class="text-blue-600">{{ $stats['scheduled'] }}</strong>
-                <span class="mt-1 block text-zinc-600">Upcoming movements</span>
+                <p>On Loan</p>
+                <strong class="text-violet-700">{{ $stats['on_loan'] }}</strong>
+                <span class="mt-1 block text-zinc-600">Works currently loaned</span>
             </div>
             <div class="museum-stat-card">
-                <p>Completed</p>
-                <strong class="text-emerald-600">{{ $stats['completed'] }}</strong>
-                <span class="mt-1 block text-zinc-600">Total movements</span>
+                <p>Under Restoration</p>
+                <strong class="text-amber-600">{{ $stats['under_restoration'] }}</strong>
+                <span class="mt-1 block text-zinc-600">Restoration in progress</span>
             </div>
         </div>
 
@@ -44,6 +44,9 @@
                         <th class="py-2">Handler</th>
                         <th class="py-2">Reason</th>
                         <th class="py-2">Status</th>
+                        @if(auth()->user()?->isAdmin())
+                            <th class="py-2">Actions</th>
+                        @endif
                     </tr>
                     </thead>
                     <tbody>
@@ -51,9 +54,14 @@
                         @php
                             $status = $movement->status;
                             $statusClass = match($status) {
+                                'On Display' => 'bg-emerald-100 text-emerald-700',
+                                'In Stage' => 'bg-blue-100 text-blue-700',
+                                'On Loan' => 'bg-violet-100 text-violet-700',
+                                'Under Restoration' => 'bg-amber-100 text-amber-700',
                                 'Completed' => 'bg-emerald-100 text-emerald-700',
                                 'Scheduled' => 'bg-blue-100 text-blue-700',
-                                default => 'bg-amber-100 text-amber-700',
+                                'In Transit', 'Overdue' => 'bg-amber-100 text-amber-700',
+                                default => 'bg-zinc-100 text-zinc-700',
                             };
                         @endphp
                         <tr class="border-b border-zinc-100 align-top">
@@ -68,10 +76,15 @@
                             <td class="py-3">{{ $movement->responsible_handler }}</td>
                             <td class="py-3"><span class="rounded-md border border-zinc-200 px-2 py-1">{{ $movement->reason }}</span></td>
                             <td class="py-3"><span class="rounded-lg px-2.5 py-1 text-xs font-semibold {{ $statusClass }}">{{ $status }}</span></td>
+                            @if(auth()->user()?->isAdmin())
+                                <td class="py-3">
+                                    <a href="{{ route('movements.edit', $movement) }}" class="museum-btn-secondary px-3 py-1.5 text-xs">Edit</a>
+                                </td>
+                            @endif
                         </tr>
                     @empty
                         <tr>
-                            <td class="py-4 text-zinc-500" colspan="8">No movement records yet.</td>
+                            <td class="py-4 text-zinc-500" colspan="{{ auth()->user()?->isAdmin() ? 9 : 8 }}">No movement records yet.</td>
                         </tr>
                     @endforelse
                     </tbody>
@@ -81,17 +94,29 @@
 
         <article class="museum-panel p-5">
             <h3 class="museum-section-title">Active Movements</h3>
-            <p class="text-zinc-600">Detailed view of artworks currently in transit</p>
+            <p class="text-zinc-600">Detailed view of artworks currently on loan, staged, or under restoration</p>
 
             <div class="mt-4 space-y-4">
                 @forelse($activeMovements as $movement)
+                    @php
+                        $activeStatusClass = match($movement->status) {
+                            'On Display' => 'bg-emerald-100 text-emerald-700',
+                            'In Stage' => 'bg-blue-100 text-blue-700',
+                            'On Loan' => 'bg-violet-100 text-violet-700',
+                            'Under Restoration' => 'bg-amber-100 text-amber-700',
+                            'Completed' => 'bg-emerald-100 text-emerald-700',
+                            'Scheduled' => 'bg-blue-100 text-blue-700',
+                            'In Transit', 'Overdue' => 'bg-amber-100 text-amber-700',
+                            default => 'bg-zinc-100 text-zinc-700',
+                        };
+                    @endphp
                     <div class="rounded-xl border border-zinc-200 bg-white p-4">
                         <div class="mb-2 flex items-center justify-between">
                             <div>
                                 <h4 class="museum-card-title">{{ $movement->artwork?->title }}</h4>
                                 <p class="text-zinc-600">{{ $movement->artwork?->artist?->name }}</p>
                             </div>
-                            <span class="rounded-lg bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-700">{{ $movement->status }}</span>
+                            <span class="rounded-lg px-3 py-1 text-sm font-semibold {{ $activeStatusClass }}">{{ $movement->status }}</span>
                         </div>
 
                         <div class="grid gap-4 md:grid-cols-2">
@@ -121,6 +146,12 @@
                             <div class="mt-3 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2">
                                 <p class="text-zinc-500">Condition Report</p>
                                 <p>{{ $movement->condition_report }}</p>
+                            </div>
+                        @endif
+
+                        @if(auth()->user()?->isAdmin())
+                            <div class="mt-3 flex justify-end">
+                                <a href="{{ route('movements.edit', $movement) }}" class="museum-btn-secondary px-3 py-1.5 text-xs">Edit Movement</a>
                             </div>
                         @endif
                     </div>
@@ -180,23 +211,33 @@
 
                 <label class="museum-field">
                     <span>From Location <em class="text-rose-500 not-italic">*</em></span>
-                    <select name="from_location" required>
-                        <option value="">Select origin</option>
-                        @foreach($locationOptions as $loc)
-                            <option value="{{ $loc }}" @selected(old('from_location') === $loc)>{{ $loc }}</option>
-                        @endforeach
-                    </select>
+                    <input
+                        type="text"
+                        name="from_location"
+                        list="movement-location-options"
+                        value="{{ old('from_location') }}"
+                        placeholder="e.g., Museum 3"
+                        required
+                    >
                 </label>
 
                 <label class="museum-field">
                     <span>To Location <em class="text-rose-500 not-italic">*</em></span>
-                    <select name="to_location" required>
-                        <option value="">Select destination</option>
-                        @foreach($locationOptions as $loc)
-                            <option value="{{ $loc }}" @selected(old('to_location') === $loc)>{{ $loc }}</option>
-                        @endforeach
-                    </select>
+                    <input
+                        type="text"
+                        name="to_location"
+                        list="movement-location-options"
+                        value="{{ old('to_location') }}"
+                        placeholder="e.g., Hall 1"
+                        required
+                    >
                 </label>
+
+                <datalist id="movement-location-options">
+                    @foreach($locationOptions as $loc)
+                        <option value="{{ $loc }}"></option>
+                    @endforeach
+                </datalist>
 
                 <label class="museum-field">
                     <span>Date Out <em class="text-rose-500 not-italic">*</em></span>
@@ -225,8 +266,8 @@
                 <label class="museum-field md:col-span-1">
                     <span>Status <em class="text-rose-500 not-italic">*</em></span>
                     <select name="status" required>
-                        @foreach(['Scheduled','In Transit','Completed','Overdue'] as $status)
-                            <option value="{{ $status }}" @selected(old('status','Scheduled')===$status)>{{ $status }}</option>
+                        @foreach(collect($statusOptions)->sort() as $status)
+                            <option value="{{ $status }}" @selected(old('status', \App\Models\Status::DEFAULT_NAMES[0])===$status)>{{ $status }}</option>
                         @endforeach
                     </select>
                 </label>

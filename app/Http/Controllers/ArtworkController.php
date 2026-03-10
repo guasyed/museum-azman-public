@@ -8,6 +8,7 @@ use App\Models\Artist;
 use App\Models\Artwork;
 use App\Models\Location;
 use App\Models\Movement;
+use App\Models\Status;
 use App\Services\ImageOptimizer;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -43,12 +44,7 @@ class ArtworkController extends Controller
             ->unique()
             ->values();
 
-        $statusOptions = Artwork::query()
-            ->whereNotNull('status')
-            ->where('status', '!=', '')
-            ->distinct()
-            ->orderBy('status')
-            ->pluck('status');
+        $statusOptions = collect(Status::allowedNames());
 
         $artworks = $this->buildArtworkQuery(
             q: $filters['q'],
@@ -120,8 +116,8 @@ class ArtworkController extends Controller
 
 		try {
 			$chromePdf = $this->renderPdfWithChrome($html);
-		} catch (\Throwable $e) {
-			\Log::warning('Chrome PDF render failed, falling back to DomPDF', [
+        } catch (\Throwable $e) {
+            Log::warning('Chrome PDF render failed, falling back to DomPDF', [
 				'message' => $e->getMessage(),
 			]);
 		}
@@ -295,11 +291,8 @@ class ArtworkController extends Controller
         $locationOptions = Location::query()
             ->whereNotNull('name')
             ->where('name', '!=', '')
+            ->orderBy('name')
             ->pluck('name')
-            ->merge(Movement::query()->pluck('from_location'))
-            ->merge(Movement::query()->pluck('to_location'))
-            ->filter()
-            ->unique()
             ->sort()
             ->values();
 
@@ -341,7 +334,9 @@ class ArtworkController extends Controller
             ->unique()
             ->values();
 
-        return compact('locationOptions', 'locationTypeOptions');
+        $statusOptions = collect(Status::allowedNames());
+
+        return compact('locationOptions', 'locationTypeOptions', 'statusOptions');
     }
 
     public function update(UpdateArtworkRequest $request, Artwork $artwork): RedirectResponse|JsonResponse
@@ -531,7 +526,7 @@ class ArtworkController extends Controller
             'acquisition_date' => $request->input('acquisition_date'),
             'acquisition_price' => $request->input('acquisition_price'),
             'current_valuation' => $request->input('current_valuation'),
-            'status' => $request->input('status', 'On Display'),
+            'status' => $request->input('status', Status::DEFAULT_NAMES[0]),
             'provenance' => $request->input('provenance'),
         ];
     }

@@ -16,7 +16,7 @@ class DashboardController extends Controller
             'total_artists' => $artworks->pluck('artist_id')->filter()->unique()->count(),
             'total_locations' => $artworks->pluck('location_id')->filter()->unique()->count(),
             'collection_value' => (float) $artworks->sum('current_valuation'),
-            'in_transit' => $artworks->where('status', 'In Transit')->count(),
+            'in_stage' => $artworks->where('status', 'In Stage')->count(),
             'on_loan' => $artworks->where('status', 'On Loan')->count(),
         ];
 
@@ -30,7 +30,7 @@ class DashboardController extends Controller
 
         $recentMovements = Artwork::query()
             ->with('location')
-            ->whereIn('status', ['In Transit', 'On Loan'])
+            ->whereIn('status', ['In Stage', 'On Loan', 'Under Restoration'])
             ->latest()
             ->take(3)
             ->get();

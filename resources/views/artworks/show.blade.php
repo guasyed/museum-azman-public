@@ -2,9 +2,9 @@
     @php
         $statusClass = match (strtolower((string) ($artwork->status ?? ''))) {
             'on display' => 'bg-emerald-100 text-emerald-700',
-            'in storage' => 'bg-blue-100 text-blue-700',
+            'in stage', 'in storage' => 'bg-blue-100 text-blue-700',
             'on loan' => 'bg-violet-100 text-violet-700',
-            'in transit' => 'bg-amber-100 text-amber-700',
+            'under restoration', 'in transit' => 'bg-amber-100 text-amber-700',
             default => 'bg-zinc-100 text-zinc-700',
         };
 

@@ -46,6 +46,8 @@ Route::middleware('auth')->group(function () {
 	Route::resource('artworks', ArtworkController::class);
 	Route::get('movements', [MovementController::class, 'index'])->name('movements.index');
 	Route::post('movements', [MovementController::class, 'store'])->name('movements.store');
+	Route::get('movements/{movement}/edit', [MovementController::class, 'edit'])->name('movements.edit')->middleware('admin');
+	Route::put('movements/{movement}', [MovementController::class, 'update'])->name('movements.update')->middleware('admin');
 	Route::get('locations', [LocationController::class, 'index'])->name('locations.index');
 	Route::get('locations/create', [LocationController::class, 'create'])->name('locations.create')->middleware('admin');
 	Route::post('locations', [LocationController::class, 'store'])->name('locations.store')->middleware('admin');

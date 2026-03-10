@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Status;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreArtworkRequest extends FormRequest
 {
@@ -30,7 +32,7 @@ class StoreArtworkRequest extends FormRequest
             'acquisition_date' => ['nullable', 'date'],
             'acquisition_price' => ['nullable', 'numeric', 'min:0'],
             'current_valuation' => ['nullable', 'numeric', 'min:0'],
-            'status' => ['required', 'string', 'max:50'],
+            'status' => ['required', 'string', 'max:50', Rule::in(Status::allowedNames())],
             'provenance' => ['nullable', 'string'],
 
             'primary_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif,bmp', 'max:10240'],

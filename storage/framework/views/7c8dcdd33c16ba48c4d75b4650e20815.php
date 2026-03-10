@@ -19,19 +19,19 @@
 
         <div class="grid gap-4 md:grid-cols-3">
             <div class="museum-stat-card">
-                <p>In Transit</p>
-                <strong class="text-amber-600"><?php echo e($stats['in_transit']); ?></strong>
-                <span class="mt-1 block text-zinc-600">Currently moving</span>
+                <p>In Stage</p>
+                <strong class="text-blue-600"><?php echo e($stats['in_stage']); ?></strong>
+                <span class="mt-1 block text-zinc-600">Works staged for display</span>
             </div>
             <div class="museum-stat-card">
-                <p>Scheduled</p>
-                <strong class="text-blue-600"><?php echo e($stats['scheduled']); ?></strong>
-                <span class="mt-1 block text-zinc-600">Upcoming movements</span>
+                <p>On Loan</p>
+                <strong class="text-violet-700"><?php echo e($stats['on_loan']); ?></strong>
+                <span class="mt-1 block text-zinc-600">Works currently loaned</span>
             </div>
             <div class="museum-stat-card">
-                <p>Completed</p>
-                <strong class="text-emerald-600"><?php echo e($stats['completed']); ?></strong>
-                <span class="mt-1 block text-zinc-600">Total movements</span>
+                <p>Under Restoration</p>
+                <strong class="text-amber-600"><?php echo e($stats['under_restoration']); ?></strong>
+                <span class="mt-1 block text-zinc-600">Restoration in progress</span>
             </div>
         </div>
 
@@ -53,6 +53,9 @@
                         <th class="py-2">Handler</th>
                         <th class="py-2">Reason</th>
                         <th class="py-2">Status</th>
+                        <?php if(auth()->user()?->isAdmin()): ?>
+                            <th class="py-2">Actions</th>
+                        <?php endif; ?>
                     </tr>
                     </thead>
                     <tbody>
@@ -60,9 +63,14 @@
                         <?php
                             $status = $movement->status;
                             $statusClass = match($status) {
+                                'On Display' => 'bg-emerald-100 text-emerald-700',
+                                'In Stage' => 'bg-blue-100 text-blue-700',
+                                'On Loan' => 'bg-violet-100 text-violet-700',
+                                'Under Restoration' => 'bg-amber-100 text-amber-700',
                                 'Completed' => 'bg-emerald-100 text-emerald-700',
                                 'Scheduled' => 'bg-blue-100 text-blue-700',
-                                default => 'bg-amber-100 text-amber-700',
+                                'In Transit', 'Overdue' => 'bg-amber-100 text-amber-700',
+                                default => 'bg-zinc-100 text-zinc-700',
                             };
                         ?>
                         <tr class="border-b border-zinc-100 align-top">
@@ -77,10 +85,15 @@
                             <td class="py-3"><?php echo e($movement->responsible_handler); ?></td>
                             <td class="py-3"><span class="rounded-md border border-zinc-200 px-2 py-1"><?php echo e($movement->reason); ?></span></td>
                             <td class="py-3"><span class="rounded-lg px-2.5 py-1 text-xs font-semibold <?php echo e($statusClass); ?>"><?php echo e($status); ?></span></td>
+                            <?php if(auth()->user()?->isAdmin()): ?>
+                                <td class="py-3">
+                                    <a href="<?php echo e(route('movements.edit', $movement)); ?>" class="museum-btn-secondary px-3 py-1.5 text-xs">Edit</a>
+                                </td>
+                            <?php endif; ?>
                         </tr>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <tr>
-                            <td class="py-4 text-zinc-500" colspan="8">No movement records yet.</td>
+                            <td class="py-4 text-zinc-500" colspan="<?php echo e(auth()->user()?->isAdmin() ? 9 : 8); ?>">No movement records yet.</td>
                         </tr>
                     <?php endif; ?>
                     </tbody>
@@ -90,17 +103,29 @@
 
         <article class="museum-panel p-5">
             <h3 class="museum-section-title">Active Movements</h3>
-            <p class="text-zinc-600">Detailed view of artworks currently in transit</p>
+            <p class="text-zinc-600">Detailed view of artworks currently on loan, staged, or under restoration</p>
 
             <div class="mt-4 space-y-4">
                 <?php $__empty_1 = true; $__currentLoopData = $activeMovements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $movement): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <?php
+                        $activeStatusClass = match($movement->status) {
+                            'On Display' => 'bg-emerald-100 text-emerald-700',
+                            'In Stage' => 'bg-blue-100 text-blue-700',
+                            'On Loan' => 'bg-violet-100 text-violet-700',
+                            'Under Restoration' => 'bg-amber-100 text-amber-700',
+                            'Completed' => 'bg-emerald-100 text-emerald-700',
+                            'Scheduled' => 'bg-blue-100 text-blue-700',
+                            'In Transit', 'Overdue' => 'bg-amber-100 text-amber-700',
+                            default => 'bg-zinc-100 text-zinc-700',
+                        };
+                    ?>
                     <div class="rounded-xl border border-zinc-200 bg-white p-4">
                         <div class="mb-2 flex items-center justify-between">
                             <div>
                                 <h4 class="museum-card-title"><?php echo e($movement->artwork?->title); ?></h4>
                                 <p class="text-zinc-600"><?php echo e($movement->artwork?->artist?->name); ?></p>
                             </div>
-                            <span class="rounded-lg bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-700"><?php echo e($movement->status); ?></span>
+                            <span class="rounded-lg px-3 py-1 text-sm font-semibold <?php echo e($activeStatusClass); ?>"><?php echo e($movement->status); ?></span>
                         </div>
 
                         <div class="grid gap-4 md:grid-cols-2">
@@ -130,6 +155,12 @@
                             <div class="mt-3 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2">
                                 <p class="text-zinc-500">Condition Report</p>
                                 <p><?php echo e($movement->condition_report); ?></p>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if(auth()->user()?->isAdmin()): ?>
+                            <div class="mt-3 flex justify-end">
+                                <a href="<?php echo e(route('movements.edit', $movement)); ?>" class="museum-btn-secondary px-3 py-1.5 text-xs">Edit Movement</a>
                             </div>
                         <?php endif; ?>
                     </div>
@@ -189,23 +220,33 @@
 
                 <label class="museum-field">
                     <span>From Location <em class="text-rose-500 not-italic">*</em></span>
-                    <select name="from_location" required>
-                        <option value="">Select origin</option>
-                        <?php $__currentLoopData = $locationOptions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $loc): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <option value="<?php echo e($loc); ?>" <?php if(old('from_location') === $loc): echo 'selected'; endif; ?>><?php echo e($loc); ?></option>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                    </select>
+                    <input
+                        type="text"
+                        name="from_location"
+                        list="movement-location-options"
+                        value="<?php echo e(old('from_location')); ?>"
+                        placeholder="e.g., Museum 3"
+                        required
+                    >
                 </label>
 
                 <label class="museum-field">
                     <span>To Location <em class="text-rose-500 not-italic">*</em></span>
-                    <select name="to_location" required>
-                        <option value="">Select destination</option>
-                        <?php $__currentLoopData = $locationOptions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $loc): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <option value="<?php echo e($loc); ?>" <?php if(old('to_location') === $loc): echo 'selected'; endif; ?>><?php echo e($loc); ?></option>
-                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                    </select>
+                    <input
+                        type="text"
+                        name="to_location"
+                        list="movement-location-options"
+                        value="<?php echo e(old('to_location')); ?>"
+                        placeholder="e.g., Hall 1"
+                        required
+                    >
                 </label>
+
+                <datalist id="movement-location-options">
+                    <?php $__currentLoopData = $locationOptions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $loc): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <option value="<?php echo e($loc); ?>"></option>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </datalist>
 
                 <label class="museum-field">
                     <span>Date Out <em class="text-rose-500 not-italic">*</em></span>
@@ -234,8 +275,8 @@
                 <label class="museum-field md:col-span-1">
                     <span>Status <em class="text-rose-500 not-italic">*</em></span>
                     <select name="status" required>
-                        <?php $__currentLoopData = ['Scheduled','In Transit','Completed','Overdue']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $status): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <option value="<?php echo e($status); ?>" <?php if(old('status','Scheduled')===$status): echo 'selected'; endif; ?>><?php echo e($status); ?></option>
+                        <?php $__currentLoopData = collect($statusOptions)->sort(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $status): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($status); ?>" <?php if(old('status', \App\Models\Status::DEFAULT_NAMES[0])===$status): echo 'selected'; endif; ?>><?php echo e($status); ?></option>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </select>
                 </label>

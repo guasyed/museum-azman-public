@@ -1,5 +1,5 @@
 @php
-$statuses = ['On Display', 'In Storage', 'On Loan', 'In Transit', 'Under Restoration'];
+$statuses = collect($statusOptions ?? \App\Models\Status::DEFAULT_NAMES)->values();
 $locationOptions = collect($locationOptions ?? []);
 $locationTypeOptions = collect($locationTypeOptions ?? []);
 $selectedLocationName = (string) old('location_name', $artwork?->location?->name);
@@ -67,7 +67,7 @@ $selectedLocationAddress = (string) old('location_address', $artwork?->location?
         <span>Status *</span>
         <select name="status">
             @foreach($statuses as $status)
-                <option value="{{ $status }}" @selected(old('status', $artwork?->status ?? 'On Display') === $status)>{{ $status }}</option>
+                <option value="{{ $status }}" @selected(old('status', $artwork?->status ?? \App\Models\Status::DEFAULT_NAMES[0]) === $status)>{{ $status }}</option>
             @endforeach
         </select>
     </label>

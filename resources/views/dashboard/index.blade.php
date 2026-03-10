@@ -22,7 +22,7 @@
                 }
             @endphp
             <div class="museum-stat-card"><p>Collection Value</p><strong title="{{ \App\Support\Currency::symbol() }}{{ number_format($collectionValueRaw, 0) }}">{{ \App\Support\Currency::symbol() }}{{ $collectionValueDisplay }}</strong></div>
-            <div class="museum-stat-card"><p>In Transit</p><strong class="text-amber-600">{{ number_format($stats['in_transit']) }}</strong></div>
+            <div class="museum-stat-card"><p>In Stage</p><strong class="text-amber-600">{{ number_format($stats['in_stage']) }}</strong></div>
             <div class="museum-stat-card"><p>On Loan</p><strong class="text-violet-700">{{ number_format($stats['on_loan']) }}</strong></div>
         </div>
 

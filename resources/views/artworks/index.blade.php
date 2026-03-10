@@ -123,10 +123,13 @@
                         @endforeach
                     </select>
 
-                    <select name="status" class="min-w-40 rounded-xl border border-zinc-300 bg-white px-4 py-2.5">
+                    <select name="status" 
+                            class="min-w-40 rounded-xl border border-zinc-300 bg-white px-4 py-2.5">
                         <option value="">All Statuses</option>
-                        @foreach($statusOptions as $status)
-                            <option value="{{ $status }}" @selected($selectedStatus === $status)>{{ $status }}</option>
+                        @foreach(collect($statusOptions)->sort() as $status)
+                            <option value="{{ $status }}" @selected($selectedStatus === $status)>
+                                {{ $status }}
+                            </option>
                         @endforeach
                     </select>
 

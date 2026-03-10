@@ -31,7 +31,7 @@
                 }
             ?>
             <div class="museum-stat-card"><p>Collection Value</p><strong title="<?php echo e(\App\Support\Currency::symbol()); ?><?php echo e(number_format($collectionValueRaw, 0)); ?>"><?php echo e(\App\Support\Currency::symbol()); ?><?php echo e($collectionValueDisplay); ?></strong></div>
-            <div class="museum-stat-card"><p>In Transit</p><strong class="text-amber-600"><?php echo e(number_format($stats['in_transit'])); ?></strong></div>
+            <div class="museum-stat-card"><p>In Stage</p><strong class="text-amber-600"><?php echo e(number_format($stats['in_stage'])); ?></strong></div>
             <div class="museum-stat-card"><p>On Loan</p><strong class="text-violet-700"><?php echo e(number_format($stats['on_loan'])); ?></strong></div>
         </div>
 

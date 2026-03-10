@@ -132,10 +132,14 @@
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </select>
 
-                    <select name="status" class="min-w-40 rounded-xl border border-zinc-300 bg-white px-4 py-2.5">
+                    <select name="status" 
+                            class="min-w-40 rounded-xl border border-zinc-300 bg-white px-4 py-2.5">
                         <option value="">All Statuses</option>
-                        <?php $__currentLoopData = $statusOptions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $status): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                            <option value="<?php echo e($status); ?>" <?php if($selectedStatus === $status): echo 'selected'; endif; ?>><?php echo e($status); ?></option>
+                        <?php $__currentLoopData = collect($statusOptions)->sort(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $status): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($status); ?>" <?php if($selectedStatus === $status): echo 'selected'; endif; ?>>
+                                <?php echo e($status); ?>
+
+                            </option>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </select>
 

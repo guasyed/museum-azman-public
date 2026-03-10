@@ -50,6 +50,31 @@
       margin-bottom: 14px;
     }
 
+    .back-row {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 1000;
+    }
+
+    .back-btn {
+      border: 1px solid #cfd6df;
+      background: #eef2f7;
+      color: #334155;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-size: 0.86rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+      box-shadow: 0 4px 12px rgba(2, 6, 23, 0.12);
+    }
+
+    .back-btn:hover {
+      background: #e5e9ef;
+      border-color: #b8c1cc;
+    }
+
     .toc {
       border: 1px solid var(--line);
       border-radius: 10px;
@@ -144,6 +169,10 @@
     .tok-string { color: #16a34a; }
     .tok-number { color: #d97706; }
     .tok-operator { color: #4b5563; }
+    .tok-cmd { color: #2563eb; }
+    .tok-flag { color: #d97706; }
+    .tok-arg { color: #16a34a; }
+    .tok-var { color: #111827; }
 
     .foot {
       margin-top: 30px;
@@ -154,6 +183,11 @@
     }
 
     @media (max-width: 980px) {
+      .back-row {
+        top: 10px;
+        left: 10px;
+      }
+
       .doc-layout {
         grid-template-columns: 1fr;
       }
@@ -174,12 +208,16 @@
         box-shadow: none;
         padding: 0;
       }
+      .back-row { display: none; }
       a { color: inherit; text-decoration: none; }
     }
   </style>
 </head>
 <body>
   <main class="container">
+    <div class="back-row">
+      <button type="button" id="back-to-referrer" class="back-btn" hidden>Back</button>
+    </div>
     <h1>Museum Azman Technical Documentation</h1>
     <p class="meta">
       <strong>Version:</strong> 1.1<br>
@@ -297,7 +335,10 @@ Route::middleware('guest')-&gt;group(function () {
   Route::get('login', [AuthController::class, 'showLogin'])-&gt;name('login');
   Route::post('login', [AuthController::class, 'login'])-&gt;name('login.perform');
 });
-Route::post('logout', [AuthController::class, 'logout'])-&gt;middleware('auth')-&gt;name('logout');</code></pre>
+
+Route::middleware('auth')-&gt;group(function () {
+  Route::post('logout', [AuthController::class, 'logout'])-&gt;name('logout');
+});</code></pre>
 
     <h3>6.2 Dashboard Module</h3>
     <p>Controller: <code>app/Http/Controllers/DashboardController.php</code></p>
@@ -309,13 +350,23 @@ Route::post('logout', [AuthController::class, 'logout'])-&gt;middleware('auth')-
 
     <h3>6.3 Artwork Module</h3>
     <p>Controller: <code>app/Http/Controllers/ArtworkController.php</code></p>
-    <pre><code>Route::resource('artworks', ArtworkController::class);
+    <pre><code>// routes/web.php
 Route::get('artworks/suggestions', [ArtworkController::class, 'suggestions']);
 Route::get('artworks/export/pdf', [ArtworkController::class, 'exportPdf']);
+Route::resource('artworks', ArtworkController::class);
+
+// app/Http/Controllers/ArtworkController.php (store excerpt)
 
 if ($request-&gt;hasFile('primary_image')) {
   $primary = $this-&gt;imageOptimizer-&gt;storeUploaded($request-&gt;file('primary_image'));
   $artwork-&gt;primary_image_path = $primary['path'] ?? null;
+}
+
+if ($request-&gt;expectsJson()) {
+  return response()-&gt;json([
+    'message' =&gt; 'Artwork created successfully.',
+    'redirect_url' =&gt; route('artworks.show', $artwork),
+  ]);
 }</code></pre>
 
     <h3>6.4 Artist Module</h3>
@@ -529,22 +580,102 @@ php artisan backup:auto</code></pre>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      const backButton = document.getElementById('back-to-referrer');
+      if (backButton) {
+        if (document.referrer) {
+          backButton.hidden = false;
+          backButton.addEventListener('click', () => {
+            window.location.href = document.referrer;
+          });
+        } else if (window.history.length > 1) {
+          backButton.hidden = false;
+          backButton.addEventListener('click', () => {
+            window.history.back();
+          });
+        }
+      }
+
       const escapeHtml = (value) => value
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
 
-      const highlightCode = (source) => {
+      const tokenizeWithPlaceholders = (input, rules) => {
+        const store = [];
+        let out = input;
+
+        const hold = (value) => {
+          const key = `@@TOK${store.length}@@`;
+          store.push(value);
+          return key;
+        };
+
+        rules.forEach((rule) => {
+          out = out.replace(rule.pattern, (match) => hold(`<span class="${rule.className}">${match}</span>`));
+        });
+
+        const restore = (value) => value.replace(/@@TOK(\d+)@@/g, (_, idx) => store[Number(idx)] || '');
+
+        return { out, restore };
+      };
+
+      const highlightPhpLike = (source) => {
         let html = escapeHtml(source);
 
-        html = html.replace(/(^|\s)(\/\/.*)$/gm, '$1<span class="tok-comment">$2</span>');
-        html = html.replace(/('(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*")/g, '<span class="tok-string">$1</span>');
+        const protectedTokens = tokenizeWithPlaceholders(html, [
+          { pattern: /(^|\s)(\/\/.*)$/gm, className: 'tok-comment' },
+          { pattern: /('(?:\\.|[^'\\])*'|"(?:\\.|[^"\\])*")/g, className: 'tok-string' },
+        ]);
+
+        html = protectedTokens.out;
+
         html = html.replace(/\b(Route|function|class|public|private|protected|return|if|else|new|null|true|false|try|catch|use|namespace|const|let|var|async|await)\b/g, '<span class="tok-keyword">$1</span>');
-        html = html.replace(/\b(middleware|group|get|post|put|delete|name|resource|with|where|sum|count|query|create|update|pluck|redirect|response|view|firstOrCreate)\b(?=\s*\()/g, '<span class="tok-fn">$1</span>');
+        html = html.replace(/\$(\w+)/g, '<span class="tok-var">$$$1</span>');
+        html = html.replace(/\b([A-Za-z_][A-Za-z0-9_]*)\b(?=\s*\()/g, '<span class="tok-fn">$1</span>');
+        html = html.replace(/\b([A-Za-z_][A-Za-z0-9_]*)\b(?=\s*(-&gt;|::))/g, '<span class="tok-fn">$1</span>');
         html = html.replace(/\b(\d+(?:\.\d+)?)\b/g, '<span class="tok-number">$1</span>');
         html = html.replace(/(-&gt;|::)/g, '<span class="tok-operator">$1</span>');
 
-        return html;
+        return protectedTokens.restore(html);
+      };
+
+      const highlightShellLike = (source) => {
+        return source.split('\n').map((line) => {
+          let html = escapeHtml(line);
+
+          html = html.replace(/(^\s*)(composer|npm|php|cp|mv|rm|cat|echo|ls)(?=\s|$)/, '$1<span class="tok-cmd">$2</span>');
+          html = html.replace(/\s(--?[a-zA-Z0-9:_-]+)/g, ' <span class="tok-flag">$1</span>');
+
+          if (/^\s*<span class="tok-cmd">php<\/span>\s+artisan\b/.test(html)) {
+            html = html.replace(/\bartisan\b/, '<span class="tok-arg">artisan</span>');
+          }
+
+          html = html.replace(/(^|\s)([A-Za-z0-9._:\/=-]+)(?=\s|$)/g, (m, lead, token) => {
+            if (/^<span class=/.test(token) || /^--?/.test(token)) {
+              return m;
+            }
+            if (/^(composer|npm|php|cp|mv|rm|cat|echo|ls)$/.test(token)) {
+              return `${lead}<span class="tok-cmd">${token}</span>`;
+            }
+            if (/^\d+$/.test(token)) {
+              return `${lead}<span class="tok-number">${token}</span>`;
+            }
+            return `${lead}<span class="tok-arg">${token}</span>`;
+          });
+
+          return html;
+        }).join('\n');
+      };
+
+      const highlightCode = (source) => {
+        const trimmed = source.trim();
+        const looksLikeShell = /^(composer|npm|php|cp|mv|rm|cat|echo|ls)\s+/m.test(trimmed) && !/[{};$]|Route::|->|\$\w+/.test(trimmed);
+
+        if (looksLikeShell) {
+          return highlightShellLike(source);
+        }
+
+        return highlightPhpLike(source);
       };
 
       document.querySelectorAll('pre').forEach((block) => {

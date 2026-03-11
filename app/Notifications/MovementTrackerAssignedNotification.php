@@ -70,6 +70,7 @@ class MovementTrackerAssignedNotification extends Notification
             : 'A movement assignment has been created for you.';
 
         return (new MailMessage)
+            ->from((string) config('mail.from.address'), (string) config('mail.from.name'))
             ->subject('New Movement Tracker Assignment')
             ->greeting('Hello '.$notifiable->name.',')
             ->line('You have been assigned as the responsible handler for an artwork movement.')

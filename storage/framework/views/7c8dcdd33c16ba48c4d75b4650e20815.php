@@ -36,7 +36,77 @@
                 <span class="mt-1 block text-zinc-600">Restoration in progress</span>
             </div>
         </div>
+        <article class="museum-panel p-5">
+            <h3 class="museum-section-title">Active Movements</h3>
+            <p class="text-zinc-600">Detailed view of artworks currently on loan, staged, or under restoration</p>
 
+            <div class="mt-4 space-y-4">
+                <?php $__empty_1 = true; $__currentLoopData = $activeMovements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $movement): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                    <?php
+                        $activeStatusClass = match($movement->status) {
+                            'On Display' => 'bg-emerald-100 text-emerald-700',
+                            'In Stage' => 'bg-blue-100 text-blue-700',
+                            'On Loan' => 'bg-violet-100 text-violet-700',
+                            'Under Restoration' => 'bg-amber-100 text-amber-700',
+                            'Completed' => 'bg-emerald-100 text-emerald-700',
+                            'Scheduled' => 'bg-blue-100 text-blue-700',
+                            'In Transit', 'Overdue' => 'bg-amber-100 text-amber-700',
+                            default => 'bg-zinc-100 text-zinc-700',
+                        };
+                        $canEditMovement = auth()->user()?->isAdmin()
+                            || (($isAssignedOnlyView ?? false)
+                                && strtolower(trim((string) $movement->responsible_handler)) === strtolower(trim((string) auth()->user()?->name)));
+                    ?>
+                    <div class="rounded-xl border border-zinc-200 bg-white p-4">
+                        <div class="mb-2 flex items-center justify-between">
+                            <div>
+                                <h4 class="museum-card-title"><?php echo e($movement->artwork?->title); ?></h4>
+                                <p class="text-zinc-600"><?php echo e($movement->artwork?->artist?->name); ?></p>
+                            </div>
+                            <span class="rounded-lg px-3 py-1 text-sm font-semibold <?php echo e($activeStatusClass); ?>"><?php echo e($movement->status); ?></span>
+                        </div>
+
+                        <div class="grid gap-4 md:grid-cols-2">
+                            <div>
+                                <p class="text-zinc-500">From</p>
+                                <p class="font-semibold"><?php echo e($movement->from_location); ?></p>
+                                <p class="mt-2 text-zinc-500">Date Out</p>
+                                <p><?php echo e($movement->date_out?->format('M j, Y')); ?></p>
+                                <p class="mt-2 text-zinc-500">Handler</p>
+                                <p><?php echo e($movement->responsible_handler); ?></p>
+                            </div>
+                            <div>
+                                <p class="text-zinc-500">To</p>
+                                <p class="font-semibold"><?php echo e($movement->to_location); ?></p>
+                                <p class="mt-2 text-zinc-500">Expected Return</p>
+                                <p><?php echo e($movement->expected_return_date?->format('M j, Y') ?? '-'); ?></p>
+                                <p class="mt-2 text-zinc-500">Reason</p>
+                                <p><span class="rounded-md border border-zinc-200 px-2 py-0.5 text-sm"><?php echo e($movement->reason); ?></span></p>
+                            </div>
+                        </div>
+
+                        <?php if($movement->notes): ?>
+                            <p class="mt-3 text-zinc-600"><?php echo e($movement->notes); ?></p>
+                        <?php endif; ?>
+
+                        <?php if($movement->condition_report): ?>
+                            <div class="mt-3 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2">
+                                <p class="text-zinc-500">Condition Report</p>
+                                <p><?php echo e($movement->condition_report); ?></p>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if($canEditMovement): ?>
+                            <div class="mt-3 flex justify-end">
+                                <a href="<?php echo e(route('movements.edit', $movement)); ?>" class="museum-btn-secondary px-3 py-1.5 text-xs">Edit Movement</a>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+                    <p class="text-zinc-500">No active movements.</p>
+                <?php endif; ?>
+            </div>
+        </article>
         <article class="museum-panel p-5">
             <div class="mb-4 flex items-center justify-between">
                 <h3 class="museum-section-title">Movement History</h3>
@@ -220,78 +290,6 @@
                     <?php endif; ?>
                     </tbody>
                 </table>
-            </div>
-        </article>
-
-        <article class="museum-panel p-5">
-            <h3 class="museum-section-title">Active Movements</h3>
-            <p class="text-zinc-600">Detailed view of artworks currently on loan, staged, or under restoration</p>
-
-            <div class="mt-4 space-y-4">
-                <?php $__empty_1 = true; $__currentLoopData = $activeMovements; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $movement): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                    <?php
-                        $activeStatusClass = match($movement->status) {
-                            'On Display' => 'bg-emerald-100 text-emerald-700',
-                            'In Stage' => 'bg-blue-100 text-blue-700',
-                            'On Loan' => 'bg-violet-100 text-violet-700',
-                            'Under Restoration' => 'bg-amber-100 text-amber-700',
-                            'Completed' => 'bg-emerald-100 text-emerald-700',
-                            'Scheduled' => 'bg-blue-100 text-blue-700',
-                            'In Transit', 'Overdue' => 'bg-amber-100 text-amber-700',
-                            default => 'bg-zinc-100 text-zinc-700',
-                        };
-                        $canEditMovement = auth()->user()?->isAdmin()
-                            || (($isAssignedOnlyView ?? false)
-                                && strtolower(trim((string) $movement->responsible_handler)) === strtolower(trim((string) auth()->user()?->name)));
-                    ?>
-                    <div class="rounded-xl border border-zinc-200 bg-white p-4">
-                        <div class="mb-2 flex items-center justify-between">
-                            <div>
-                                <h4 class="museum-card-title"><?php echo e($movement->artwork?->title); ?></h4>
-                                <p class="text-zinc-600"><?php echo e($movement->artwork?->artist?->name); ?></p>
-                            </div>
-                            <span class="rounded-lg px-3 py-1 text-sm font-semibold <?php echo e($activeStatusClass); ?>"><?php echo e($movement->status); ?></span>
-                        </div>
-
-                        <div class="grid gap-4 md:grid-cols-2">
-                            <div>
-                                <p class="text-zinc-500">From</p>
-                                <p class="font-semibold"><?php echo e($movement->from_location); ?></p>
-                                <p class="mt-2 text-zinc-500">Date Out</p>
-                                <p><?php echo e($movement->date_out?->format('M j, Y')); ?></p>
-                                <p class="mt-2 text-zinc-500">Handler</p>
-                                <p><?php echo e($movement->responsible_handler); ?></p>
-                            </div>
-                            <div>
-                                <p class="text-zinc-500">To</p>
-                                <p class="font-semibold"><?php echo e($movement->to_location); ?></p>
-                                <p class="mt-2 text-zinc-500">Expected Return</p>
-                                <p><?php echo e($movement->expected_return_date?->format('M j, Y') ?? '-'); ?></p>
-                                <p class="mt-2 text-zinc-500">Reason</p>
-                                <p><span class="rounded-md border border-zinc-200 px-2 py-0.5 text-sm"><?php echo e($movement->reason); ?></span></p>
-                            </div>
-                        </div>
-
-                        <?php if($movement->notes): ?>
-                            <p class="mt-3 text-zinc-600"><?php echo e($movement->notes); ?></p>
-                        <?php endif; ?>
-
-                        <?php if($movement->condition_report): ?>
-                            <div class="mt-3 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2">
-                                <p class="text-zinc-500">Condition Report</p>
-                                <p><?php echo e($movement->condition_report); ?></p>
-                            </div>
-                        <?php endif; ?>
-
-                        <?php if($canEditMovement): ?>
-                            <div class="mt-3 flex justify-end">
-                                <a href="<?php echo e(route('movements.edit', $movement)); ?>" class="museum-btn-secondary px-3 py-1.5 text-xs">Edit Movement</a>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                    <p class="text-zinc-500">No active movements.</p>
-                <?php endif; ?>
             </div>
         </article>
 

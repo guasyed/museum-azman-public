@@ -68,6 +68,7 @@ class MovementTrackerUpdatedByHandlerNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
+            ->from((string) config('mail.from.address'), (string) config('mail.from.name'))
             ->subject('Movement Tracker Updated by Handler')
             ->greeting('Hello '.$notifiable->name.',')
             ->line('A handler updated an assigned movement tracker record.')

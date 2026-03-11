@@ -65,7 +65,8 @@ class MovementController extends Controller
                 ->orderByDesc('id');
         }
 
-        $movements = $movementsQuery->get();
+        $movements = $movementsQuery->paginate(10, ['*'], 'page')->withQueryString();
+
         $artworks = Artwork::query()->with(['artist', 'location'])->orderBy('title')->get();
         $statusOptions = Status::allowedNames();
         $handlerOptions = $this->handlerUsersQuery()
@@ -82,13 +83,25 @@ class MovementController extends Controller
             ->sort()
             ->values();
 
+        // Stats come from a lightweight count query (not affected by pagination)
+        $statsQuery = Movement::query();
+        if ($isAssignedOnlyView) {
+            $statsQuery->whereRaw('LOWER(responsible_handler) = ?', [strtolower((string) $currentUser->name)]);
+        }
         $stats = [
-            'in_stage' => $movements->where('status', 'In Stage')->count(),
-            'on_loan' => $movements->where('status', 'On Loan')->count(),
-            'under_restoration' => $movements->where('status', 'Under Restoration')->count(),
+            'in_stage' => (clone $statsQuery)->where('status', 'In Stage')->count(),
+            'on_loan' => (clone $statsQuery)->where('status', 'On Loan')->count(),
+            'under_restoration' => (clone $statsQuery)->where('status', 'Under Restoration')->count(),
         ];
 
-        $activeMovements = $movements->whereIn('status', ['In Stage', 'On Loan', 'Under Restoration']);
+        // Active movements are paginated separately
+        $activeQuery = Movement::query()->with('artwork.artist')
+            ->whereIn('status', ['In Stage', 'On Loan', 'Under Restoration']);
+        if ($isAssignedOnlyView) {
+            $activeQuery->whereRaw('LOWER(responsible_handler) = ?', [strtolower((string) $currentUser->name)]);
+        }
+        $activeMovements = $activeQuery->orderByDesc('id')->paginate(10, ['*'], 'active_page')->withQueryString();
+
         $canRecordMovement = ! $isAssignedOnlyView;
 
         return view('movements.index', compact('movements', 'artworks', 'stats', 'activeMovements', 'locationOptions', 'statusOptions', 'handlerOptions', 'sortColumn', 'direction', 'canRecordMovement', 'isAssignedOnlyView'));

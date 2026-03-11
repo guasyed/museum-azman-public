@@ -27,7 +27,83 @@
                 <span class="mt-1 block text-zinc-600">Restoration in progress</span>
             </div>
         </div>
+        <article class="museum-panel p-5">
+            <h3 class="museum-section-title">Active Movements</h3>
+            <p class="text-zinc-600">Detailed view of artworks currently on loan, staged, or under restoration</p>
 
+            <div class="mt-4 space-y-4">
+                @forelse($activeMovements as $movement)
+                    @php
+                        $activeStatusClass = match($movement->status) {
+                            'On Display' => 'bg-emerald-100 text-emerald-700',
+                            'In Stage' => 'bg-blue-100 text-blue-700',
+                            'On Loan' => 'bg-violet-100 text-violet-700',
+                            'Under Restoration' => 'bg-amber-100 text-amber-700',
+                            'Completed' => 'bg-emerald-100 text-emerald-700',
+                            'Scheduled' => 'bg-blue-100 text-blue-700',
+                            'In Transit', 'Overdue' => 'bg-amber-100 text-amber-700',
+                            default => 'bg-zinc-100 text-zinc-700',
+                        };
+                        $canEditMovement = auth()->user()?->isAdmin()
+                            || (($isAssignedOnlyView ?? false)
+                                && strtolower(trim((string) $movement->responsible_handler)) === strtolower(trim((string) auth()->user()?->name)));
+                    @endphp
+                    <div class="rounded-xl border border-zinc-200 bg-white p-4">
+                        <div class="mb-2 flex items-center justify-between">
+                            <div>
+                                <h4 class="museum-card-title">{{ $movement->artwork?->title }}</h4>
+                                <p class="text-zinc-600">{{ $movement->artwork?->artist?->name }}</p>
+                            </div>
+                            <span class="rounded-lg px-3 py-1 text-sm font-semibold {{ $activeStatusClass }}">{{ $movement->status }}</span>
+                        </div>
+
+                        <div class="grid gap-4 md:grid-cols-2">
+                            <div>
+                                <p class="text-zinc-500">From</p>
+                                <p class="font-semibold">{{ $movement->from_location }}</p>
+                                <p class="mt-2 text-zinc-500">Date Out</p>
+                                <p>{{ $movement->date_out?->format('M j, Y') }}</p>
+                                <p class="mt-2 text-zinc-500">Handler</p>
+                                <p>{{ $movement->responsible_handler }}</p>
+                            </div>
+                            <div>
+                                <p class="text-zinc-500">To</p>
+                                <p class="font-semibold">{{ $movement->to_location }}</p>
+                                <p class="mt-2 text-zinc-500">Expected Return</p>
+                                <p>{{ $movement->expected_return_date?->format('M j, Y') ?? '-' }}</p>
+                                <p class="mt-2 text-zinc-500">Reason</p>
+                                <p><span class="rounded-md border border-zinc-200 px-2 py-0.5 text-sm">{{ $movement->reason }}</span></p>
+                            </div>
+                        </div>
+
+                        @if($movement->notes)
+                            <p class="mt-3 text-zinc-600">{{ $movement->notes }}</p>
+                        @endif
+
+                        @if($movement->condition_report)
+                            <div class="mt-3 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2">
+                                <p class="text-zinc-500">Condition Report</p>
+                                <p>{{ $movement->condition_report }}</p>
+                            </div>
+                        @endif
+
+                        @if($canEditMovement)
+                            <div class="mt-3 flex justify-end">
+                                <a href="{{ route('movements.edit', $movement) }}" class="museum-btn-secondary px-3 py-1.5 text-xs">Edit Movement</a>
+                            </div>
+                        @endif
+                    </div>
+                @empty
+                    <p class="text-zinc-500">No active movements.</p>
+                @endforelse
+            </div>
+
+            @if($activeMovements->hasPages())
+                <div class="mt-5">
+                    {{ $activeMovements->links() }}
+                </div>
+            @endif
+        </article>
         <article class="museum-panel p-5">
             <div class="mb-4 flex items-center justify-between">
                 <h3 class="museum-section-title">Movement History</h3>
@@ -212,78 +288,12 @@
                     </tbody>
                 </table>
             </div>
-        </article>
 
-        <article class="museum-panel p-5">
-            <h3 class="museum-section-title">Active Movements</h3>
-            <p class="text-zinc-600">Detailed view of artworks currently on loan, staged, or under restoration</p>
-
-            <div class="mt-4 space-y-4">
-                @forelse($activeMovements as $movement)
-                    @php
-                        $activeStatusClass = match($movement->status) {
-                            'On Display' => 'bg-emerald-100 text-emerald-700',
-                            'In Stage' => 'bg-blue-100 text-blue-700',
-                            'On Loan' => 'bg-violet-100 text-violet-700',
-                            'Under Restoration' => 'bg-amber-100 text-amber-700',
-                            'Completed' => 'bg-emerald-100 text-emerald-700',
-                            'Scheduled' => 'bg-blue-100 text-blue-700',
-                            'In Transit', 'Overdue' => 'bg-amber-100 text-amber-700',
-                            default => 'bg-zinc-100 text-zinc-700',
-                        };
-                        $canEditMovement = auth()->user()?->isAdmin()
-                            || (($isAssignedOnlyView ?? false)
-                                && strtolower(trim((string) $movement->responsible_handler)) === strtolower(trim((string) auth()->user()?->name)));
-                    @endphp
-                    <div class="rounded-xl border border-zinc-200 bg-white p-4">
-                        <div class="mb-2 flex items-center justify-between">
-                            <div>
-                                <h4 class="museum-card-title">{{ $movement->artwork?->title }}</h4>
-                                <p class="text-zinc-600">{{ $movement->artwork?->artist?->name }}</p>
-                            </div>
-                            <span class="rounded-lg px-3 py-1 text-sm font-semibold {{ $activeStatusClass }}">{{ $movement->status }}</span>
-                        </div>
-
-                        <div class="grid gap-4 md:grid-cols-2">
-                            <div>
-                                <p class="text-zinc-500">From</p>
-                                <p class="font-semibold">{{ $movement->from_location }}</p>
-                                <p class="mt-2 text-zinc-500">Date Out</p>
-                                <p>{{ $movement->date_out?->format('M j, Y') }}</p>
-                                <p class="mt-2 text-zinc-500">Handler</p>
-                                <p>{{ $movement->responsible_handler }}</p>
-                            </div>
-                            <div>
-                                <p class="text-zinc-500">To</p>
-                                <p class="font-semibold">{{ $movement->to_location }}</p>
-                                <p class="mt-2 text-zinc-500">Expected Return</p>
-                                <p>{{ $movement->expected_return_date?->format('M j, Y') ?? '-' }}</p>
-                                <p class="mt-2 text-zinc-500">Reason</p>
-                                <p><span class="rounded-md border border-zinc-200 px-2 py-0.5 text-sm">{{ $movement->reason }}</span></p>
-                            </div>
-                        </div>
-
-                        @if($movement->notes)
-                            <p class="mt-3 text-zinc-600">{{ $movement->notes }}</p>
-                        @endif
-
-                        @if($movement->condition_report)
-                            <div class="mt-3 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2">
-                                <p class="text-zinc-500">Condition Report</p>
-                                <p>{{ $movement->condition_report }}</p>
-                            </div>
-                        @endif
-
-                        @if($canEditMovement)
-                            <div class="mt-3 flex justify-end">
-                                <a href="{{ route('movements.edit', $movement) }}" class="museum-btn-secondary px-3 py-1.5 text-xs">Edit Movement</a>
-                            </div>
-                        @endif
-                    </div>
-                @empty
-                    <p class="text-zinc-500">No active movements.</p>
-                @endforelse
-            </div>
+            @if($movements->hasPages())
+                <div class="mt-5">
+                    {{ $movements->links() }}
+                </div>
+            @endif
         </article>
 
     </section>

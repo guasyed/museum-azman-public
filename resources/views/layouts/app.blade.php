@@ -260,6 +260,133 @@
             color: #9f1239;
         }
 
+        .museum-install-trigger {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            border-radius: 9999px;
+            border: 1px solid color-mix(in srgb, var(--museum-accent) 28%, white);
+            background: color-mix(in srgb, var(--museum-accent) 10%, white);
+            color: var(--museum-accent);
+            transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+        }
+
+        .museum-install-trigger:hover {
+            background: color-mix(in srgb, var(--museum-accent) 16%, white);
+            transform: translateY(-1px);
+        }
+
+        .museum-install-trigger[data-install-variant="icon"] {
+            width: 2.75rem;
+            height: 2.75rem;
+            padding: 0;
+        }
+
+        .museum-install-trigger[data-install-variant="pill"] {
+            padding: 0.65rem 0.95rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .museum-install-trigger[data-install-variant="menu"] {
+            width: 100%;
+            justify-content: flex-start;
+            border-radius: 1rem;
+            padding: 0.95rem 1rem;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .museum-install-trigger.is-hidden {
+            display: none !important;
+        }
+
+        .museum-install-trigger svg {
+            width: 1.2rem;
+            height: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .museum-install-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1200;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            background: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(6px);
+        }
+
+        .museum-install-modal.active {
+            display: flex;
+        }
+
+        .museum-install-dialog {
+            width: min(100%, 32rem);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(228, 228, 231, 0.9);
+            background: rgba(255, 255, 255, 0.96);
+            padding: 1.5rem;
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24);
+        }
+
+        .museum-install-title {
+            color: #18181b;
+        }
+
+        .museum-install-description {
+            color: #52525b;
+        }
+
+        .museum-install-steps {
+            margin-top: 1rem;
+            padding-left: 1.25rem;
+            color: #27272a;
+        }
+
+        .museum-install-steps li + li {
+            margin-top: 0.55rem;
+        }
+
+        .museum-install-note {
+            margin-top: 1rem;
+            border-radius: 1rem;
+            background: #f4f4f5;
+            padding: 0.85rem 1rem;
+            font-size: 0.875rem;
+            color: #52525b;
+        }
+
+        body.museum-shell.museum-theme-dark .museum-install-dialog {
+            background: rgba(17, 24, 39, 0.98);
+            border-color: #374151;
+            color: #e5e7eb;
+        }
+
+        body.museum-shell.museum-install-open {
+            overflow: hidden;
+        }
+
+        body.museum-shell.museum-theme-dark .museum-install-title {
+            color: #f9fafb;
+        }
+
+        body.museum-shell.museum-theme-dark .museum-install-description {
+            color: #cbd5e1;
+        }
+
+        body.museum-shell.museum-theme-dark .museum-install-steps {
+            color: #e5e7eb;
+        }
+
+        body.museum-shell.museum-theme-dark .museum-install-note {
+            background: #0f172a;
+            color: #cbd5e1;
+        }
+
         @media (max-width: 1024px) {
             .museum-shell {
                 padding-top: 0;
@@ -340,9 +467,22 @@
         @endif
         <p class="text-lg font-bold text-zinc-900">{{ $brandTitle }}</p>
     </div>
-    <button id="hamburgerBtn" class="p-2 text-zinc-600">
-        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-    </button>
+    <div class="flex items-center gap-2">
+        <button
+            type="button"
+            class="museum-install-trigger"
+            data-install-trigger
+            data-install-variant="icon"
+            title="Install app"
+            aria-label="Install app"
+        >
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3v11"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m7.5 10.5 4.5 4.5 4.5-4.5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 17.5a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 17.5"></path></svg>
+            <span class="sr-only">Install app</span>
+        </button>
+        <button id="hamburgerBtn" class="p-2 text-zinc-600" type="button" aria-label="Open menu">
+            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+    </div>
 </header>
 
 <div class="min-h-screen lg:grid lg:grid-cols-[260px_1fr]">
@@ -412,6 +552,20 @@
 
     <main class="flex-1 overflow-y-auto">
         <div class="mx-auto w-full max-w-350 p-6 lg:p-10">
+            <div class="mb-4 hidden lg:flex justify-end">
+                <button
+                    type="button"
+                    class="museum-install-trigger"
+                    data-install-trigger
+                    data-install-variant="pill"
+                    title="Install app"
+                    aria-label="Install app"
+                >
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3v11"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m7.5 10.5 4.5 4.5 4.5-4.5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 17.5a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 17.5"></path></svg>
+                    <span data-install-label>Install App</span>
+                </button>
+            </div>
+
             @auth
                 @php
                     $notificationCount = 0;
@@ -565,6 +719,18 @@
         </button>
     </div>
     <nav class="flex flex-col">
+        <button
+            type="button"
+            class="museum-install-trigger mb-4"
+            data-install-trigger
+            data-install-variant="menu"
+            title="Install app"
+            aria-label="Install app"
+        >
+            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3v11"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m7.5 10.5 4.5 4.5 4.5-4.5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 17.5a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 17.5"></path></svg>
+            <span data-install-label>Install App</span>
+        </button>
+
         <a href="{{ route('dashboard') }}" class="mobile-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a>
         <a href="{{ route('artworks.index') }}" class="mobile-nav-link {{ request()->routeIs('artworks.*') ? 'active' : '' }}">Collection</a>
         <a href="{{ route('movements.index') }}" class="mobile-nav-link {{ request()->routeIs('movements.*') ? 'active' : '' }}">Movement Tracker</a>
@@ -586,6 +752,28 @@
             </form>
         @endauth
     </nav>
+</div>
+
+<div id="installModal" class="museum-install-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="installModalTitle">
+    <div class="museum-install-dialog">
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">Install app</p>
+                <h2 id="installModalTitle" class="museum-install-title mt-2 text-2xl font-semibold">Install Museum Azman</h2>
+                <p id="installModalDescription" class="museum-install-description mt-3 text-sm leading-6"></p>
+            </div>
+            <button type="button" id="installModalClose" class="rounded-full border border-zinc-200 p-2 text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-700" aria-label="Close install instructions">
+                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <ol id="installModalSteps" class="museum-install-steps text-sm leading-6"></ol>
+        <p id="installModalNote" class="museum-install-note"></p>
+
+        <div class="mt-6 flex justify-end">
+            <button type="button" id="installModalDone" class="museum-btn rounded-full px-5 py-2.5 text-sm font-semibold text-white">Close</button>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.7/build/js/intlTelInput.min.js"></script>

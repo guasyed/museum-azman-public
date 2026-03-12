@@ -351,7 +351,7 @@ class ReportController extends Controller
             '--disable-dev-shm-usage',
             '--no-pdf-header-footer',
             '--print-to-pdf-no-header',
-            '--virtual-time-budget=7000',
+            '--virtual-time-budget=20000',
             '--print-to-pdf='.escapeshellarg($pdfPath),
             escapeshellarg('file://'.$htmlPath),
         ]);

@@ -1,0 +1,10 @@
+Set a system cron in production:
+* * * * * cd /Users/syed/MEGA/WORK/RELIVA/Website/LEBTECH/museum-azman && php artisan schedule:run >> /dev/null 2>&1
+
+Keep php artisan schedule:work running in a separate process (local/dev).
+
+
+
+php artisan backup:auto works and generated a file: private/backups/database-backup-20260311-205346.json.
+php artisan schedule:list shows backup:auto is scheduled at your configured time (22:25).
+php artisan schedule:run -v reported “No scheduled commands are ready to run” because it was not yet due at that moment.

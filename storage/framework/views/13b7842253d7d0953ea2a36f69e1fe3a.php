@@ -154,41 +154,42 @@
     </style>
 </head>
 <body>
-    @php
+    <?php
         $pdfGainAnalysis = $pdfGainAnalysis ?? $gainAnalysis;
         $pdfGeography = $pdfGeography ?? $geography->map(fn ($row) => ['name' => $row['name'], 'y' => $row['count']])->values();
         $pdfMediumDistribution = $pdfMediumDistribution ?? $mediumDistribution;
-    @endphp
+    ?>
     <div class="page">
         <div class="top">
             <div>
                 <h1>Reports & Analytics</h1>
                 <div class="subtitle">Comprehensive portfolio insights and performance metrics</div>
             </div>
-            <div class="stamp">Generated: {{ $exportedAt->format('Y-m-d H:i:s') }}</div>
+            <div class="stamp">Generated: <?php echo e($exportedAt->format('Y-m-d H:i:s')); ?></div>
         </div>
 
         <div class="grid-4">
             <div class="card">
                 <p>Total Portfolio Value</p>
-                <strong>{{ \App\Support\Currency::short($stats['total_value']) }}</strong>
+                <strong><?php echo e(\App\Support\Currency::short($stats['total_value'])); ?></strong>
             </div>
             <div class="card">
                 <p>Unrealized Gain</p>
-                <strong style="color: {{ $stats['unrealized_gain'] >= 0 ? '#16a34a' : '#e11d48' }};">
-                    {{ $stats['unrealized_gain'] >= 0 ? '+' : '-' }}{{ \App\Support\Currency::short(abs($stats['unrealized_gain'])) }}
+                <strong style="color: <?php echo e($stats['unrealized_gain'] >= 0 ? '#16a34a' : '#e11d48'); ?>;">
+                    <?php echo e($stats['unrealized_gain'] >= 0 ? '+' : '-'); ?><?php echo e(\App\Support\Currency::short(abs($stats['unrealized_gain']))); ?>
+
                 </strong>
-                <small>{{ number_format($stats['coverage_ratio'], 1) }}% insured ratio</small>
+                <small><?php echo e(number_format($stats['coverage_ratio'], 1)); ?>% insured ratio</small>
             </div>
             <div class="card">
                 <p>Insurance Coverage</p>
-                <strong>{{ \App\Support\Currency::short($stats['insured_value']) }}</strong>
-                <small>{{ number_format($stats['coverage_ratio'], 1) }}% of current value</small>
+                <strong><?php echo e(\App\Support\Currency::short($stats['insured_value'])); ?></strong>
+                <small><?php echo e(number_format($stats['coverage_ratio'], 1)); ?>% of current value</small>
             </div>
             <div class="card">
                 <p>Works on Loan</p>
-                <strong>{{ $stats['on_loan'] }}</strong>
-                <small>{{ \App\Support\Currency::short($stats['on_loan_insured']) }} insured</small>
+                <strong><?php echo e($stats['on_loan']); ?></strong>
+                <small><?php echo e(\App\Support\Currency::short($stats['on_loan_insured'])); ?> insured</small>
             </div>
         </div>
 
@@ -227,30 +228,31 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($pdfGainAnalysis as $artwork)
-                        @php
+                    <?php $__currentLoopData = $pdfGainAnalysis; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $artwork): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <?php
                             $acq = (float) $artwork->acquisition_price;
                             $cur = (float) $artwork->current_valuation;
                             $gain = $cur - $acq;
                             $change = $acq > 0 ? ($gain / $acq) * 100 : 0;
-                        @endphp
+                        ?>
                         <tr>
                             <td>
-                                <strong style="font-size:13px;">{{ $artwork->title }}</strong><br>
-                                <span style="color:#6b7280;">{{ $artwork->artist?->name ?? '-' }}</span>
+                                <strong style="font-size:13px;"><?php echo e($artwork->title); ?></strong><br>
+                                <span style="color:#6b7280;"><?php echo e($artwork->artist?->name ?? '-'); ?></span>
                             </td>
-                            <td class="text-right">{{ \App\Support\Currency::short($acq) }}</td>
-                            <td class="text-right"><strong>{{ \App\Support\Currency::short($cur) }}</strong></td>
-                            <td class="text-right" style="color: {{ $gain >= 0 ? '#16a34a' : '#e11d48' }};">
-                                {{ $gain >= 0 ? '+' : '-' }}{{ \App\Support\Currency::short(abs($gain)) }}
+                            <td class="text-right"><?php echo e(\App\Support\Currency::short($acq)); ?></td>
+                            <td class="text-right"><strong><?php echo e(\App\Support\Currency::short($cur)); ?></strong></td>
+                            <td class="text-right" style="color: <?php echo e($gain >= 0 ? '#16a34a' : '#e11d48'); ?>;">
+                                <?php echo e($gain >= 0 ? '+' : '-'); ?><?php echo e(\App\Support\Currency::short(abs($gain))); ?>
+
                             </td>
                             <td class="text-right">
-                                <span class="chip {{ $change >= 0 ? 'chip-pos' : 'chip-neg' }}">
-                                    {{ $change >= 0 ? '+' : '-' }}{{ number_format(abs($change), 1) }}%
+                                <span class="chip <?php echo e($change >= 0 ? 'chip-pos' : 'chip-neg'); ?>">
+                                    <?php echo e($change >= 0 ? '+' : '-'); ?><?php echo e(number_format(abs($change), 1)); ?>%
                                 </span>
                             </td>
                         </tr>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </tbody>
             </table>
         </div>
@@ -268,14 +270,14 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($worksOnLoan as $artwork)
+                    <?php $__currentLoopData = $worksOnLoan; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $artwork): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr>
-                            <td>{{ $artwork->title }}</td>
-                            <td>{{ $artwork->location?->name ?? 'Unknown Location' }}</td>
-                            <td class="text-right">{{ \App\Support\Currency::short((float) $artwork->current_valuation) }}</td>
+                            <td><?php echo e($artwork->title); ?></td>
+                            <td><?php echo e($artwork->location?->name ?? 'Unknown Location'); ?></td>
+                            <td class="text-right"><?php echo e(\App\Support\Currency::short((float) $artwork->current_valuation)); ?></td>
                             <td class="text-right">On Loan</td>
                         </tr>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </tbody>
             </table>
         </div>
@@ -294,31 +296,31 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($coverageByRegion as $region)
+                    <?php $__currentLoopData = $coverageByRegion; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $region): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <tr>
-                            <td>{{ $region['name'] }}</td>
-                            <td class="text-right">{{ number_format((int) $region['count']) }}</td>
-                            <td class="text-right">{{ \App\Support\Currency::short((float) $region['insured']) }}</td>
-                            <td class="text-right">{{ \App\Support\Currency::short((float) $region['market']) }}</td>
-                            <td class="text-right">{{ number_format((float) $region['ratio'], 1) }}%</td>
+                            <td><?php echo e($region['name']); ?></td>
+                            <td class="text-right"><?php echo e(number_format((int) $region['count'])); ?></td>
+                            <td class="text-right"><?php echo e(\App\Support\Currency::short((float) $region['insured'])); ?></td>
+                            <td class="text-right"><?php echo e(\App\Support\Currency::short((float) $region['market'])); ?></td>
+                            <td class="text-right"><?php echo e(number_format((float) $region['ratio'], 1)); ?>%</td>
                         </tr>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </tbody>
             </table>
         </div>
     </div>
 
-    <script>{!! $highchartsScript !!}</script>
+    <script><?php echo $highchartsScript; ?></script>
     <script>
         (function () {
             if (typeof Highcharts === 'undefined') {
                 return;
             }
 
-            const geoSeries = @json($pdfGeography);
-            const mediumSeries = @json($pdfMediumDistribution);
-            const trendYears = @json($portfolioTrend->pluck('year')->values());
-            const trendValues = @json($portfolioTrend->pluck('value')->values());
+            const geoSeries = <?php echo json_encode($pdfGeography, 15, 512) ?>;
+            const mediumSeries = <?php echo json_encode($pdfMediumDistribution, 15, 512) ?>;
+            const trendYears = <?php echo json_encode($portfolioTrend->pluck('year')->values(), 15, 512) ?>;
+            const trendValues = <?php echo json_encode($portfolioTrend->pluck('value')->values(), 15, 512) ?>;
             const colors = ['#2563eb', '#f97316', '#14b8a6', '#a855f7', '#e11d48', '#22c55e', '#f59e0b'];
 
             Highcharts.setOptions({
@@ -404,3 +406,4 @@
     </script>
 </body>
 </html>
+<?php /**PATH /Users/syed/MEGA/WORK/RELIVA/Website/LEBTECH/museum-azman/resources/views/reports/pdf.blade.php ENDPATH**/ ?>

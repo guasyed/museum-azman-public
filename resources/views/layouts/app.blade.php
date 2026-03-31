@@ -34,50 +34,20 @@
             $uiBodyFontKey = array_key_exists($bodyFontValue, $fontFamilies) ? $bodyFontValue : 'inter';
         }
 
-        if (auth()->check()) {
-            $currentUser = auth()->user();
-
-            $userThemeValue = (string) ($currentUser->appearance_theme ?? '');
-            $userDensityValue = (string) ($currentUser->appearance_density ?? '');
-            $userAccentValue = (string) ($currentUser->appearance_accent_color ?? '');
-            $userHeadingFontValue = (string) ($currentUser->appearance_heading_font ?? '');
-            $userBodyFontValue = (string) ($currentUser->appearance_body_font ?? '');
-
-            if (in_array($userThemeValue, ['light', 'dark'], true)) {
-                $uiTheme = $userThemeValue;
-            }
-
-            if (in_array($userDensityValue, ['comfortable', 'compact', 'spacious'], true)) {
-                $uiDensity = $userDensityValue;
-            }
-
-            if (preg_match('/^#[0-9A-Fa-f]{6}$/', $userAccentValue)) {
-                $uiAccent = strtolower($userAccentValue);
-            }
-
-            if (array_key_exists($userHeadingFontValue, $fontFamilies)) {
-                $uiHeadingFontKey = $userHeadingFontValue;
-            }
-
-            if (array_key_exists($userBodyFontValue, $fontFamilies)) {
-                $uiBodyFontKey = $userBodyFontValue;
-            }
-        }
-
         $uiHeadingFontFamily = $fontFamilies[$uiHeadingFontKey];
         $uiBodyFontFamily = $fontFamilies[$uiBodyFontKey];
     @endphp
-	<link rel="manifest" href="{{ asset('manifest.json') }}">
+    <link rel="manifest" href="/manifest.json">
     <meta name="theme-color" content="{{ $uiTheme === 'dark' ? '#111827' : '#f7f7f6' }}">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Museum Azman">
-    <link rel="apple-touch-icon" href="{{ asset('icons/icon-192.png') }}">
+    <link rel="apple-touch-icon" href="/icons/icon192.png">
 
     <title>{{ $title ?? 'Museum Azman' }}</title>
     @php
-        $faviconHref = asset('icons/museum-azman.ico').'?v=3';
+        $faviconHref = '/icons/museum-azman.ico?v=3';
         $faviconType = 'image/x-icon';
 
         if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {
@@ -97,9 +67,18 @@
                 ];
 
                 $faviconType = $faviconTypes[$extension] ?? 'image/png';
-                $faviconHref = asset('storage/'.ltrim($savedLogoPath, '/')).'?v='.(string) \Illuminate\Support\Facades\Storage::disk('public')->lastModified($savedLogoPath);
+                $faviconHref = '/storage/'.ltrim($savedLogoPath, '/').'?v='.(string) \Illuminate\Support\Facades\Storage::disk('public')->lastModified($savedLogoPath);
             }
         }
+
+        $viteCss = \Illuminate\Support\Facades\Vite::asset('resources/css/app.css');
+        $viteJs = \Illuminate\Support\Facades\Vite::asset('resources/js/app.js');
+        $toRelativeAsset = static function (string $url): string {
+            $path = (string) parse_url($url, PHP_URL_PATH);
+            $query = (string) parse_url($url, PHP_URL_QUERY);
+
+            return $query !== '' ? $path.'?'.$query : $path;
+        };
     @endphp
     <link rel="icon" type="{{ $faviconType }}" href="{{ $faviconHref }}">
     <link rel="alternate icon" href="{{ $faviconHref }}">
@@ -107,18 +86,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=Lora:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.7/build/css/intlTelInput.css">
-    @php
-        $host = strtolower((string) request()->getHost());
-        $isTunnelHost = str_contains($host, 'pinggy') || str_contains($host, 'ngrok') || str_contains($host, 'loca.lt');
-        $isSettingsRoute = request()->routeIs('settings.*');
-    @endphp
-
-    @if($isTunnelHost && $isSettingsRoute)
-        <link rel="stylesheet" href="{{ \Illuminate\Support\Facades\Vite::asset('resources/css/app.css') }}">
-        <script type="module" src="{{ \Illuminate\Support\Facades\Vite::asset('resources/js/app.js') }}"></script>
-    @else
-        @vite(['resources/css/app.css', 'resources/js/app.js'])
-    @endif
+    <link rel="stylesheet" href="{{ $toRelativeAsset($viteCss) }}">
+    <script type="module" src="{{ $toRelativeAsset($viteJs) }}"></script>
 
     <style>
         body.museum-shell {
@@ -275,12 +244,6 @@
         .museum-install-trigger:hover {
             background: color-mix(in srgb, var(--museum-accent) 16%, white);
             transform: translateY(-1px);
-        }
-
-        .museum-install-trigger[data-install-variant="icon"] {
-            width: 2.75rem;
-            height: 2.75rem;
-            padding: 0;
         }
 
         .museum-install-trigger[data-install-variant="pill"] {
@@ -468,17 +431,6 @@
         <p class="text-lg font-bold text-zinc-900">{{ $brandTitle }}</p>
     </div>
     <div class="flex items-center gap-2">
-        <button
-            type="button"
-            class="museum-install-trigger"
-            data-install-trigger
-            data-install-variant="icon"
-            title="Install app"
-            aria-label="Install app"
-        >
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3v11"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m7.5 10.5 4.5 4.5 4.5-4.5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 17.5a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 17.5"></path></svg>
-            <span class="sr-only">Install app</span>
-        </button>
         <button id="hamburgerBtn" class="p-2 text-zinc-600" type="button" aria-label="Open menu">
             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
         </button>
@@ -534,6 +486,10 @@
             </a>
 
             @if(auth()->check() && auth()->user()->isAdmin())
+                <a href="{{ route('admin.imports.csv.index') }}" class="museum-nav-item flex items-center gap-3 {{ request()->routeIs('admin.imports.csv.*') ? 'active' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    <span>Import CSV</span>
+                </a>
                 <a href="{{ route('admin.users.index') }}" class="museum-nav-item flex items-center gap-3 {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><path d="M20 8v6"></path><path d="M23 11h-6"></path></svg>
                     <span>Manage Users</span>
@@ -739,6 +695,7 @@
         <a href="{{ route('reports.index') }}" class="mobile-nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">Reports & Analytics</a>
         <a href="{{ route('settings.index') }}" class="mobile-nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}">Settings</a>
         @if(auth()->check() && auth()->user()->isAdmin())
+            <a href="{{ route('admin.imports.csv.index') }}" class="mobile-nav-link {{ request()->routeIs('admin.imports.csv.*') ? 'active' : '' }}">Import CSV</a>
             <a href="{{ route('settings.index', ['tab' => 'users-roles']) }}" class="mobile-nav-link {{ request()->routeIs('settings.*') && request()->string('tab')->toString() === 'users-roles' ? 'active' : '' }}">Users &amp; Roles</a>
             <a href="{{ route('admin.docs.technical') }}" class="mobile-nav-link {{ request()->routeIs('admin.docs.technical') ? 'active' : '' }}">Technical Docs</a>
             <a href="{{ route('admin.users.index') }}" class="mobile-nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">Manage Users</a>
@@ -1000,7 +957,7 @@
 </script>
 <script>
 if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("{{ asset('sw.js') }}")
+    navigator.serviceWorker.register("/sw.js")
     .then(() => console.log("Service Worker registered"));
 }
 </script>

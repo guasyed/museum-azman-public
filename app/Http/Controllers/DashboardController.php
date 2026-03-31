@@ -20,13 +20,7 @@ class DashboardController extends Controller
             'on_loan' => $artworks->where('status', 'On Loan')->count(),
         ];
 
-        $geo = $this->geographyCounts($artworks);
-        $totalGeo = max($geo['malaysia'] + $geo['southeast_asia'] + $geo['rest_of_world'], 1);
-        $donutStops = sprintf(
-            '#111111 0%% %1$.2f%%, #7f7a76 %1$.2f%% %2$.2f%%, #ada8a3 %2$.2f%% 100%%',
-            ($geo['malaysia'] / $totalGeo) * 100,
-            (($geo['malaysia'] + $geo['southeast_asia']) / $totalGeo) * 100
-        );
+        $geoByCountry = $this->geographyCounts($artworks);
 
         $recentMovements = Artwork::query()
             ->with('location')
@@ -42,40 +36,26 @@ class DashboardController extends Controller
             ->take(4)
             ->get();
 
-        return view('dashboard.index', compact('stats', 'recentArtworks', 'geo', 'donutStops', 'recentMovements'));
+        return view('dashboard.index', compact('stats', 'recentArtworks', 'geoByCountry', 'recentMovements'));
     }
 
     private function geographyCounts(Collection $artworks): array
     {
-        $seaCountries = [
-            'malaysia', 'singapore', 'indonesia', 'thailand', 'philippines',
-            'vietnam', 'myanmar', 'cambodia', 'laos', 'brunei', 'timor-leste',
-        ];
-
-        $malaysia = 0;
-        $southeastAsia = 0;
-        $rest = 0;
+        $counts = [];
 
         foreach ($artworks as $artwork) {
-            $country = strtolower((string) ($artwork->artist?->country ?? ''));
+            $rawCountry = trim((string) ($artwork->artist?->country ?? ''));
+            $country = $rawCountry === '' ? 'Unknown' : $rawCountry;
 
-            if ($country === 'malaysia' || $country === 'malaysian') {
-                $malaysia++;
-                continue;
+            if (! isset($counts[$country])) {
+                $counts[$country] = 0;
             }
 
-            if (in_array($country, $seaCountries, true)) {
-                $southeastAsia++;
-                continue;
-            }
-
-            $rest++;
+            $counts[$country]++;
         }
 
-        return [
-            'malaysia' => $malaysia,
-            'southeast_asia' => $southeastAsia,
-            'rest_of_world' => $rest,
-        ];
+        arsort($counts);
+
+        return $counts;
     }
 }

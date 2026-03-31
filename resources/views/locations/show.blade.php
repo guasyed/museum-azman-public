@@ -37,7 +37,7 @@
                 </div>
                 <div class="museum-detail">
                     <span>Last Audit</span>
-                    <strong>{{ optional($location->last_audit_date)->format('d/m/Y') ?: '-' }}</strong>
+                    <strong>{{ \App\Support\DateFormat::display($location->last_audit_date) }}</strong>
                 </div>
             </div>
 

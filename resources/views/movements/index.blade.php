@@ -62,7 +62,7 @@
                                 <p class="text-zinc-500">From</p>
                                 <p class="font-semibold">{{ $movement->from_location }}</p>
                                 <p class="mt-2 text-zinc-500">Date Out</p>
-                                <p>{{ $movement->date_out?->format('M j, Y') }}</p>
+                                <p>{{ \App\Support\DateFormat::display($movement->date_out) }}</p>
                                 <p class="mt-2 text-zinc-500">Handler</p>
                                 <p>{{ $movement->responsible_handler }}</p>
                             </div>
@@ -70,7 +70,7 @@
                                 <p class="text-zinc-500">To</p>
                                 <p class="font-semibold">{{ $movement->to_location }}</p>
                                 <p class="mt-2 text-zinc-500">Expected Return</p>
-                                <p>{{ $movement->expected_return_date?->format('M j, Y') ?? '-' }}</p>
+                                <p>{{ \App\Support\DateFormat::display($movement->expected_return_date) }}</p>
                                 <p class="mt-2 text-zinc-500">Reason</p>
                                 <p><span class="rounded-md border border-zinc-200 px-2 py-0.5 text-sm">{{ $movement->reason }}</span></p>
                             </div>
@@ -269,8 +269,8 @@
                             </td>
                             <td class="py-3">{{ $movement->from_location }}</td>
                             <td class="py-3">{{ $movement->to_location }}</td>
-                            <td class="py-3">{{ $movement->date_out?->format('M j, Y') }}</td>
-                            <td class="py-3">{{ $movement->expected_return_date?->format('M j, Y') ?? '-' }}</td>
+                            <td class="py-3">{{ \App\Support\DateFormat::display($movement->date_out) }}</td>
+                            <td class="py-3">{{ \App\Support\DateFormat::display($movement->expected_return_date) }}</td>
                             <td class="py-3">{{ $movement->responsible_handler }}</td>
                             <td class="py-3"><span class="rounded-md border border-zinc-200 px-2 py-1">{{ $movement->reason }}</span></td>
                             <td class="py-3"><span class="rounded-lg px-2.5 py-1 text-xs font-semibold {{ $statusClass }}">{{ $status }}</span></td>

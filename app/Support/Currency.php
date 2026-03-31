@@ -9,6 +9,11 @@ class Currency
 {
     private static ?string $cachedCode = null;
 
+    public static function clearCache(): void
+    {
+        self::$cachedCode = null;
+    }
+
     public static function code(): string
     {
         if (self::$cachedCode !== null) {

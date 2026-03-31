@@ -59,6 +59,7 @@ composer run test
 
 - `php artisan backup:auto` - Generate automatic backup snapshot
 - `php artisan museum:import-xlsx {path} {--download-images}` - Import museum data
+- `php artisan museum:import-csv {path} {--connection=} {--download-images}` - Import museum data from CSV
 - `php artisan schedule:list` - Verify scheduled tasks
 
 Cron (recommended):

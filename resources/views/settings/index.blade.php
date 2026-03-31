@@ -10,6 +10,23 @@
             <p class="museum-page-subtitle">System configuration and user management</p>
         </div>
 
+        @if(session('success'))
+            <div class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                {{ session('success') }}
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                <p class="font-semibold">Unable to save your changes:</p>
+                <ul class="mt-1 list-disc pl-5">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
         <div class="mb-8 border-b border-zinc-200">
     <nav class="flex flex-wrap gap-2 -mb-px" aria-label="Settings tabs">
         @php
@@ -395,7 +412,7 @@
                                     $isPrivilegedRole = in_array($rawRole, ['admin', 'owner'], true);
 
                                     $lastLogin = $user->updated_at
-                                        ? $user->updated_at->format('Y-m-d h:i A')
+                                        ? \App\Support\DateFormat::display($user->updated_at) . ' ' . $user->updated_at->format('h:i A')
                                         : '-';
                                 @endphp
                                 <tr class="border-b border-zinc-200 last:border-b-0">
@@ -623,10 +640,10 @@
                     <div class="border-t border-zinc-200 pt-4">
                         <p class="font-semibold text-zinc-800">Accent Color</p>
                         <div class="mt-3 flex items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">
-                            <input type="color" name="accent_color" value="{{ $selectedAccent }}" class="h-10 w-14 cursor-pointer rounded border border-zinc-300 bg-white p-1">
+                            <input id="accent_color" type="color" name="accent_color" value="{{ $selectedAccent }}" class="h-10 w-14 cursor-pointer rounded border border-zinc-300 bg-white p-1">
                             <div>
                                 <p class="font-semibold text-zinc-900">Custom Accent</p>
-                                <p class="text-xs text-zinc-500">Selected: {{ strtoupper($selectedAccent) }}</p>
+                                <p id="accent_color_label" class="text-xs text-zinc-500">Selected: {{ strtoupper($selectedAccent) }}</p>
                             </div>
                         </div>
                     </div>
@@ -636,5 +653,29 @@
                 </form>
             </article>
         @endif
+
+        <script>
+            (function () {
+                const accentInput = document.getElementById('accent_color');
+                const accentLabel = document.getElementById('accent_color_label');
+
+                if (!accentInput || !accentLabel) {
+                    return;
+                }
+
+                const applyPreview = () => {
+                    const nextColor = (accentInput.value || '').toUpperCase();
+                    if (!nextColor) {
+                        return;
+                    }
+
+                    accentLabel.textContent = `Selected: ${nextColor}`;
+                    document.body.style.setProperty('--museum-accent', nextColor.toLowerCase());
+                };
+
+                accentInput.addEventListener('input', applyPreview);
+                accentInput.addEventListener('change', applyPreview);
+            })();
+        </script>
     </section>
 </x-layout>

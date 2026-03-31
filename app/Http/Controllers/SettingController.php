@@ -195,16 +195,6 @@ class SettingController extends Controller
             'body_font' => $settings['body_font'] ?? 'inter',
         ];
 
-        if ($currentUser) {
-            $appearanceSettings = [
-                'theme' => $currentUser->appearance_theme ?: $appearanceSettings['theme'],
-                'density' => $currentUser->appearance_density ?: $appearanceSettings['density'],
-                'accent_color' => $currentUser->appearance_accent_color ?: $appearanceSettings['accent_color'],
-                'heading_font' => $currentUser->appearance_heading_font ?: $appearanceSettings['heading_font'],
-                'body_font' => $currentUser->appearance_body_font ?: $appearanceSettings['body_font'],
-            ];
-        }
-
         $backupList = $this->listBackups($configuredTimezone);
         $backupSettings = [
             'enabled' => ($settings['backup_auto_enabled'] ?? '1') === '1',
@@ -390,24 +380,7 @@ class SettingController extends Controller
 
                 $validated['accent_color'] = strtolower((string) $validated['accent_color']);
 
-                $currentUser = $request->user();
-                if (! $currentUser) {
-                    return redirect()
-                        ->route('settings.index', ['tab' => 'appearance'])
-                        ->withErrors(['settings' => 'Unable to update appearance preferences.']);
-                }
-
-                if ($currentUser->isAdmin()) {
-                    $this->saveSettings($validated);
-                }
-
-                $currentUser->update([
-                    'appearance_theme' => (string) $validated['theme'],
-                    'appearance_density' => (string) $validated['density'],
-                    'appearance_accent_color' => (string) $validated['accent_color'],
-                    'appearance_heading_font' => (string) $validated['heading_font'],
-                    'appearance_body_font' => (string) $validated['body_font'],
-                ]);
+                $this->saveSettings($validated);
 
                 return redirect()
                     ->route('settings.index', ['tab' => 'appearance'])
@@ -459,6 +432,9 @@ class SettingController extends Controller
                 ['value' => (string) $value]
             );
         }
+
+        \App\Support\Currency::clearCache();
+        \App\Support\DateFormat::clearCache();
     }
 
     private function createBackupFile(string $timezone): ?string

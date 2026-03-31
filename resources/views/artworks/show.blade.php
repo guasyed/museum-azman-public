@@ -61,7 +61,7 @@
                             <div><p class="text-zinc-500">Dimensions</p><p class="font-medium">{{ $artwork->size_from_cm ?: '-' }} × {{ $artwork->size_to_cm ?: '-' }} cm</p></div>
                             <div><p class="text-zinc-500">Country of Origin</p><p class="font-medium">{{ $artwork->artist?->country ?: 'Malaysia' }}</p></div>
                             <div><p class="text-zinc-500">Region</p><p class="font-medium">{{ $artwork->artist?->country ?: '-' }}</p></div>
-                            <div><p class="text-zinc-500">Acquisition Date</p><p class="font-medium">{{ optional($artwork->acquisition_date)->format('d/m/Y') ?: '-' }}</p></div>
+                            <div><p class="text-zinc-500">Acquisition Date</p><p class="font-medium">{{ \App\Support\DateFormat::display($artwork->acquisition_date) }}</p></div>
                         </div>
 
                         <div class="space-y-2 border-b border-zinc-200 pb-4 text-sm">
@@ -91,7 +91,7 @@
                         @forelse($artwork->movements->take(6) as $movement)
                             <div class="border-b border-zinc-200 py-3.5 last:border-b-0">
                                 <div class="mb-2 flex items-center justify-between gap-2">
-                                    <p class="text-[0.8rem] font-semibold leading-none text-zinc-900">{{ optional($movement->date_out)->format('d/m/Y') ?: '-' }}</p>
+                                    <p class="text-[0.8rem] font-semibold leading-none text-zinc-900">{{ \App\Support\DateFormat::display($movement->date_out) }}</p>
                                     <span class="inline-flex rounded-xl bg-zinc-900 px-3 py-1 text-[0.8rem] font-semibold text-white">{{ $movement->status ?: 'Completed' }}</span>
                                 </div>
 
@@ -101,7 +101,7 @@
                                         <p><span class="text-zinc-500">To:</span> {{ $movement->to_location ?: '-' }}</p>
                                         <p><span class="text-zinc-500">Responsible Handler:</span> {{ $movement->responsible_handler ?: '-' }}</p>
                                         <p><span class="text-zinc-500">Reason:</span> {{ $movement->reason ?: '-' }}</p>
-                                        <p><span class="text-zinc-500">Expected Return:</span> {{ optional($movement->expected_return_date)->format('d/m/Y') ?: '-' }}</p>
+                                        <p><span class="text-zinc-500">Expected Return:</span> {{ \App\Support\DateFormat::display($movement->expected_return_date) }}</p>
                                     </div>
 
                                     <div class="space-y-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5">

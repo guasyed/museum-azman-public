@@ -173,7 +173,7 @@
                                 <td class="px-4 py-3.5 text-zinc-600">{{ $location->address ?: '-' }}</td>
                                 <td class="px-4 py-3.5 text-right font-semibold">{{ $location->artworks_count }}</td>
                                 <td class="px-4 py-3.5 text-right font-semibold">{{ \App\Support\Currency::symbol() }}{{ number_format($location->insured_value, 0) }}</td>
-                                <td class="px-4 py-3.5 text-zinc-600">{{ optional($location->last_audit_date)->format('d/m/Y') ?: '-' }}</td>
+                                <td class="px-4 py-3.5 text-zinc-600">{{ \App\Support\DateFormat::display($location->last_audit_date) }}</td>
                                 <td class="px-4 py-3.5">
                                     <div class="flex items-center justify-center gap-3 text-zinc-700">
                                         @if($location->map_url)
@@ -235,7 +235,7 @@
                         </div>
 
                         <div class="mt-3 border-t border-zinc-200 pt-3 text-sm text-zinc-500">
-                            Last audit: {{ optional($location->last_audit_date)->format('d/m/Y') ?: '-' }}
+                            Last audit: {{ \App\Support\DateFormat::display($location->last_audit_date) }}
                         </div>
 
                         <div class="mt-3 flex items-center gap-2">

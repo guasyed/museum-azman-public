@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\AdminImportController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ArtworkController;
 use App\Http\Controllers\ArtistController;
@@ -26,7 +27,7 @@ Route::get('/optimize-clear', function () {
         'status' => 'success',
         'message' => 'Cache, config, route, dan view telah dibersihkan!'
     ]);
-});
+})->middleware(['auth', 'admin']);
 
 
 Route::middleware('guest')->group(function () {
@@ -83,6 +84,9 @@ Route::middleware('auth')->group(function () {
 	Route::post('settings/backup/delete', [SettingController::class, 'deleteBackup'])->name('settings.backup.delete')->middleware('admin');
 
 	Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
+		Route::get('imports/csv', [AdminImportController::class, 'index'])->name('imports.csv.index');
+		Route::post('imports/csv', [AdminImportController::class, 'store'])->name('imports.csv.store');
+
 		Route::get('technical-documentation', function () {
 			$docPath = base_path('docs/Museum-Azman-Technical-Documentation.html');
 
@@ -103,4 +107,10 @@ Route::middleware('auth')->group(function () {
 		Route::patch('users/{user}/approve', [AdminUserController::class, 'approve'])->name('users.approve');
 		Route::delete('users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
 	});
+});
+
+Route::fallback(function () {
+	return auth()->check()
+		? redirect()->route('dashboard')
+		: redirect()->route('login');
 });

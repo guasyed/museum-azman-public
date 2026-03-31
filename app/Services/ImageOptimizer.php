@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -31,7 +32,22 @@ class ImageOptimizer
 
     public function storeFromUrl(string $url, string $directory = 'artworks'): ?array
     {
-        $response = $this->http->timeout(30)->get($url);
+        $trimmedUrl = trim($url);
+
+        if (! filter_var($trimmedUrl, FILTER_VALIDATE_URL)) {
+            return null;
+        }
+
+        $scheme = strtolower((string) parse_url($trimmedUrl, PHP_URL_SCHEME));
+        if (! in_array($scheme, ['http', 'https'], true)) {
+            return null;
+        }
+
+        try {
+            $response = $this->http->timeout(60)->get($trimmedUrl);
+        } catch (ConnectionException) {
+            return null;
+        }
 
         if (! $response->successful()) {
             return null;
@@ -43,7 +59,7 @@ class ImageOptimizer
             return null;
         }
 
-        $fileName = basename(parse_url($url, PHP_URL_PATH) ?: 'imported-image');
+        $fileName = basename(parse_url($trimmedUrl, PHP_URL_PATH) ?: 'imported-image');
 
         return $this->storeFromBinary($response->body(), $fileName, $directory, $contentType);
     }

@@ -19,7 +19,7 @@ RewriteRule ^(.*)$ public/$1 [L]
    php_value memory_limit 512M
    php_value post_max_size 58M
    php_value session.gc_maxlifetime 1440
-   php_value session.save_path "/opt/alt/php85/var/lib/php/session"
+   php_value session.save_path "/opt/alt/php83/var/lib/php/session"
    php_value upload_max_filesize 52M
    php_flag zlib.output_compression Off
 </IfModule>
@@ -31,7 +31,7 @@ RewriteRule ^(.*)$ public/$1 [L]
    php_value memory_limit 512M
    php_value post_max_size 58M
    php_value session.gc_maxlifetime 1440
-   php_value session.save_path "/opt/alt/php85/var/lib/php/session"
+   php_value session.save_path "/opt/alt/php83/var/lib/php/session"
    php_value upload_max_filesize 52M
    php_flag zlib.output_compression Off
 </IfModule>

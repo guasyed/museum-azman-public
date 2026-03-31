@@ -33,16 +33,13 @@
 
             <div id="geo-distribution-chart" class="dashboard-geo-chart mx-auto mt-4 mb-4 w-full max-w-95"></div>
 
-                <div class="flex items-center justify-center gap-3 text-sm">
-                    <span class="inline-flex items-center gap-1"><i class="inline-block h-3 w-3 bg-[#2563eb]"></i>Malaysia</span>
-                    <span class="inline-flex items-center gap-1"><i class="inline-block h-3 w-3 bg-[#a855f7]"></i>Southeast Asia</span>
-                    <span class="inline-flex items-center gap-1"><i class="inline-block h-3 w-3 bg-[#f97316]"></i>Rest of World</span>
-                </div>
-
-                <div class="mt-6 grid grid-cols-3 border-t border-zinc-200 pt-5 text-center">
-                    <div><p class="museum-stat-value">{{ $geo['malaysia'] }}</p><p class="text-sm text-zinc-600">Malaysia</p></div>
-                    <div><p class="museum-stat-value">{{ $geo['southeast_asia'] }}</p><p class="text-sm text-zinc-600">Southeast Asia</p></div>
-                    <div><p class="museum-stat-value">{{ $geo['rest_of_world'] }}</p><p class="text-sm text-zinc-600">Rest of World</p></div>
+                <div class="mt-6 flex flex-nowrap justify-between gap-2 border-t border-zinc-200 pt-4 text-center sm:gap-3">
+                    @foreach(array_slice($geoByCountry, 0, 8, true) as $country => $count)
+                        <div>
+                            <p class="font-bold leading-tight text-zinc-900" style="font-size:20px">{{ number_format($count) }}</p>
+                            <p class="leading-tight text-zinc-600" style="font-size:10px">{{ $country }}</p>
+                        </div>
+                    @endforeach
                 </div>
             </article>
 
@@ -130,11 +127,11 @@
                 chartContainer.style.minHeight = '240px';
             }
 
-            const geoSeriesData = [
-                { name: 'Malaysia', y: {{ (int) ($geo['malaysia'] ?? 0) }} },
-                { name: 'Southeast Asia', y: {{ (int) ($geo['southeast_asia'] ?? 0) }} },
-                { name: 'Rest of World', y: {{ (int) ($geo['rest_of_world'] ?? 0) }} },
-            ];
+            const geoSeriesData = @json(
+                collect($geoByCountry)->map(
+                    fn ($count, $country) => ['name' => $country, 'y' => (int) $count]
+                )->values()
+            );
 
             const totalGeo = geoSeriesData.reduce((sum, item) => sum + item.y, 0);
 
@@ -187,7 +184,7 @@
                 },
                 credits: { enabled: false },
                 tooltip: {
-                    pointFormat: '{series.name}: <b>{point.percentage:.0f}%</b>'
+                    pointFormat: '<b>{point.name}</b><br/>Count: <b>{point.y}</b><br/>Share: <b>{point.percentage:.0f}%</b>'
                 },
                 legend: { enabled: false },
                 plotOptions: {
@@ -201,11 +198,11 @@
                         showInLegend: false
                     }
                 },
-                colors: ['#2563eb', '#a855f7', '#f97316'],
                 series: [{
                     name: 'Collection',
                     type: 'pie',
                     innerSize: '62%',
+                    center: ['50%', '50%'],
                     data: geoSeriesData
                 }]
             });

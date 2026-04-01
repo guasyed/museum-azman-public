@@ -41,7 +41,13 @@
             <div class="space-y-4">
                 <article class="museum-panel overflow-hidden p-0">
                     @if($artwork->primary_image_url)
-                        <img src="{{ $artwork->primary_image_url }}" alt="{{ $artwork->title }}" class="h-130 w-full object-cover">
+                        <img
+                            src="{{ $artwork->primary_image_url }}"
+                            alt="{{ $artwork->title }}"
+                            class="h-130 w-full object-cover"
+                            onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');"
+                        >
+                        <div class="hidden h-130 flex items-center justify-center bg-zinc-100 text-zinc-500">No Image</div>
                     @else
                         <div class="flex h-130 items-center justify-center bg-zinc-100 text-zinc-500">No Image</div>
                     @endif

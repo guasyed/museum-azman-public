@@ -288,7 +288,13 @@
                     <article id="artwork-{{ $artwork->id }}" class="overflow-hidden rounded-2xl border border-zinc-300 bg-white">
                         <a href="{{ route('artworks.show', ['artwork' => $artwork, 'from' => 'collection', 'return' => request()->fullUrlWithQuery(['scroll_to' => $artwork->id])]) }}">
                             @if($artwork->primary_image_url)
-                                <img src="{{ $artwork->primary_image_url }}" alt="{{ $artwork->title }}" class="h-95 w-full object-cover">
+                                <img
+                                    src="{{ $artwork->primary_image_url }}"
+                                    alt="{{ $artwork->title }}"
+                                    class="h-95 w-full object-cover"
+                                    onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');"
+                                >
+                                <div class="hidden h-95 flex items-center justify-center bg-zinc-100 text-zinc-500">No Image</div>
                             @else
                                 <div class="flex h-95 items-center justify-center bg-zinc-100 text-zinc-500">No Image</div>
                             @endif

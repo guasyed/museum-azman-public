@@ -357,25 +357,31 @@
         }
 		
 		@media (min-width: 1024px) {
-			.museum-brand-title {
-				font-size: 1.4rem;
-				font-weight: 700;
+            .museum-brand-lockup {
+                display: grid;
+                grid-template-columns: auto 1fr;
+                align-items: center;
+                column-gap: 0.75rem;
+            }
+
+            .museum-brand-logo {
+                width: 4.25rem;
+                height: 4.25rem;
+                object-fit: contain;
+                border: 1px solid #d4d4d8;
+                border-radius: 0.75rem;
+                padding: 0.35rem;
+                background: #fff;
+            }
+
+            .museum-brand-title {
+                font-size: 1.05rem;
+                line-height: 1.15;
+                font-weight: 700;
                 color: var(--museum-accent);
-			}
-			
-			/* Logo image styling */
-			.lg\:flex .flex.items-center.gap-3 img {
-				width: 30% !important;
-				height: auto !important;
-				max-width: 60px; /* Optional: prevents image from getting too large */
-			}
-			
-			/* Alternative: more specific selector for the sidebar logo */
-			aside .flex.items-center.gap-3 img {
-				width: 30%;
-				height: auto;
-				max-width: 60px; /* Optional: prevents image from getting too large */
-			}
+                letter-spacing: -0.01em;
+                overflow-wrap: anywhere;
+            }
 			
 			/* Fix for desktop sidebar */
 			.lg\:grid {
@@ -441,9 +447,9 @@
 
     <aside class="hidden lg:flex min-h-screen flex-col border-r border-zinc-200 bg-[#f7f7f6]">
         <div class="border-b border-zinc-200 p-6">
-            <div class="flex items-center gap-3">
+            <div class="museum-brand-lockup">
                 <?php if($brandLogoUrl): ?>
-                    <img src="<?php echo e($brandLogoUrl); ?>" alt="logo" class="h-12 w-12 rounded-lg object-cover border border-zinc-300">
+                    <img src="<?php echo e($brandLogoUrl); ?>" alt="logo" class="museum-brand-logo">
                 <?php endif; ?>
                 <p class="museum-brand-title"><?php echo e($brandTitle); ?></p>
             </div>

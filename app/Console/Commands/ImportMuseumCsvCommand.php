@@ -5,11 +5,13 @@ namespace App\Console\Commands;
 use App\Models\Artist;
 use App\Models\Artwork;
 use App\Models\ArtworkImage;
+use App\Models\Country;
 use App\Models\Location;
 use App\Services\ImageOptimizer;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class ImportMuseumCsvCommand extends Command
@@ -110,52 +112,38 @@ class ImportMuseumCsvCommand extends Command
         $pendingFirstDataRow = $looksLikeHeader ? null : $firstRow;
 
         $created = 0;
-        $updated = 0;
         $skipped = 0;
         $imagesSaved = 0;
         $rowIndex = 0;
 
-        $processRow = function (array $row) use ($headers, $downloadImages, &$created, &$updated, &$skipped, &$imagesSaved): void {
+        $processRow = function (array $row) use ($headers, $downloadImages, &$created, &$skipped, &$imagesSaved): void {
             $mapped = $this->mapRow($headers, $row);
             if ($mapped === null) {
                 $skipped++;
                 return;
             }
 
-            $artist = Artist::query()->updateOrCreate(
-                ['name' => $mapped['artist_name']],
-                [
-                    'country' => $mapped['artist_country'],
-                    'birth_year' => $mapped['artist_birth_year'],
-                ]
-            );
+            $artist = Artist::query()->create([
+                'name' => $mapped['artist_name'],
+                'country_id' => $this->resolveCountryId($mapped['artist_country']),
+                'country' => $mapped['artist_country'],
+                'birth_year' => $mapped['artist_birth_year'],
+            ]);
 
-            $location = Location::query()->firstOrCreate(
-                ['name' => $mapped['location_name'] ?: 'Unknown Location'],
-                ['type' => 'Imported']
-            );
-
-            $artwork = Artwork::query()
-                ->where('artist_id', $artist->id)
-                ->where('title', $mapped['title'])
-                ->where('description', $mapped['artwork_payload']['description'])
-                ->where('source_image_url', $mapped['artwork_payload']['source_image_url'])
-                ->first();
+            $location = Location::query()->create([
+                'name' => $mapped['location_name'] ?: 'Unknown Location',
+                'type' => 'Imported',
+            ]);
 
             $payload = array_merge($mapped['artwork_payload'], [
                 'artist_id' => $artist->id,
                 'location_id' => $location->id,
             ]);
 
-            if ($artwork) {
-                $artwork->fill($payload)->save();
-                $updated++;
-            } else {
-                $artwork = Artwork::query()->create(array_merge($payload, [
-                    'slug' => $this->uniqueSlug($mapped['title']),
-                ]));
-                $created++;
-            }
+            $artwork = Artwork::query()->create(array_merge($payload, [
+                'slug' => $this->uniqueSlug($mapped['title']),
+            ]));
+            $created++;
 
             if (! $downloadImages || $mapped['image_urls'] === []) {
                 return;
@@ -167,20 +155,16 @@ class ImportMuseumCsvCommand extends Command
                     continue;
                 }
 
-                ArtworkImage::query()->firstOrCreate(
-                    [
-                        'artwork_id' => $artwork->id,
-                        'path' => $stored['path'],
-                    ],
-                    [
-                        'mime_type' => $stored['mime_type'] ?? null,
-                        'size_bytes' => $stored['size_bytes'] ?? null,
-                        'position' => $index,
-                        'original_name' => $stored['original_name'] ?? null,
-                    ]
-                );
+                ArtworkImage::query()->create([
+                    'artwork_id' => $artwork->id,
+                    'path' => $stored['path'],
+                    'mime_type' => $stored['mime_type'] ?? null,
+                    'size_bytes' => $stored['size_bytes'] ?? null,
+                    'position' => $index,
+                    'original_name' => $stored['original_name'] ?? null,
+                ]);
 
-                if ($index === 0 && empty($artwork->primary_image_path)) {
+                if ($index === 0 && $this->shouldReplacePrimaryImage($artwork, $stored['path'])) {
                     $artwork->update(['primary_image_path' => $stored['path']]);
                 }
 
@@ -188,7 +172,7 @@ class ImportMuseumCsvCommand extends Command
             }
         };
 
-        DB::transaction(function () use ($reader, $pendingFirstDataRow, $processRow, &$rowIndex, &$created, &$updated, &$skipped): void {
+        DB::transaction(function () use ($reader, $pendingFirstDataRow, $processRow, &$rowIndex, &$created, &$skipped): void {
             if (is_array($pendingFirstDataRow)) {
                 $rowIndex++;
                 $processRow($pendingFirstDataRow);
@@ -198,7 +182,7 @@ class ImportMuseumCsvCommand extends Command
                 $rowIndex++;
 
                 if ($rowIndex % 50 === 0) {
-                    $this->line("Processing row {$rowIndex}... (Created: {$created}, Updated: {$updated}, Skipped: {$skipped})");
+                    $this->line("Processing row {$rowIndex}... (Inserted: {$created}, Skipped: {$skipped})");
                 }
 
                 if (! is_array($row)) {
@@ -209,7 +193,7 @@ class ImportMuseumCsvCommand extends Command
             }
         });
 
-        $this->info("Import completed. Created: {$created}, Updated: {$updated}, Skipped: {$skipped}, Images saved: {$imagesSaved}");
+        $this->info("Import completed. Inserted: {$created}, Skipped: {$skipped}, Images saved: {$imagesSaved}");
     }
 
     private function truncateArtworks(): void
@@ -220,6 +204,19 @@ class ImportMuseumCsvCommand extends Command
         DB::table('artworks')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1');
         $this->info('Tables cleared. Starting fresh import.');
+    }
+
+    private function shouldReplacePrimaryImage(Artwork $artwork, string $newPath): bool
+    {
+        if ($artwork->primary_image_path === null || $artwork->primary_image_path === '') {
+            return true;
+        }
+
+        if ($artwork->primary_image_path === $newPath) {
+            return false;
+        }
+
+        return ! Storage::disk('public')->exists($artwork->primary_image_path);
     }
 
     private function mapRow(array $headers, array $row): ?array
@@ -233,43 +230,67 @@ class ImportMuseumCsvCommand extends Command
             $data[$header] = $row[$i] ?? null;
         }
 
-        $artistName = $this->nullIfEmpty($data['artist'] ?? null);
-        $title = $this->nullIfEmpty($data['artwork'] ?? null);
-        if ($artistName === null || $title === null) {
+        if ($this->isEffectivelyEmptyRow($data)) {
             return null;
         }
 
-        $description = $this->nullIfEmpty($data['description'] ?? null);
-        $locationName = $this->nullIfEmpty($data['location'] ?? null) ?? 'Unknown Location';
-        $acquisitionPrice = $this->parseDecimal($data['price_of_acquisition'] ?? null);
+        $artistName = $this->firstNonEmpty($data, ['artist', 'artist_name']) ?? 'Unknown Artist';
+        $title = $this->firstNonEmpty($data, ['artwork', 'artwork_', 'title', 'artwork_title']) ?? 'Untitled';
+
+        $description = $this->firstNonEmpty($data, ['description', 'details']);
+        $locationName = $this->firstNonEmpty($data, ['location', 'location_name']) ?? 'Unknown Location';
+        $acquisitionPrice = $this->parseDecimal($this->firstNonEmpty($data, ['price_of_acquisition', 'acquisition_price']));
 
         $imageUrls = array_values(array_filter([
-            $this->nullIfEmpty($data['image_1'] ?? null),
-            $this->nullIfEmpty($data['image_2'] ?? null),
-            $this->nullIfEmpty($data['image_3'] ?? null),
+            $this->firstNonEmpty($data, ['image_1', 'image1']),
+            $this->firstNonEmpty($data, ['image_2', 'image2']),
+            $this->firstNonEmpty($data, ['image_3', 'image3']),
         ]));
 
         return [
             'artist_name' => $artistName,
-            'artist_country' => $this->nullIfEmpty($data['country'] ?? null),
-            'artist_birth_year' => $this->parseYear($data['dob'] ?? null),
+            'artist_country' => $this->firstNonEmpty($data, ['country', 'artist_country']),
+            'artist_birth_year' => $this->parseYear($this->firstNonEmpty($data, ['dob', 'birth_year'])),
             'location_name' => $locationName,
             'title' => $title,
             'image_urls' => $imageUrls,
             'artwork_payload' => [
                 'title' => $title,
-                'year' => $this->parseYear($data['year'] ?? null),
+                'year' => $this->parseYear($this->firstNonEmpty($data, ['year'])),
                 'description' => $description,
                 'medium' => $this->extractMedium($description),
                 'size_from_cm' => $this->extractSmallestDimensionCm($description),
                 'size_to_cm' => $this->extractLargestDimensionCm($description),
-                'acquisition_date' => $this->parseDate($data['date_of_acquisition'] ?? null),
+                'acquisition_date' => $this->parseDate($this->firstNonEmpty($data, ['date_of_acquisition', 'acquisition_date'])),
                 'acquisition_price' => $acquisitionPrice,
                 'current_valuation' => $acquisitionPrice,
                 'status' => 'On Display',
                 'source_image_url' => $imageUrls[0] ?? null,
             ],
         ];
+    }
+
+    private function firstNonEmpty(array $data, array $keys): ?string
+    {
+        foreach ($keys as $key) {
+            $value = $this->nullIfEmpty($data[$key] ?? null);
+            if ($value !== null) {
+                return $value;
+            }
+        }
+
+        return null;
+    }
+
+    private function isEffectivelyEmptyRow(array $data): bool
+    {
+        foreach ($data as $value) {
+            if ($this->nullIfEmpty($value) !== null) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private function normalizeHeader(string $header): string
@@ -420,5 +441,16 @@ class ImportMuseumCsvCommand extends Command
         }
 
         return $slug;
+    }
+
+    private function resolveCountryId(?string $countryName): ?int
+    {
+        if ($countryName === null || $countryName === '') {
+            return null;
+        }
+
+        return Country::query()->firstOrCreate([
+            'name' => $countryName,
+        ])->id;
     }
 }

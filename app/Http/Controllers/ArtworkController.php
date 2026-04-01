@@ -6,6 +6,7 @@ use App\Http\Requests\StoreArtworkRequest;
 use App\Http\Requests\UpdateArtworkRequest;
 use App\Models\Artist;
 use App\Models\Artwork;
+use App\Models\Country;
 use App\Models\Location;
 use App\Models\Movement;
 use App\Models\Status;
@@ -57,6 +58,7 @@ class ArtworkController extends Controller
             ->with([
                 'artist',
                 'location',
+                'images:id,artwork_id,path,position',
             ])
             ->latest()
             ->paginate(24)
@@ -241,10 +243,13 @@ class ArtworkController extends Controller
     public function store(StoreArtworkRequest $request): RedirectResponse|JsonResponse
     {
         $artwork = DB::transaction(function () use ($request) {
-            $artist = Artist::firstOrCreate(
+            $countryName = $this->cleanCountryName($request->input('artist_country'));
+
+            $artist = Artist::updateOrCreate(
                 ['name' => $request->string('artist_name')->trim()->toString()],
                 [
-                    'country' => $request->input('artist_country'),
+                    'country' => $countryName,
+                    'country_id' => $this->resolveCountryId($countryName),
                     'birth_year' => $request->input('artist_birth_year'),
                 ]
             );
@@ -353,10 +358,13 @@ class ArtworkController extends Controller
         $isSafeReturnUrl = $this->isSafeReturnUrl($request, $returnUrl);
 
         DB::transaction(function () use ($request, $artwork, $selectedPrimaryGalleryImageId) {
-            $artist = Artist::firstOrCreate(
+            $countryName = $this->cleanCountryName($request->input('artist_country'));
+
+            $artist = Artist::updateOrCreate(
                 ['name' => $request->string('artist_name')->trim()->toString()],
                 [
-                    'country' => $request->input('artist_country'),
+                    'country' => $countryName,
+                    'country_id' => $this->resolveCountryId($countryName),
                     'birth_year' => $request->input('artist_birth_year'),
                 ]
             );
@@ -756,5 +764,23 @@ class ArtworkController extends Controller
         }
 
         return null;
+    }
+
+    private function resolveCountryId(?string $countryName): ?int
+    {
+        if ($countryName === null || $countryName === '') {
+            return null;
+        }
+
+        return Country::query()->firstOrCreate([
+            'name' => $countryName,
+        ])->id;
+    }
+
+    private function cleanCountryName(mixed $value): ?string
+    {
+        $countryName = trim((string) $value);
+
+        return $countryName === '' ? null : $countryName;
     }
 }

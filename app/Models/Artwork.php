@@ -74,12 +74,26 @@ class Artwork extends Model
             return asset('storage/'.$this->primary_image_path);
         }
 
-        $fallbackPath = $this->relationLoaded('images')
-            ? optional($this->images->first())->path
-            : optional($this->images()->select('path')->orderBy('position')->first())->path;
+        $fallbackPath = null;
+
+        if ($this->relationLoaded('images')) {
+            $fallbackPath = optional($this->images->first())->path;
+        } elseif ($this->exists) {
+            $fallbackPath = optional($this->images()->select('path')->orderBy('position')->first())->path;
+        }
 
         if ($fallbackPath && $disk->exists($fallbackPath)) {
             return asset('storage/'.$fallbackPath);
+        }
+
+        $sourceImageUrl = is_string($this->source_image_url) ? trim($this->source_image_url) : '';
+
+        if ($sourceImageUrl !== '' && filter_var($sourceImageUrl, FILTER_VALIDATE_URL)) {
+            $scheme = strtolower((string) parse_url($sourceImageUrl, PHP_URL_SCHEME));
+
+            if (in_array($scheme, ['http', 'https'], true)) {
+                return $sourceImageUrl;
+            }
         }
 
         return null;

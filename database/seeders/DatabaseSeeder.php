@@ -15,6 +15,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call([
+            CountriesTableSeeder::class,
+        ]);
+
         User::query()->updateOrCreate(
             ['email' => 'admin@museumazman.com'],
             [

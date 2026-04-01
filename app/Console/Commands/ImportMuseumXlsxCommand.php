@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Artist;
 use App\Models\Artwork;
+use App\Models\Country;
 use App\Models\Location;
 use App\Services\ImageOptimizer;
 use Carbon\Carbon;
@@ -57,6 +58,7 @@ class ImportMuseumXlsxCommand extends Command
                 $artist = Artist::firstOrCreate(
                     ['name' => $mapped['artist_name']],
                     [
+                        'country_id' => $this->resolveCountryId($mapped['artist_country']),
                         'country' => $mapped['artist_country'],
                         'birth_year' => $mapped['artist_birth_year'],
                     ]
@@ -266,5 +268,16 @@ class ImportMuseumXlsxCommand extends Command
         }
 
         return $slug;
+    }
+
+    private function resolveCountryId(?string $countryName): ?int
+    {
+        if ($countryName === null || $countryName === '') {
+            return null;
+        }
+
+        return Country::query()->firstOrCreate([
+            'name' => $countryName,
+        ])->id;
     }
 }

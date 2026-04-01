@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use App\Services\ActivityLogger;
 
 class AdminImportController extends Controller
 {
@@ -58,6 +59,8 @@ class AdminImportController extends Controller
                         : 'CSV import failed. Please check file format and try again.',
                 ]);
         }
+
+        ActivityLogger::log('admin.csv_imported', 'Admin completed a CSV import' . ($output !== '' ? ': ' . mb_substr($output, 0, 120) : ''));
 
         return redirect()
             ->route('admin.imports.csv.index')

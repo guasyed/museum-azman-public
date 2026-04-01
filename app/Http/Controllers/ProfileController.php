@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\ImageOptimizer;
+use App\Services\ActivityLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -57,6 +58,8 @@ class ProfileController extends Controller
 
         $user->update($validated);
 
+        ActivityLogger::log('profile.updated', "Profile updated by: {$user->name}", $user);
+
         return redirect()->route('profile.edit')->with('success', 'Profile details updated successfully.');
     }
 
@@ -72,6 +75,8 @@ class ProfileController extends Controller
         $user->forceFill([
             'password' => Hash::make($validated['password']),
         ])->save();
+
+        ActivityLogger::log('profile.password_changed', "Password changed by: {$user->name}", $user);
 
         return redirect()->route('profile.edit')->with('success', 'Password updated successfully.');
     }

@@ -1,4 +1,13 @@
-<x-layout title="Settings - Museum Azman">
+<?php if (isset($component)) { $__componentOriginal23a33f287873b564aaf305a1526eada4 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginal23a33f287873b564aaf305a1526eada4 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.layout','data' => ['title' => 'Settings - Museum Azman']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('layout'); ?>
+<?php if ($component->shouldRender()): ?>
+<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
+<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
+<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
+<?php endif; ?>
+<?php $component->withAttributes(['title' => 'Settings - Museum Azman']); ?>
     <style>
         .settings-tab:hover {
             color: var(--museum-accent);
@@ -10,20 +19,20 @@
             <p class="museum-page-subtitle">System configuration and user management</p>
         </div>
 
-        @if($errors->any())
+        <?php if($errors->any()): ?>
             <div class="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
                 <p class="font-semibold">Unable to save your changes:</p>
                 <ul class="mt-1 list-disc pl-5">
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
+                    <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                        <li><?php echo e($error); ?></li>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </ul>
             </div>
-        @endif
+        <?php endif; ?>
 
         <div class="mb-8 border-b border-zinc-200">
     <nav class="flex flex-wrap gap-2 -mb-px" aria-label="Settings tabs">
-        @php
+        <?php
             $tabs = ($canAccessAdminTabs ?? false)
                 ? [
                     ['key' => 'general',       'label' => 'General',        'icon' => '⚙️'],
@@ -35,13 +44,13 @@
                     ['key' => 'notifications', 'label' => 'Notifications',  'icon' => '🔔'],
                     ['key' => 'appearance',    'label' => 'Appearance',     'icon' => '🎨'],
                 ];
-        @endphp
+        ?>
 
-        @foreach($tabs as $tab)
-            @php $isActive = $activeTab === $tab['key']; @endphp
+        <?php $__currentLoopData = $tabs; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tab): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+            <?php $isActive = $activeTab === $tab['key']; ?>
 
             <a
-                href="{{ route('settings.index', ['tab' => $tab['key']]) }}"
+                href="<?php echo e(route('settings.index', ['tab' => $tab['key']])); ?>"
                 class="
                     settings-tab
                     inline-flex items-center gap-2
@@ -49,44 +58,44 @@
                     border-b-2
                     text-sm font-semibold
                     transition-colors
-                    {{ $isActive
+                    <?php echo e($isActive
                         ? 'border-current'
-                        : 'border-transparent text-zinc-500'
-                    }}
+                        : 'border-transparent text-zinc-500'); ?>
+
                 "
-                style="{{ $isActive ? 'color: var(--museum-accent);' : '' }}"
-                aria-current="{{ $isActive ? 'page' : 'false' }}"
+                style="<?php echo e($isActive ? 'color: var(--museum-accent);' : ''); ?>"
+                aria-current="<?php echo e($isActive ? 'page' : 'false'); ?>"
             >
-                <span class="text-base leading-none">{{ $tab['icon'] }}</span>
-                <span>{{ $tab['label'] }}</span>
+                <span class="text-base leading-none"><?php echo e($tab['icon']); ?></span>
+                <span><?php echo e($tab['label']); ?></span>
             </a>
-        @endforeach
+        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
     </nav>
 </div>
 
-        @if($activeTab === 'general')
+        <?php if($activeTab === 'general'): ?>
             <article class="museum-panel p-4 sm:p-5">
                 <h3 class="museum-section-title text-base!">Organization Information</h3>
                 <p class="mt-1 text-sm text-zinc-600">Basic information about your collection</p>
 
-                <form method="POST" action="{{ route('settings.update', ['section' => 'general']) }}" enctype="multipart/form-data" class="mt-5">
-                    @csrf
-                    <fieldset @disabled(!($canManageSettings ?? false)) class="m-0 min-w-0 border-0 p-0">
+                <form method="POST" action="<?php echo e(route('settings.update', ['section' => 'general'])); ?>" enctype="multipart/form-data" class="mt-5">
+                    <?php echo csrf_field(); ?>
+                    <fieldset <?php if(!($canManageSettings ?? false)): echo 'disabled'; endif; ?> class="m-0 min-w-0 border-0 p-0">
                     <div class="grid gap-4 md:grid-cols-2">
                         <div class="space-y-4">
                             <label class="museum-field">
                                 <span>Organization Logo</span>
                                 <input type="file" name="organization_logo" accept="image/*,.webp" class="museum-input">
-                                @if(!empty($generalSettings['organization_logo_url']))
+                                <?php if(!empty($generalSettings['organization_logo_url'])): ?>
                                     <div class="mt-2">
-                                        <img src="{{ $generalSettings['organization_logo_url'] }}" alt="Organization Logo" class="h-16 w-16 rounded-lg border border-zinc-300 object-cover">
+                                        <img src="<?php echo e($generalSettings['organization_logo_url']); ?>" alt="Organization Logo" class="h-16 w-16 rounded-lg border border-zinc-300 object-cover">
                                     </div>
-                                @endif
+                                <?php endif; ?>
                             </label>
 
                             <label class="museum-field">
                                 <span>Organization Name</span>
-                                <input name="organization_name" value="{{ old('organization_name', $generalSettings['organization_name']) }}">
+                                <input name="organization_name" value="<?php echo e(old('organization_name', $generalSettings['organization_name'])); ?>">
                             </label>
                             <label class="museum-field">
                                 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.7/build/css/intlTelInput.css">
@@ -95,24 +104,24 @@
                                     id="phone_number"
                                     name="phone_number"
                                     type="tel"
-                                    value="{{ old('phone_number', $generalSettings['phone_number'] ?? '') }}"
+                                    value="<?php echo e(old('phone_number', $generalSettings['phone_number'] ?? '')); ?>"
                                     class="museum-input"
                                 >
                             </label>
                             <label class="museum-field">
                                 <span>Address</span>
-                                <input name="address" value="{{ old('address', $generalSettings['address']) }}">
+                                <input name="address" value="<?php echo e(old('address', $generalSettings['address'])); ?>">
                             </label>
                         </div>
 
                         <div class="space-y-4">
                             <label class="museum-field">
                                 <span>Contact Email</span>
-                                <input type="email" name="contact_email" value="{{ old('contact_email', $generalSettings['contact_email']) }}">
+                                <input type="email" name="contact_email" value="<?php echo e(old('contact_email', $generalSettings['contact_email'])); ?>">
                             </label>
                             <label class="museum-field">
                                 <span>Timezone</span>
-                               @php
+                               <?php
                                 $currentTz = old('timezone', $generalSettings['timezone'] ?? config('app.timezone'));
                                 $regions = [
                                     'Asia' => DateTimeZone::ASIA,
@@ -123,15 +132,15 @@
                                     'Pacific' => DateTimeZone::PACIFIC,
                                     'UTC' => DateTimeZone::UTC,
                                 ];
-                                @endphp
+                                ?>
 
                                 <select name="timezone" class="museum-input">
 
-                                @foreach($regions as $region => $mask)
-                                    <optgroup label="{{ $region }}">
-                                        @foreach(DateTimeZone::listIdentifiers($mask) as $tz)
+                                <?php $__currentLoopData = $regions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $region => $mask): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <optgroup label="<?php echo e($region); ?>">
+                                        <?php $__currentLoopData = DateTimeZone::listIdentifiers($mask); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $tz): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
 
-                                            @php
+                                            <?php
                                                 $dt = new DateTime("now", new DateTimeZone($tz));
                                                 $offset = $dt->getOffset();
                                                 $hours = floor($offset / 3600);
@@ -139,24 +148,25 @@
                                                 $gmt = sprintf('GMT%+d:%02d', $hours, $minutes);
 
                                                 $city = str_replace('_', ' ', explode('/', $tz)[1] ?? $tz);
-                                            @endphp
+                                            ?>
 
-                                            <option value="{{ $tz }}" @selected($currentTz === $tz)>
-                                                {{ $gmt }} — {{ $city }}
+                                            <option value="<?php echo e($tz); ?>" <?php if($currentTz === $tz): echo 'selected'; endif; ?>>
+                                                <?php echo e($gmt); ?> — <?php echo e($city); ?>
+
                                             </option>
 
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </optgroup>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                                 </select>
                             </label>
                         </div>
                     </div>
 
-                    @if($canManageSettings ?? false)
+                    <?php if($canManageSettings ?? false): ?>
                         <button type="submit" class="museum-btn mt-5">Save Changes</button>
-                    @endif
+                    <?php endif; ?>
                     </fieldset>
                 </form>
             </article>
@@ -165,35 +175,35 @@
                 <h3 class="museum-section-title text-base!">$ Currency & Regional Settings</h3>
                 <p class="mt-1 text-sm text-zinc-600">Configure currency and regional preferences</p>
 
-                <form method="POST" action="{{ route('settings.update', ['section' => 'regional']) }}" class="mt-5">
-                    @csrf
-                    <fieldset @disabled(!($canManageSettings ?? false)) class="m-0 min-w-0 border-0 p-0">
+                <form method="POST" action="<?php echo e(route('settings.update', ['section' => 'regional'])); ?>" class="mt-5">
+                    <?php echo csrf_field(); ?>
+                    <fieldset <?php if(!($canManageSettings ?? false)): echo 'disabled'; endif; ?> class="m-0 min-w-0 border-0 p-0">
                     <div class="grid gap-4 md:grid-cols-2">
                         <label class="museum-field">
                             <span>Default Currency</span>
                             <select name="currency">
-                                <option value="USD" @selected(old('currency', $regionalSettings['currency']) === 'USD')>USD ($)</option>
-                                <option value="MYR" @selected(old('currency', $regionalSettings['currency']) === 'MYR')>MYR (RM)</option>
-                                <option value="EUR" @selected(old('currency', $regionalSettings['currency']) === 'EUR')>EUR (€)</option>
-                                <option value="GBP" @selected(old('currency', $regionalSettings['currency']) === 'GBP')>GBP (£)</option>
-                                <option value="SGD" @selected(old('currency', $regionalSettings['currency']) === 'SGD')>SGD (S$)</option>
+                                <option value="USD" <?php if(old('currency', $regionalSettings['currency']) === 'USD'): echo 'selected'; endif; ?>>USD ($)</option>
+                                <option value="MYR" <?php if(old('currency', $regionalSettings['currency']) === 'MYR'): echo 'selected'; endif; ?>>MYR (RM)</option>
+                                <option value="EUR" <?php if(old('currency', $regionalSettings['currency']) === 'EUR'): echo 'selected'; endif; ?>>EUR (€)</option>
+                                <option value="GBP" <?php if(old('currency', $regionalSettings['currency']) === 'GBP'): echo 'selected'; endif; ?>>GBP (£)</option>
+                                <option value="SGD" <?php if(old('currency', $regionalSettings['currency']) === 'SGD'): echo 'selected'; endif; ?>>SGD (S$)</option>
                             </select>
                         </label>
 
                         <label class="museum-field">
                             <span>Date Format</span>
                             <select name="date_format">
-                                <option value="Y-m-d" @selected(old('date_format', $regionalSettings['date_format']) === 'Y-m-d')>YYYY-MM-DD</option>
-                                <option value="d/m/Y" @selected(old('date_format', $regionalSettings['date_format']) === 'd/m/Y')>DD/MM/YYYY</option>
-                                <option value="m/d/Y" @selected(old('date_format', $regionalSettings['date_format']) === 'm/d/Y')>MM/DD/YYYY</option>
-                                <option value="d M Y" @selected(old('date_format', $regionalSettings['date_format']) === 'd M Y')>DD MMM YYYY</option>
+                                <option value="Y-m-d" <?php if(old('date_format', $regionalSettings['date_format']) === 'Y-m-d'): echo 'selected'; endif; ?>>YYYY-MM-DD</option>
+                                <option value="d/m/Y" <?php if(old('date_format', $regionalSettings['date_format']) === 'd/m/Y'): echo 'selected'; endif; ?>>DD/MM/YYYY</option>
+                                <option value="m/d/Y" <?php if(old('date_format', $regionalSettings['date_format']) === 'm/d/Y'): echo 'selected'; endif; ?>>MM/DD/YYYY</option>
+                                <option value="d M Y" <?php if(old('date_format', $regionalSettings['date_format']) === 'd M Y'): echo 'selected'; endif; ?>>DD MMM YYYY</option>
                             </select>
                         </label>
                     </div>
 
-                    @if($canManageSettings ?? false)
+                    <?php if($canManageSettings ?? false): ?>
                         <button type="submit" class="museum-btn mt-5">Save Changes</button>
-                    @endif
+                    <?php endif; ?>
                     </fieldset>
                 </form>
             </article>
@@ -208,64 +218,66 @@
                             <p class="font-semibold text-zinc-900">Automatic Backups</p>
                             <p class="mt-1 text-sm text-zinc-600">
                                 Last backup:
-                                @if(!empty($backupMeta['last_generated_at']))
-                                    {{ \Illuminate\Support\Carbon::parse($backupMeta['last_generated_at'])->timezone($backupMeta['timezone'] ?? config('app.timezone'))->format('M j, Y \a\t g:i A') }}
-                                @else
+                                <?php if(!empty($backupMeta['last_generated_at'])): ?>
+                                    <?php echo e(\Illuminate\Support\Carbon::parse($backupMeta['last_generated_at'])->timezone($backupMeta['timezone'] ?? config('app.timezone'))->format('M j, Y \a\t g:i A')); ?>
+
+                                <?php else: ?>
                                     Not generated yet
-                                @endif
+                                <?php endif; ?>
                             </p>
-                            @if(!empty($backupMeta['last_file']))
-                                <p class="mt-1 text-xs text-zinc-500">File: {{ basename((string) $backupMeta['last_file']) }}</p>
-                            @endif
-                            <p class="mt-1 text-xs text-zinc-500">Timezone: {{ $backupMeta['timezone'] ?? config('app.timezone') }}</p>
+                            <?php if(!empty($backupMeta['last_file'])): ?>
+                                <p class="mt-1 text-xs text-zinc-500">File: <?php echo e(basename((string) $backupMeta['last_file'])); ?></p>
+                            <?php endif; ?>
+                            <p class="mt-1 text-xs text-zinc-500">Timezone: <?php echo e($backupMeta['timezone'] ?? config('app.timezone')); ?></p>
                         </div>
-                        <span class="rounded-md px-2 py-0.5 text-xs font-semibold {{ ($backupSettings['enabled'] ?? true) ? 'bg-zinc-900 text-white' : 'bg-zinc-200 text-zinc-700' }}">
-                            {{ ($backupSettings['enabled'] ?? true) ? 'Enabled' : 'Disabled' }}
+                        <span class="rounded-md px-2 py-0.5 text-xs font-semibold <?php echo e(($backupSettings['enabled'] ?? true) ? 'bg-zinc-900 text-white' : 'bg-zinc-200 text-zinc-700'); ?>">
+                            <?php echo e(($backupSettings['enabled'] ?? true) ? 'Enabled' : 'Disabled'); ?>
+
                         </span>
                     </div>
                 </div>
 
-                <form method="POST" action="{{ route('settings.update', ['section' => 'backup']) }}" class="mt-4 grid gap-4 rounded-xl border border-zinc-200 bg-white p-4 md:grid-cols-3">
-                    @csrf
-                    <fieldset @disabled(!($canManageSettings ?? false)) class="m-0 min-w-0 border-0 p-0 contents">
+                <form method="POST" action="<?php echo e(route('settings.update', ['section' => 'backup'])); ?>" class="mt-4 grid gap-4 rounded-xl border border-zinc-200 bg-white p-4 md:grid-cols-3">
+                    <?php echo csrf_field(); ?>
+                    <fieldset <?php if(!($canManageSettings ?? false)): echo 'disabled'; endif; ?> class="m-0 min-w-0 border-0 p-0 contents">
                     <label class="museum-field md:col-span-1">
                         <span>Auto Backup</span>
                         <input type="hidden" name="backup_auto_enabled" value="0">
                         <select name="backup_auto_enabled">
-                            <option value="1" @selected(old('backup_auto_enabled', ($backupSettings['enabled'] ?? true) ? '1' : '0') === '1')>Enabled</option>
-                            <option value="0" @selected(old('backup_auto_enabled', ($backupSettings['enabled'] ?? true) ? '1' : '0') === '0')>Disabled</option>
+                            <option value="1" <?php if(old('backup_auto_enabled', ($backupSettings['enabled'] ?? true) ? '1' : '0') === '1'): echo 'selected'; endif; ?>>Enabled</option>
+                            <option value="0" <?php if(old('backup_auto_enabled', ($backupSettings['enabled'] ?? true) ? '1' : '0') === '0'): echo 'selected'; endif; ?>>Disabled</option>
                         </select>
                     </label>
 
                     <label class="museum-field md:col-span-1">
                         <span>Run Time (Daily)</span>
-                        <input type="time" name="backup_auto_time" value="{{ old('backup_auto_time', $backupSettings['time'] ?? '03:00') }}" required>
+                        <input type="time" name="backup_auto_time" value="<?php echo e(old('backup_auto_time', $backupSettings['time'] ?? '03:00')); ?>" required>
                     </label>
 
                     <div class="md:col-span-3">
-                        @if($canManageSettings ?? false)
+                        <?php if($canManageSettings ?? false): ?>
                             <button style="margin-top:29px;" type="submit" class="museum-btn w-full">Save Auto Backup</button>
-                        @endif
+                        <?php endif; ?>
                     </div>
                     </fieldset>
                 </form>
 
                 <div class="mt-4 flex flex-wrap items-center gap-2">
-                    @if($canManageSettings ?? false)
-                        <form method="POST" action="{{ route('settings.backup.generate') }}">
-                            @csrf
+                    <?php if($canManageSettings ?? false): ?>
+                        <form method="POST" action="<?php echo e(route('settings.backup.generate')); ?>">
+                            <?php echo csrf_field(); ?>
                             <button type="submit" class="museum-btn">Generate Backup</button>
                         </form>
 
-                        @if(!empty($backupMeta['has_file']))
-                            <a href="{{ route('settings.backup.download') }}" class="museum-btn-secondary">Download Backup</a>
-                        @else
+                        <?php if(!empty($backupMeta['has_file'])): ?>
+                            <a href="<?php echo e(route('settings.backup.download')); ?>" class="museum-btn-secondary">Download Backup</a>
+                        <?php else: ?>
                             <button type="button" class="museum-btn-secondary opacity-60" disabled>Download Backup</button>
-                        @endif
-                    @else
+                        <?php endif; ?>
+                    <?php else: ?>
                         <button type="button" class="museum-btn opacity-60" disabled>Generate Backup</button>
                         <button type="button" class="museum-btn-secondary opacity-60" disabled>Download Backup</button>
-                    @endif
+                    <?php endif; ?>
 
                     <button type="button" class="museum-btn-secondary">Restore from Backup</button>
                 </div>
@@ -281,46 +293,46 @@
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-zinc-100">
-                            @forelse($backupList as $backup)
+                            <?php $__empty_1 = true; $__currentLoopData = $backupList; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $backup): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                 <tr>
-                                    <td class="px-4 py-3 font-medium text-zinc-900">{{ $backup['file_name'] }}</td>
-                                    <td class="px-4 py-3 text-zinc-600">{{ $backup['generated_at_display'] }}</td>
-                                    <td class="px-4 py-3 text-right text-zinc-600">{{ number_format((int) $backup['size_kb']) }} KB</td>
+                                    <td class="px-4 py-3 font-medium text-zinc-900"><?php echo e($backup['file_name']); ?></td>
+                                    <td class="px-4 py-3 text-zinc-600"><?php echo e($backup['generated_at_display']); ?></td>
+                                    <td class="px-4 py-3 text-right text-zinc-600"><?php echo e(number_format((int) $backup['size_kb'])); ?> KB</td>
                                     <td class="px-4 py-3">
                                         <div class="flex items-center justify-end gap-2">
-                                            @if($canManageSettings ?? false)
-                                                <a href="{{ route('settings.backup.download', ['file' => $backup['file_name']]) }}" class="museum-btn-secondary">Download</a>
-                                                <form method="POST" action="{{ route('settings.backup.delete') }}" onsubmit="return confirm('Delete this backup file?');">
-                                                    @csrf
-                                                    <input type="hidden" name="file" value="{{ $backup['file_name'] }}">
+                                            <?php if($canManageSettings ?? false): ?>
+                                                <a href="<?php echo e(route('settings.backup.download', ['file' => $backup['file_name']])); ?>" class="museum-btn-secondary">Download</a>
+                                                <form method="POST" action="<?php echo e(route('settings.backup.delete')); ?>" onsubmit="return confirm('Delete this backup file?');">
+                                                    <?php echo csrf_field(); ?>
+                                                    <input type="hidden" name="file" value="<?php echo e($backup['file_name']); ?>">
                                                     <button type="submit" class="museum-btn-secondary text-rose-600">Delete</button>
                                                 </form>
-                                            @else
+                                            <?php else: ?>
                                                 <button type="button" class="museum-btn-secondary opacity-60" disabled>Download</button>
                                                 <button type="button" class="museum-btn-secondary opacity-60" disabled>Delete</button>
-                                            @endif
+                                            <?php endif; ?>
                                         </div>
                                     </td>
                                 </tr>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
                                     <td colspan="4" class="px-4 py-4 text-zinc-500">No backup files yet. Generate your first backup above.</td>
                                 </tr>
-                            @endforelse
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
             </article>
-        @elseif($activeTab === 'users-roles')
+        <?php elseif($activeTab === 'users-roles'): ?>
             <article class="museum-panel p-4 sm:p-5">
                 <div class="flex items-start justify-between gap-3">
                     <div>
                         <h3 class="museum-section-title text-base!">◉ User Management</h3>
                         <p class="mt-1 text-sm text-zinc-600">Manage users and their access permissions</p>
                     </div>
-                    @if(auth()->check() && auth()->user()->isAdmin())
-                        <a href="{{ route('admin.users.index') }}" class="museum-btn text-xs">+ Add User</a>
-                    @endif
+                    <?php if(auth()->check() && auth()->user()->isAdmin()): ?>
+                        <a href="<?php echo e(route('admin.users.index')); ?>" class="museum-btn text-xs">+ Add User</a>
+                    <?php endif; ?>
                 </div>
 
                 <div class="mt-4 overflow-x-auto">
@@ -328,63 +340,63 @@
                         <thead>
                             <tr class="border-b border-zinc-200 text-left text-xs font-semibold uppercase tracking-wide text-zinc-500">
                                 <th class="py-2">
-                                    @php
+                                    <?php
                                         $isUserNameSort = ($userSortColumn ?? 'name') === 'name';
                                         $nextUserNameDirection = $isUserNameSort && ($userDirection ?? 'asc') === 'asc' ? 'desc' : 'asc';
-                                    @endphp
+                                    ?>
                                     <a
-                                        href="{{ route('settings.index', array_merge(request()->query(), ['tab' => 'users-roles', 'user_sort' => 'name', 'user_direction' => $nextUserNameDirection])) }}"
+                                        href="<?php echo e(route('settings.index', array_merge(request()->query(), ['tab' => 'users-roles', 'user_sort' => 'name', 'user_direction' => $nextUserNameDirection]))); ?>"
                                         class="inline-flex items-center gap-1 hover:text-zinc-900"
                                     >
                                         <span>Name</span>
-                                        @if($isUserNameSort)
-                                            <span class="text-xs">{{ ($userDirection ?? 'asc') === 'asc' ? '▲' : '▼' }}</span>
-                                        @endif
+                                        <?php if($isUserNameSort): ?>
+                                            <span class="text-xs"><?php echo e(($userDirection ?? 'asc') === 'asc' ? '▲' : '▼'); ?></span>
+                                        <?php endif; ?>
                                     </a>
                                 </th>
                                 <th class="py-2">
-                                    @php
+                                    <?php
                                         $isUserEmailSort = ($userSortColumn ?? 'name') === 'email';
                                         $nextUserEmailDirection = $isUserEmailSort && ($userDirection ?? 'asc') === 'asc' ? 'desc' : 'asc';
-                                    @endphp
+                                    ?>
                                     <a
-                                        href="{{ route('settings.index', array_merge(request()->query(), ['tab' => 'users-roles', 'user_sort' => 'email', 'user_direction' => $nextUserEmailDirection])) }}"
+                                        href="<?php echo e(route('settings.index', array_merge(request()->query(), ['tab' => 'users-roles', 'user_sort' => 'email', 'user_direction' => $nextUserEmailDirection]))); ?>"
                                         class="inline-flex items-center gap-1 hover:text-zinc-900"
                                     >
                                         <span>Email</span>
-                                        @if($isUserEmailSort)
-                                            <span class="text-xs">{{ ($userDirection ?? 'asc') === 'asc' ? '▲' : '▼' }}</span>
-                                        @endif
+                                        <?php if($isUserEmailSort): ?>
+                                            <span class="text-xs"><?php echo e(($userDirection ?? 'asc') === 'asc' ? '▲' : '▼'); ?></span>
+                                        <?php endif; ?>
                                     </a>
                                 </th>
                                 <th class="py-2">
-                                    @php
+                                    <?php
                                         $isUserRoleSort = ($userSortColumn ?? 'name') === 'role';
                                         $nextUserRoleDirection = $isUserRoleSort && ($userDirection ?? 'asc') === 'asc' ? 'desc' : 'asc';
-                                    @endphp
+                                    ?>
                                     <a
-                                        href="{{ route('settings.index', array_merge(request()->query(), ['tab' => 'users-roles', 'user_sort' => 'role', 'user_direction' => $nextUserRoleDirection])) }}"
+                                        href="<?php echo e(route('settings.index', array_merge(request()->query(), ['tab' => 'users-roles', 'user_sort' => 'role', 'user_direction' => $nextUserRoleDirection]))); ?>"
                                         class="inline-flex items-center gap-1 hover:text-zinc-900"
                                     >
                                         <span>Role</span>
-                                        @if($isUserRoleSort)
-                                            <span class="text-xs">{{ ($userDirection ?? 'asc') === 'asc' ? '▲' : '▼' }}</span>
-                                        @endif
+                                        <?php if($isUserRoleSort): ?>
+                                            <span class="text-xs"><?php echo e(($userDirection ?? 'asc') === 'asc' ? '▲' : '▼'); ?></span>
+                                        <?php endif; ?>
                                     </a>
                                 </th>
                                 <th class="py-2">
-                                    @php
+                                    <?php
                                         $isUserStatusSort = ($userSortColumn ?? 'name') === 'status';
                                         $nextUserStatusDirection = $isUserStatusSort && ($userDirection ?? 'asc') === 'asc' ? 'desc' : 'asc';
-                                    @endphp
+                                    ?>
                                     <a
-                                        href="{{ route('settings.index', array_merge(request()->query(), ['tab' => 'users-roles', 'user_sort' => 'status', 'user_direction' => $nextUserStatusDirection])) }}"
+                                        href="<?php echo e(route('settings.index', array_merge(request()->query(), ['tab' => 'users-roles', 'user_sort' => 'status', 'user_direction' => $nextUserStatusDirection]))); ?>"
                                         class="inline-flex items-center gap-1 hover:text-zinc-900"
                                     >
                                         <span>Status</span>
-                                        @if($isUserStatusSort)
-                                            <span class="text-xs">{{ ($userDirection ?? 'asc') === 'asc' ? '▲' : '▼' }}</span>
-                                        @endif
+                                        <?php if($isUserStatusSort): ?>
+                                            <span class="text-xs"><?php echo e(($userDirection ?? 'asc') === 'asc' ? '▲' : '▼'); ?></span>
+                                        <?php endif; ?>
                                     </a>
                                 </th>
                                 <th class="py-2">Last Login</th>
@@ -392,8 +404,8 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse($users as $user)
-                                @php
+                            <?php $__empty_1 = true; $__currentLoopData = $users; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $user): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                <?php
                                     $nameParts = preg_split('/\s+/', trim((string) $user->name)) ?: [];
                                     $initials = collect($nameParts)
                                         ->take(2)
@@ -408,44 +420,44 @@
                                     $lastLogin = $user->updated_at
                                         ? \App\Support\DateFormat::display($user->updated_at) . ' ' . $user->updated_at->format('h:i A')
                                         : '-';
-                                @endphp
+                                ?>
                                 <tr class="border-b border-zinc-200 last:border-b-0">
                                     <td class="py-3">
                                         <div class="flex items-center gap-2">
-                                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold text-white" style="background: var(--museum-accent);">{{ $initials }}</span>
-                                            <span class="font-medium text-zinc-900">{{ $user->name }}</span>
+                                            <span class="inline-flex h-6 w-6 items-center justify-center rounded-full text-[10px] font-semibold text-white" style="background: var(--museum-accent);"><?php echo e($initials); ?></span>
+                                            <span class="font-medium text-zinc-900"><?php echo e($user->name); ?></span>
                                         </div>
                                     </td>
-                                    <td class="py-3 text-zinc-600">{{ $user->email }}</td>
+                                    <td class="py-3 text-zinc-600"><?php echo e($user->email); ?></td>
                                     <td class="py-3">
                                         <span
                                             class="rounded-md px-2 py-0.5 text-[11px] font-semibold"
-                                            style="{{ $isPrivilegedRole
+                                            style="<?php echo e($isPrivilegedRole
                                                 ? 'background: var(--museum-accent); color: #fff;'
-                                                : 'background: color-mix(in srgb, var(--museum-accent) 14%, white); color: var(--museum-accent); border: 1px solid color-mix(in srgb, var(--museum-accent) 35%, white);' }}"
-                                        >{{ $roleLabel }}</span>
+                                                : 'background: color-mix(in srgb, var(--museum-accent) 14%, white); color: var(--museum-accent); border: 1px solid color-mix(in srgb, var(--museum-accent) 35%, white);'); ?>"
+                                        ><?php echo e($roleLabel); ?></span>
                                     </td>
                                     <td class="py-3">
-                                        @if($user->isApproved())
+                                        <?php if($user->isApproved()): ?>
                                             <span class="rounded-md border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">Approved</span>
-                                        @else
+                                        <?php else: ?>
                                             <span class="rounded-md border px-2 py-0.5 text-[11px] font-semibold" style="border-color: color-mix(in srgb, var(--museum-accent) 35%, white); background: color-mix(in srgb, var(--museum-accent) 12%, white); color: var(--museum-accent);">Pending</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
-                                    <td class="py-3 text-zinc-600">{{ $lastLogin }}</td>
+                                    <td class="py-3 text-zinc-600"><?php echo e($lastLogin); ?></td>
                                     <td class="py-3 text-right">
-                                        @if(auth()->check() && auth()->user()->isAdmin())
-                                            <a href="{{ route('admin.users.index') }}" class="text-zinc-700 hover:text-zinc-900">Manage</a>
-                                        @else
+                                        <?php if(auth()->check() && auth()->user()->isAdmin()): ?>
+                                            <a href="<?php echo e(route('admin.users.index')); ?>" class="text-zinc-700 hover:text-zinc-900">Manage</a>
+                                        <?php else: ?>
                                             <span class="text-zinc-400">View</span>
-                                        @endif
+                                        <?php endif; ?>
                                     </td>
                                 </tr>
-                            @empty
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                 <tr>
                                     <td colspan="6" class="py-4 text-zinc-500">No users found.</td>
                                 </tr>
-                            @endforelse
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
@@ -456,43 +468,43 @@
                 <p class="mt-1 text-sm text-zinc-600">Overview of permissions by user role</p>
 
                 <div class="mt-4 space-y-3">
-                    @forelse($roles as $role)
-                        @php
+                    <?php $__empty_1 = true; $__currentLoopData = $roles; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $role): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                        <?php
                             $permissions = is_array($role->permissions) ? $role->permissions : [];
                             $firstColumn = array_slice($permissions, 0, (int) ceil(max(count($permissions), 1) / 2));
                             $secondColumn = array_slice($permissions, count($firstColumn));
                             $isDarkBadge = in_array($role->slug, ['owner', 'admin'], true);
-                        @endphp
+                        ?>
                         <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-3">
                             <div class="mb-2 flex items-center gap-2">
-                                <span class="rounded-md px-2 py-0.5 text-xs font-semibold {{ $isDarkBadge ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-700' }}">{{ $role->name }}</span>
-                                <p class="text-xs text-zinc-500">{{ $role->description }}</p>
+                                <span class="rounded-md px-2 py-0.5 text-xs font-semibold <?php echo e($isDarkBadge ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-700'); ?>"><?php echo e($role->name); ?></span>
+                                <p class="text-xs text-zinc-500"><?php echo e($role->description); ?></p>
                             </div>
                             <div class="grid gap-2 text-xs text-zinc-700 md:grid-cols-2">
                                 <ul class="list-disc space-y-1 pl-4">
-                                    @foreach($firstColumn as $item)
-                                        <li>{{ $item }}</li>
-                                    @endforeach
+                                    <?php $__currentLoopData = $firstColumn; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <li><?php echo e($item); ?></li>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </ul>
                                 <ul class="list-disc space-y-1 pl-4">
-                                    @foreach($secondColumn as $item)
-                                        <li>{{ $item }}</li>
-                                    @endforeach
+                                    <?php $__currentLoopData = $secondColumn; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <li><?php echo e($item); ?></li>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </ul>
                             </div>
                         </div>
-                    @empty
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                         <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-500">No role definitions found.</div>
-                    @endforelse
+                    <?php endif; ?>
                 </div>
             </article>
-        @elseif($activeTab === 'notifications')
+        <?php elseif($activeTab === 'notifications'): ?>
             <article class="museum-panel p-4 sm:p-5">
                 <h3 class="museum-section-title text-base!">◌ Notification Preferences</h3>
                 <p class="mt-1 text-sm text-zinc-600">Configure when and how you receive notifications</p>
 
-                <form method="POST" action="{{ route('settings.update', ['section' => 'notifications']) }}" class="mt-5">
-                    @csrf
+                <form method="POST" action="<?php echo e(route('settings.update', ['section' => 'notifications'])); ?>" class="mt-5">
+                    <?php echo csrf_field(); ?>
                     <fieldset class="m-0 min-w-0 border-0 p-0">
                     <div class="space-y-3">
                         <label class="flex items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 cursor-pointer">
@@ -501,7 +513,7 @@
                                 <p class="text-sm text-zinc-600">Get notified when artworks are moved</p>
                             </div>
                             <input type="hidden" name="movement_alerts" value="0">
-                            <input type="checkbox" name="movement_alerts" value="1" @checked(old('movement_alerts', $notificationSettings['movement_alerts'] ? '1' : '0') === '1') class="h-4 w-4 rounded border-zinc-300">
+                            <input type="checkbox" name="movement_alerts" value="1" <?php if(old('movement_alerts', $notificationSettings['movement_alerts'] ? '1' : '0') === '1'): echo 'checked'; endif; ?> class="h-4 w-4 rounded border-zinc-300">
                         </label>
 
                         <label class="flex items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 cursor-pointer">
@@ -510,7 +522,7 @@
                                 <p class="text-sm text-zinc-600">Alert 30 days before insurance expiration</p>
                             </div>
                             <input type="hidden" name="insurance_expiry" value="0">
-                            <input type="checkbox" name="insurance_expiry" value="1" @checked(old('insurance_expiry', $notificationSettings['insurance_expiry'] ? '1' : '0') === '1') class="h-4 w-4 rounded border-zinc-300">
+                            <input type="checkbox" name="insurance_expiry" value="1" <?php if(old('insurance_expiry', $notificationSettings['insurance_expiry'] ? '1' : '0') === '1'): echo 'checked'; endif; ?> class="h-4 w-4 rounded border-zinc-300">
                         </label>
 
                         <label class="flex items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 cursor-pointer">
@@ -519,7 +531,7 @@
                                 <p class="text-sm text-zinc-600">Reminder when loaned artworks are due back</p>
                             </div>
                             <input type="hidden" name="loan_return_due" value="0">
-                            <input type="checkbox" name="loan_return_due" value="1" @checked(old('loan_return_due', $notificationSettings['loan_return_due'] ? '1' : '0') === '1') class="h-4 w-4 rounded border-zinc-300">
+                            <input type="checkbox" name="loan_return_due" value="1" <?php if(old('loan_return_due', $notificationSettings['loan_return_due'] ? '1' : '0') === '1'): echo 'checked'; endif; ?> class="h-4 w-4 rounded border-zinc-300">
                         </label>
 
                         <label class="flex items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 cursor-pointer">
@@ -528,7 +540,7 @@
                                 <p class="text-sm text-zinc-600">Notifications for scheduled restoration work</p>
                             </div>
                             <input type="hidden" name="restoration_due" value="0">
-                            <input type="checkbox" name="restoration_due" value="1" @checked(old('restoration_due', $notificationSettings['restoration_due'] ? '1' : '0') === '1') class="h-4 w-4 rounded border-zinc-300">
+                            <input type="checkbox" name="restoration_due" value="1" <?php if(old('restoration_due', $notificationSettings['restoration_due'] ? '1' : '0') === '1'): echo 'checked'; endif; ?> class="h-4 w-4 rounded border-zinc-300">
                         </label>
 
                         <label class="flex items-center justify-between rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-3 cursor-pointer">
@@ -537,7 +549,7 @@
                                 <p class="text-sm text-zinc-600">Alert when artwork valuations change significantly</p>
                             </div>
                             <input type="hidden" name="valuation_updates" value="0">
-                            <input type="checkbox" name="valuation_updates" value="1" @checked(old('valuation_updates', $notificationSettings['valuation_updates'] ? '1' : '0') === '1') class="h-4 w-4 rounded border-zinc-300">
+                            <input type="checkbox" name="valuation_updates" value="1" <?php if(old('valuation_updates', $notificationSettings['valuation_updates'] ? '1' : '0') === '1'): echo 'checked'; endif; ?> class="h-4 w-4 rounded border-zinc-300">
                         </label>
                     </div>
 
@@ -546,12 +558,12 @@
                         <div class="mt-3 space-y-2 text-sm">
                             <label class="inline-flex items-center gap-2 text-zinc-700">
                                 <input type="hidden" name="delivery_email" value="0">
-                                <input type="checkbox" name="delivery_email" value="1" @checked(old('delivery_email', $notificationSettings['delivery_email'] ? '1' : '0') === '1') class="rounded border-zinc-300">
+                                <input type="checkbox" name="delivery_email" value="1" <?php if(old('delivery_email', $notificationSettings['delivery_email'] ? '1' : '0') === '1'): echo 'checked'; endif; ?> class="rounded border-zinc-300">
                                 <span>Email Notifications</span>
                             </label>
                             <label class="inline-flex items-center gap-2 text-zinc-700">
                                 <input type="hidden" name="delivery_browser" value="0">
-                                <input type="checkbox" name="delivery_browser" value="1" @checked(old('delivery_browser', $notificationSettings['delivery_browser'] ? '1' : '0') === '1') class="rounded border-zinc-300">
+                                <input type="checkbox" name="delivery_browser" value="1" <?php if(old('delivery_browser', $notificationSettings['delivery_browser'] ? '1' : '0') === '1'): echo 'checked'; endif; ?> class="rounded border-zinc-300">
                                 <span>Browser Notifications</span>
                             </label>
                         </div>
@@ -560,15 +572,15 @@
                     </fieldset>
                 </form>
             </article>
-        @elseif($activeTab === 'appearance')
+        <?php elseif($activeTab === 'appearance'): ?>
             <article class="museum-panel p-4 sm:p-5">
                 <h3 class="museum-section-title text-base!">◔ Display Preferences</h3>
                 <p class="mt-1 text-sm text-zinc-600">Customize the look and feel of the application</p>
 
-                <form method="POST" action="{{ route('settings.update', ['section' => 'appearance']) }}" class="mt-5 space-y-4">
-                    @csrf
+                <form method="POST" action="<?php echo e(route('settings.update', ['section' => 'appearance'])); ?>" class="mt-5 space-y-4">
+                    <?php echo csrf_field(); ?>
                     <fieldset class="m-0 min-w-0 border-0 p-0 space-y-4">
-                    @php
+                    <?php
                         $accentCandidate = (string) old('accent_color', $appearanceSettings['accent_color'] ?? '#1c1917');
                         $selectedAccent = preg_match('/^#[0-9A-Fa-f]{6}$/', $accentCandidate) ? strtolower($accentCandidate) : '#1c1917';
                         $selectedHeadingFont = old('heading_font', $appearanceSettings['heading_font'] ?? 'cormorant');
@@ -580,12 +592,12 @@
                             'inter' => 'Inter',
                             'manrope' => 'Manrope',
                         ];
-                    @endphp
+                    ?>
                     <div>
                         <p class="font-semibold text-zinc-800">Theme</p>
                         <select name="theme" class="mt-2 w-full rounded-xl border border-zinc-300 bg-white px-4 py-2.5">
-                            <option value="light" @selected(old('theme', $appearanceSettings['theme']) === 'light')>Light Mode</option>
-                            <option value="dark" @selected(old('theme', $appearanceSettings['theme']) === 'dark')>Dark Mode</option>
+                            <option value="light" <?php if(old('theme', $appearanceSettings['theme']) === 'light'): echo 'selected'; endif; ?>>Light Mode</option>
+                            <option value="dark" <?php if(old('theme', $appearanceSettings['theme']) === 'dark'): echo 'selected'; endif; ?>>Dark Mode</option>
                         </select>
                         <p class="mt-2 text-sm text-zinc-500">Dark mode variant available for reduced eye strain</p>
                     </div>
@@ -593,9 +605,9 @@
                     <div>
                         <p class="font-semibold text-zinc-800">Display Density</p>
                         <select name="density" class="mt-2 w-full rounded-xl border border-zinc-300 bg-white px-4 py-2.5">
-                            <option value="comfortable" @selected(old('density', $appearanceSettings['density']) === 'comfortable')>Comfortable</option>
-                            <option value="compact" @selected(old('density', $appearanceSettings['density']) === 'compact')>Compact</option>
-                            <option value="spacious" @selected(old('density', $appearanceSettings['density']) === 'spacious')>Spacious</option>
+                            <option value="comfortable" <?php if(old('density', $appearanceSettings['density']) === 'comfortable'): echo 'selected'; endif; ?>>Comfortable</option>
+                            <option value="compact" <?php if(old('density', $appearanceSettings['density']) === 'compact'): echo 'selected'; endif; ?>>Compact</option>
+                            <option value="spacious" <?php if(old('density', $appearanceSettings['density']) === 'spacious'): echo 'selected'; endif; ?>>Spacious</option>
                         </select>
                     </div>
 
@@ -605,28 +617,28 @@
                             <label class="museum-field">
                                 <span class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Headings & Titles</span>
                                 <select name="heading_font">
-                                    @foreach($fontOptions as $fontValue => $fontLabel)
-                                        <option value="{{ $fontValue }}" @selected($selectedHeadingFont === $fontValue)>{{ $fontLabel }}</option>
-                                    @endforeach
+                                    <?php $__currentLoopData = $fontOptions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $fontValue => $fontLabel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($fontValue); ?>" <?php if($selectedHeadingFont === $fontValue): echo 'selected'; endif; ?>><?php echo e($fontLabel); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </select>
                             </label>
                             <label class="museum-field">
                                 <span class="text-xs font-semibold uppercase tracking-wide text-zinc-500">Body Text</span>
                                 <select name="body_font">
-                                    @foreach($fontOptions as $fontValue => $fontLabel)
-                                        <option value="{{ $fontValue }}" @selected($selectedBodyFont === $fontValue)>{{ $fontLabel }}</option>
-                                    @endforeach
+                                    <?php $__currentLoopData = $fontOptions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $fontValue => $fontLabel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <option value="<?php echo e($fontValue); ?>" <?php if($selectedBodyFont === $fontValue): echo 'selected'; endif; ?>><?php echo e($fontLabel); ?></option>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </select>
                             </label>
                         </div>
                         <div class="mt-3 space-y-2">
                             <div class="flex items-center justify-between rounded-lg bg-zinc-100 px-3 py-2 text-sm">
                                 <span class="text-zinc-600">Headings & Titles</span>
-                                <span class="text-zinc-500">{{ $fontOptions[$selectedHeadingFont] ?? 'Cormorant Garamond' }}</span>
+                                <span class="text-zinc-500"><?php echo e($fontOptions[$selectedHeadingFont] ?? 'Cormorant Garamond'); ?></span>
                             </div>
                             <div class="flex items-center justify-between rounded-lg bg-zinc-100 px-3 py-2 text-sm">
                                 <span class="text-zinc-600">Body Text</span>
-                                <span class="text-zinc-500">{{ $fontOptions[$selectedBodyFont] ?? 'Inter' }}</span>
+                                <span class="text-zinc-500"><?php echo e($fontOptions[$selectedBodyFont] ?? 'Inter'); ?></span>
                             </div>
                         </div>
                     </div>
@@ -634,10 +646,10 @@
                     <div class="border-t border-zinc-200 pt-4">
                         <p class="font-semibold text-zinc-800">Accent Color</p>
                         <div class="mt-3 flex items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2">
-                            <input id="accent_color" type="color" name="accent_color" value="{{ $selectedAccent }}" class="h-10 w-14 cursor-pointer rounded border border-zinc-300 bg-white p-1">
+                            <input id="accent_color" type="color" name="accent_color" value="<?php echo e($selectedAccent); ?>" class="h-10 w-14 cursor-pointer rounded border border-zinc-300 bg-white p-1">
                             <div>
                                 <p class="font-semibold text-zinc-900">Custom Accent</p>
-                                <p id="accent_color_label" class="text-xs text-zinc-500">Selected: {{ strtoupper($selectedAccent) }}</p>
+                                <p id="accent_color_label" class="text-xs text-zinc-500">Selected: <?php echo e(strtoupper($selectedAccent)); ?></p>
                             </div>
                         </div>
                     </div>
@@ -646,7 +658,7 @@
                     </fieldset>
                 </form>
             </article>
-        @endif
+        <?php endif; ?>
 
         <script>
             (function () {
@@ -672,4 +684,14 @@
             })();
         </script>
     </section>
-</x-layout>
+ <?php echo $__env->renderComponent(); ?>
+<?php endif; ?>
+<?php if (isset($__attributesOriginal23a33f287873b564aaf305a1526eada4)): ?>
+<?php $attributes = $__attributesOriginal23a33f287873b564aaf305a1526eada4; ?>
+<?php unset($__attributesOriginal23a33f287873b564aaf305a1526eada4); ?>
+<?php endif; ?>
+<?php if (isset($__componentOriginal23a33f287873b564aaf305a1526eada4)): ?>
+<?php $component = $__componentOriginal23a33f287873b564aaf305a1526eada4; ?>
+<?php unset($__componentOriginal23a33f287873b564aaf305a1526eada4); ?>
+<?php endif; ?>
+<?php /**PATH /Users/syed/MEGA/WORK/RELIVA/Website/LEBTECH/museum-azman/resources/views/settings/index.blade.php ENDPATH**/ ?>

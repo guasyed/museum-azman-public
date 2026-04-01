@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Location;
+use App\Services\ActivityLogger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\View\View;
@@ -33,6 +34,8 @@ class LocationController extends Controller
         ]);
 
         $location = Location::create($validated);
+
+        ActivityLogger::log('location.created', "Location created: {$location->name}", $location);
 
         return redirect()->route('locations.show', $location)->with('success', 'Location added successfully.');
     }
@@ -141,6 +144,8 @@ class LocationController extends Controller
 
         $location->update($validated);
 
+        ActivityLogger::log('location.updated', "Location updated: {$location->name}", $location);
+
         return redirect()->route('locations.show', $location)->with('success', 'Location updated successfully.');
     }
 
@@ -168,12 +173,13 @@ class LocationController extends Controller
 
     private function mapQuery(Location $location): string
     {
-        $parts = [
-            trim((string) $location->name),
-            trim((string) ($location->address ?? '')),
-        ];
+        // Only build a meaningful query when an address is actually set.
+        $address = trim((string) ($location->address ?? ''));
+        if ($address === '') {
+            return '';
+        }
 
-        return implode(', ', array_values(array_filter($parts, fn (string $value) => $value !== '')));
+        return $address;
     }
 
     private function mapUrl(string $query): ?string
@@ -191,7 +197,7 @@ class LocationController extends Controller
             return null;
         }
 
-        return 'https://www.google.com/maps?q=' . rawurlencode($query) . '&output=embed';
+        return 'https://maps.google.com/maps?q=' . rawurlencode($query) . '&output=embed&z=15&hl=en';
     }
 
     private function displayType(Location $location): string

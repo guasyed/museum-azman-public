@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Artist;
+use App\Models\Country;
+use App\Services\ActivityLogger;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -109,5 +112,72 @@ class ArtistController extends Controller
         ];
 
         return view('artists.index', compact('artists', 'stats', 'q', 'sort', 'artistSuggestions'));
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name'       => ['required', 'string', 'max:255', 'unique:artists,name'],
+            'country'    => ['nullable', 'string', 'max:255'],
+            'birth_year' => ['nullable', 'integer', 'min:1000', 'max:' . date('Y')],
+            'biography'  => ['nullable', 'string', 'max:5000'],
+        ]);
+
+        $countryName = trim((string) ($validated['country'] ?? ''));
+        if ($countryName !== '') {
+            $countryRow = Country::query()->firstOrCreate(['name' => $countryName]);
+            $validated['country_id'] = $countryRow->id;
+        }
+
+        $artist = Artist::query()->create($validated);
+
+        ActivityLogger::log('artist.created', "Artist created: {$artist->name}", $artist);
+
+        return redirect()->route('artists.index')->with('success', "Artist \"{$artist->name}\" added successfully.");
+    }
+
+    public function edit(Artist $artist): View
+    {
+        return view('artists.edit', compact('artist'));
+    }
+
+    public function update(Request $request, Artist $artist): RedirectResponse
+    {
+        $validated = $request->validate([
+            'name'       => ['required', 'string', 'max:255', 'unique:artists,name,' . $artist->id],
+            'country'    => ['nullable', 'string', 'max:255'],
+            'birth_year' => ['nullable', 'integer', 'min:1000', 'max:' . date('Y')],
+            'biography'  => ['nullable', 'string', 'max:5000'],
+        ]);
+
+        $countryName = trim((string) ($validated['country'] ?? ''));
+        if ($countryName !== '') {
+            $countryRow = Country::query()->firstOrCreate(['name' => $countryName]);
+            $validated['country_id'] = $countryRow->id;
+        } else {
+            $validated['country_id'] = null;
+        }
+
+        $artist->update($validated);
+
+        ActivityLogger::log('artist.updated', "Artist updated: {$artist->name}", $artist);
+
+        return redirect()->route('artists.index')->with('success', "Artist \"{$artist->name}\" updated successfully.");
+    }
+
+    public function destroy(Artist $artist): RedirectResponse
+    {
+        if ($artist->artworks()->exists()) {
+            return redirect()->route('artists.index')->withErrors([
+                'artists' => "Cannot delete \"{$artist->name}\" — they still have artworks in the collection.",
+            ]);
+        }
+
+        $name = $artist->name;
+        $artist->delete();
+
+        ActivityLogger::log('artist.deleted', "Artist deleted: {$name}");
+
+        return redirect()->route('artists.index')->with('success', "Artist \"{$name}\" deleted.");
     }
 }

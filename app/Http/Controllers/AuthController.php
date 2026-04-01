@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use App\Models\User;
 use App\Notifications\NewUserRegistrationNotification;
+use App\Services\ActivityLogger;
 use App\Services\ImageOptimizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -147,6 +148,8 @@ class AuthController extends Controller
         $user = User::query()->create($userPayload);
         $user->load('roleRelation');
 
+        ActivityLogger::log('auth.register', "New user registered: {$user->name} ({$user->email})", $user);
+
         if (Schema::hasTable('notifications')) {
             $admins = User::query()
                 ->with('roleRelation')
@@ -186,11 +189,16 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
+        ActivityLogger::log('auth.login', "User logged in: {$request->user()?->name}", $request->user());
+
         return redirect()->intended(route('dashboard'));
     }
 
     public function logout(Request $request): RedirectResponse
     {
+        $user = $request->user();
+        ActivityLogger::log('auth.logout', "User logged out: {$user?->name}", $user);
+
         Auth::logout();
 
         $request->session()->invalidate();

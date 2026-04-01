@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\AdminActivityLogController;
 use App\Http\Controllers\AdminImportController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ArtworkController;
@@ -74,6 +75,10 @@ Route::middleware('auth')->group(function () {
 	Route::get('locations/{location}/edit', [LocationController::class, 'edit'])->name('locations.edit')->middleware('admin');
 	Route::put('locations/{location}', [LocationController::class, 'update'])->name('locations.update')->middleware('admin');
 	Route::get('artists', [ArtistController::class, 'index'])->name('artists.index');
+	Route::post('artists', [ArtistController::class, 'store'])->name('artists.store')->middleware('admin');
+	Route::get('artists/{artist}/edit', [ArtistController::class, 'edit'])->name('artists.edit')->middleware('admin');
+	Route::put('artists/{artist}', [ArtistController::class, 'update'])->name('artists.update')->middleware('admin');
+	Route::delete('artists/{artist}', [ArtistController::class, 'destroy'])->name('artists.destroy')->middleware('admin');
 	Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
 	Route::get('reports/export/pdf', [ReportController::class, 'exportPdf'])->name('reports.export.pdf');
 	Route::get('reports/export/excel', [ReportController::class, 'exportExcel'])->name('reports.export.excel');
@@ -106,6 +111,8 @@ Route::middleware('auth')->group(function () {
 		Route::put('users/{user}', [AdminUserController::class, 'update'])->name('users.update');
 		Route::patch('users/{user}/approve', [AdminUserController::class, 'approve'])->name('users.approve');
 		Route::delete('users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+
+		Route::get('activity-logs', [AdminActivityLogController::class, 'index'])->name('activity-logs.index');
 	});
 });
 

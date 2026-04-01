@@ -11,6 +11,7 @@ use App\Models\Location;
 use App\Models\Movement;
 use App\Models\Status;
 use App\Services\ImageOptimizer;
+use App\Services\ActivityLogger;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -281,6 +282,8 @@ class ArtworkController extends Controller
             return $artwork;
         });
 
+        ActivityLogger::log('artwork.created', "Artwork created: {$artwork->title}", $artwork);
+
         $redirectUrl = route('artworks.show', $artwork);
 
         if ($request->expectsJson()) {
@@ -425,6 +428,8 @@ class ArtworkController extends Controller
             }
         });
 
+        ActivityLogger::log('artwork.updated', "Artwork updated: {$artwork->title}", $artwork);
+
         $redirectUrl = $isSafeReturnUrl
             ? (string) $returnUrl
             : route('artworks.show', [
@@ -481,6 +486,8 @@ class ArtworkController extends Controller
         }
 
         $artwork->delete();
+
+        ActivityLogger::log('artwork.deleted', "Artwork deleted: {$artwork->title}", $artwork);
 
         return redirect()
             ->route('artworks.index')

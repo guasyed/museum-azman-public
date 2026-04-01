@@ -10,6 +10,7 @@ use App\Models\Status;
 use App\Models\User;
 use App\Notifications\MovementTrackerAssignedNotification;
 use App\Notifications\MovementTrackerUpdatedByHandlerNotification;
+use App\Services\ActivityLogger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -122,6 +123,8 @@ class MovementController extends Controller
 
         $this->syncArtworkStatus((int) $movement->artwork_id);
 
+        ActivityLogger::log('movement.created', "Movement recorded for artwork ID {$movement->artwork_id}", $movement);
+
         return redirect()->back()->with('success', 'Movement recorded successfully.');
     }
 
@@ -175,6 +178,8 @@ class MovementController extends Controller
         }
 
         $this->notifyAdminsWhenHandlerUpdates($movement, $currentUser);
+
+        ActivityLogger::log('movement.updated', "Movement updated for artwork ID {$movement->artwork_id}", $movement);
 
         return redirect()->route('movements.index')->with('success', 'Movement updated successfully.');
     }

@@ -37,9 +37,14 @@
     @endphp
 
     <section class="space-y-6">
-        <div>
-            <h2 class="museum-page-title">Artists</h2>
-            <p class="museum-page-subtitle">Artist directory and portfolio overview</p>
+        <div class="flex items-start justify-between gap-4">
+            <div>
+                <h2 class="museum-page-title">Artists</h2>
+                <p class="museum-page-subtitle">Artist directory and portfolio overview</p>
+            </div>
+            @if(auth()->check() && auth()->user()->isAdmin())
+                <button type="button" id="open-add-artist-modal" class="museum-btn shrink-0">+ Add Artist</button>
+            @endif
         </div>
 
         <div class="grid gap-4 md:grid-cols-3">
@@ -177,20 +182,36 @@
 
                                 {{-- Action --}}
                                 <td class="px-4 py-3 text-right">
-                                    <button
-                                        type="button"
-                                        class="inline-flex items-center gap-2 rounded-xl border bg-white px-3 py-2 text-xs font-semibold shadow-sm transition group-hover:shadow js-open-artist-modal"
-                                        style="border-color: color-mix(in srgb, var(--museum-accent) 38%, white); color: var(--museum-accent);"
-                                        data-artist-id="{{ $artist->id }}"
-                                        aria-label="View {{ $artist->name }}"
-                                        
-                                    >
-                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-                                            <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path>
-                                            <circle cx="12" cy="12" r="3"></circle>
-                                        </svg>
-                                        View
-                                    </button>
+                                    <div class="inline-flex items-center gap-2">
+                                        <button
+                                            type="button"
+                                            class="inline-flex items-center gap-2 rounded-xl border bg-white px-3 py-2 text-xs font-semibold shadow-sm transition group-hover:shadow js-open-artist-modal"
+                                            style="border-color: color-mix(in srgb, var(--museum-accent) 38%, white); color: var(--museum-accent);"
+                                            data-artist-id="{{ $artist->id }}"
+                                            aria-label="View {{ $artist->name }}"
+                                        >
+                                            <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                                                <path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"></path>
+                                                <circle cx="12" cy="12" r="3"></circle>
+                                            </svg>
+                                            View
+                                        </button>
+                                        @if(auth()->check() && auth()->user()->isAdmin())
+                                            <button
+                                                type="button"
+                                                class="inline-flex items-center gap-1.5 rounded-xl border border-zinc-300 bg-white px-3 py-2 text-xs font-semibold text-zinc-700 shadow-sm transition hover:bg-zinc-50 js-open-edit-artist"
+                                                data-artist-id="{{ $artist->id }}"
+                                                data-artist-name="{{ $artist->name }}"
+                                                data-artist-country="{{ $artist->country }}"
+                                                data-artist-birth="{{ $artist->birth_year }}"
+                                                data-artist-bio="{{ $artist->biography }}"
+                                                aria-label="Edit {{ $artist->name }}"
+                                            >
+                                                <svg class="h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                                                Edit
+                                            </button>
+                                        @endif
+                                    </div>
                                 </td>
                             </tr>
                         @empty
@@ -205,6 +226,56 @@
             </div>
         </article>
     </section>
+
+    {{-- Create / Edit Artist Modal --}}
+    @if(auth()->check() && auth()->user()->isAdmin())
+    <div class="museum-modal-overlay" id="artist-form-modal">
+        <div class="museum-modal" role="dialog" aria-modal="true" aria-labelledby="artist-form-title" style="max-width:36rem;">
+            <button type="button" class="museum-modal-close" id="artist-form-close" aria-label="Close">&times;</button>
+
+            <h3 id="artist-form-title" class="museum-section-title text-xl! mb-4"></h3>
+
+            <form id="artist-form" method="POST" class="space-y-4">
+                @csrf
+                <span id="artist-form-method-field"></span>
+
+                <label class="museum-field block">
+                    <span>Name <span class="text-rose-500">*</span></span>
+                    <input type="text" name="name" id="af-name" required maxlength="255">
+                </label>
+
+                <label class="museum-field block">
+                    <span>Nationality / Country</span>
+                    <input type="text" name="country" id="af-country" maxlength="255" placeholder="e.g. Malaysia">
+                </label>
+
+                <label class="museum-field block">
+                    <span>Birth Year</span>
+                    <input type="number" name="birth_year" id="af-birth" min="1000" max="{{ date('Y') }}" placeholder="e.g. 1975">
+                </label>
+
+                <label class="museum-field block">
+                    <span>Biography</span>
+                    <textarea name="biography" id="af-bio" rows="4" maxlength="5000" class="resize-y"></textarea>
+                </label>
+
+                <div class="flex items-center justify-between gap-3 pt-2">
+                    <button type="button" id="af-delete-btn" class="hidden rounded-xl border border-rose-200 bg-rose-50 px-4 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-100">Delete Artist</button>
+                    <div class="ml-auto flex gap-2">
+                        <button type="button" id="artist-form-cancel" class="museum-btn-secondary">Cancel</button>
+                        <button type="submit" class="museum-btn" id="af-submit-btn">Save</button>
+                    </div>
+                </div>
+            </form>
+
+            {{-- Hidden delete form --}}
+            <form id="artist-delete-form" method="POST" class="hidden">
+                @csrf
+                @method('DELETE')
+            </form>
+        </div>
+    </div>
+    @endif
 
     <div class="museum-modal-overlay" id="artist-view-modal">
         <div class="museum-modal" role="dialog" aria-modal="true" aria-labelledby="artist-view-title">
@@ -512,6 +583,74 @@ document.addEventListener('DOMContentLoaded', () => {
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape') {
             closeArtistModal();
+        }
+    });
+
+    // ── Create / Edit Artist modal ──────────────────────────────────
+    const formModal      = document.getElementById('artist-form-modal');
+    const formEl         = document.getElementById('artist-form');
+    const formTitle      = document.getElementById('artist-form-title');
+    const formMethodEl   = document.getElementById('artist-form-method-field');
+    const afName         = document.getElementById('af-name');
+    const afCountry      = document.getElementById('af-country');
+    const afBirth        = document.getElementById('af-birth');
+    const afBio          = document.getElementById('af-bio');
+    const afSubmitBtn    = document.getElementById('af-submit-btn');
+    const afDeleteBtn    = document.getElementById('af-delete-btn');
+    const deleteForm     = document.getElementById('artist-delete-form');
+    const openAddBtn     = document.getElementById('open-add-artist-modal');
+
+    const createRoute    = @json(route('artists.store'));
+    const updateRouteBase= @json(route('artists.update', ['artist' => '__ID__']));
+    const deleteRouteBase= @json(route('artists.destroy', ['artist' => '__ID__']));
+
+    const closeFormModal = () => formModal?.classList.remove('is-open');
+
+    const openFormModal = ({ id = null, name = '', country = '', birth_year = '', biography = '' } = {}) => {
+        if (!formModal || !formEl) return;
+
+        const isEdit = !!id;
+        formTitle.textContent = isEdit ? 'Edit Artist' : 'Add Artist';
+        afSubmitBtn.textContent = isEdit ? 'Save Changes' : 'Add Artist';
+
+        formEl.action = isEdit ? updateRouteBase.replace('__ID__', id) : createRoute;
+        formMethodEl.innerHTML = isEdit ? '<input type="hidden" name="_method" value="PUT">' : '';
+
+        afName.value    = name;
+        afCountry.value = country;
+        afBirth.value   = birth_year ?? '';
+        afBio.value     = biography ?? '';
+
+        if (isEdit && deleteForm && afDeleteBtn) {
+            deleteForm.action = deleteRouteBase.replace('__ID__', id);
+            afDeleteBtn.classList.remove('hidden');
+        } else {
+            afDeleteBtn?.classList.add('hidden');
+        }
+
+        formModal.classList.add('is-open');
+        setTimeout(() => afName.focus(), 60);
+    };
+
+    openAddBtn?.addEventListener('click', () => openFormModal());
+
+    document.querySelectorAll('.js-open-edit-artist').forEach((btn) => {
+        btn.addEventListener('click', () => openFormModal({
+            id:         btn.dataset.artistId,
+            name:       btn.dataset.artistName,
+            country:    btn.dataset.artistCountry,
+            birth_year: btn.dataset.artistBirth,
+            biography:  btn.dataset.artistBio,
+        }));
+    });
+
+    document.getElementById('artist-form-close')?.addEventListener('click', closeFormModal);
+    document.getElementById('artist-form-cancel')?.addEventListener('click', closeFormModal);
+    formModal?.addEventListener('click', (e) => { if (e.target === formModal) closeFormModal(); });
+
+    afDeleteBtn?.addEventListener('click', () => {
+        if (confirm('Delete this artist? This cannot be undone.')) {
+            deleteForm?.submit();
         }
     });
 });

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Role;
 use App\Models\User;
 use App\Notifications\NewUserRegistrationNotification;
+use App\Services\ActivityLogger;
 use App\Services\ImageOptimizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -84,7 +85,9 @@ class AdminUserController extends Controller
         $validated['is_approved'] = true;
         $validated['approved_at'] = now();
 
-        User::query()->create($validated);
+        $newUser = User::query()->create($validated);
+
+        ActivityLogger::log('admin.user_created', "Admin created user: {$newUser->name} ({$newUser->email})", $newUser);
 
         return redirect()->route('admin.users.index')->with('success', 'User created successfully.');
     }
@@ -131,6 +134,8 @@ class AdminUserController extends Controller
 
         $user->update($validated);
 
+        ActivityLogger::log('admin.user_updated', "Admin updated user: {$user->name} ({$user->email})", $user);
+
         return redirect()->route('admin.users.index')->with('success', 'User updated successfully.');
     }
 
@@ -144,6 +149,8 @@ class AdminUserController extends Controller
             'is_approved' => true,
             'approved_at' => now(),
         ])->save();
+
+        ActivityLogger::log('admin.user_approved', "Admin approved user: {$user->name} ({$user->email})", $user);
 
         $currentAdmin = request()->user();
         if ($currentAdmin && Schema::hasTable('notifications')) {
@@ -165,11 +172,16 @@ class AdminUserController extends Controller
             ]);
         }
 
+        $userName = $user->name;
+        $userEmail = $user->email;
+
         if ($user->avatar_path) {
             Storage::disk('public')->delete($user->avatar_path);
         }
 
         $user->delete();
+
+        ActivityLogger::log('admin.user_deleted', "Admin deleted user: {$userName} ({$userEmail})");
 
         return redirect()->route('admin.users.index')->with('success', 'User deleted successfully.');
     }

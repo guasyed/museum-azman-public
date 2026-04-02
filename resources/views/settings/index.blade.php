@@ -69,7 +69,7 @@
                 <h3 class="museum-section-title text-base!">Organization Information</h3>
                 <p class="mt-1 text-sm text-zinc-600">Basic information about your collection</p>
 
-                <form method="POST" action="{{ route('settings.update', ['section' => 'general']) }}" enctype="multipart/form-data" class="mt-5">
+                <form method="POST" action="{{ route('settings.update', ['section' => 'general'], false) }}" enctype="multipart/form-data" class="mt-5">
                     @csrf
                     <fieldset @disabled(!($canManageSettings ?? false)) class="m-0 min-w-0 border-0 p-0">
                     <div class="grid gap-4 md:grid-cols-2">
@@ -165,7 +165,7 @@
                 <h3 class="museum-section-title text-base!">$ Currency & Regional Settings</h3>
                 <p class="mt-1 text-sm text-zinc-600">Configure currency and regional preferences</p>
 
-                <form method="POST" action="{{ route('settings.update', ['section' => 'regional']) }}" class="mt-5">
+                <form method="POST" action="{{ route('settings.update', ['section' => 'regional'], false) }}" class="mt-5">
                     @csrf
                     <fieldset @disabled(!($canManageSettings ?? false)) class="m-0 min-w-0 border-0 p-0">
                     <div class="grid gap-4 md:grid-cols-2">
@@ -225,7 +225,7 @@
                     </div>
                 </div>
 
-                <form method="POST" action="{{ route('settings.update', ['section' => 'backup']) }}" class="mt-4 grid gap-4 rounded-xl border border-zinc-200 bg-white p-4 md:grid-cols-3">
+                <form method="POST" action="{{ route('settings.update', ['section' => 'backup'], false) }}" class="mt-4 grid gap-4 rounded-xl border border-zinc-200 bg-white p-4 md:grid-cols-3">
                     @csrf
                     <fieldset @disabled(!($canManageSettings ?? false)) class="m-0 min-w-0 border-0 p-0 contents">
                     <label class="museum-field md:col-span-1">
@@ -252,7 +252,7 @@
 
                 <div class="mt-4 flex flex-wrap items-center gap-2">
                     @if($canManageSettings ?? false)
-                        <form method="POST" action="{{ route('settings.backup.generate') }}">
+                        <form method="POST" action="{{ route('settings.backup.generate', [], false) }}">
                             @csrf
                             <button type="submit" class="museum-btn">Generate Backup</button>
                         </form>
@@ -290,7 +290,7 @@
                                         <div class="flex items-center justify-end gap-2">
                                             @if($canManageSettings ?? false)
                                                 <a href="{{ route('settings.backup.download', ['file' => $backup['file_name']]) }}" class="museum-btn-secondary">Download</a>
-                                                <form method="POST" action="{{ route('settings.backup.delete') }}" onsubmit="return confirm('Delete this backup file?');">
+                                                <form method="POST" action="{{ route('settings.backup.delete', [], false) }}" onsubmit="return confirm('Delete this backup file?');">
                                                     @csrf
                                                     <input type="hidden" name="file" value="{{ $backup['file_name'] }}">
                                                     <button type="submit" class="museum-btn-secondary text-rose-600">Delete</button>
@@ -491,7 +491,7 @@
                 <h3 class="museum-section-title text-base!">◌ Notification Preferences</h3>
                 <p class="mt-1 text-sm text-zinc-600">Configure when and how you receive notifications</p>
 
-                <form method="POST" action="{{ route('settings.update', ['section' => 'notifications']) }}" class="mt-5">
+                <form method="POST" action="{{ route('settings.update', ['section' => 'notifications'], false) }}" class="mt-5">
                     @csrf
                     <fieldset class="m-0 min-w-0 border-0 p-0">
                     <div class="space-y-3">
@@ -565,7 +565,7 @@
                 <h3 class="museum-section-title text-base!">◔ Display Preferences</h3>
                 <p class="mt-1 text-sm text-zinc-600">Customize the look and feel of the application</p>
 
-                <form method="POST" action="{{ route('settings.update', ['section' => 'appearance']) }}" class="mt-5 space-y-4">
+                <form method="POST" action="{{ route('settings.update', ['section' => 'appearance'], false) }}" class="mt-5 space-y-4">
                     @csrf
                     <fieldset class="m-0 min-w-0 border-0 p-0 space-y-4">
                     @php

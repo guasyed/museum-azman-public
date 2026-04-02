@@ -629,7 +629,7 @@
                         <span>Profile</span>
                     </a>
 
-                    <form method="POST" action="{{ route('logout') }}">
+                    <form method="POST" action="{{ route('logout', [], false) }}">
                         @csrf
                         <button type="submit" class="museum-btn-secondary">Logout</button>
                     </form>
@@ -721,7 +721,7 @@
         
         @auth
             <a href="{{ route('profile.edit') }}" class="mobile-nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}">My Profile</a>
-            <form method="POST" action="{{ route('logout') }}" class="mt-8">
+            <form method="POST" action="{{ route('logout', [], false) }}" class="mt-8">
                 @csrf
                 <button type="submit" class="w-full rounded-lg bg-zinc-900 px-4 py-3 text-white font-semibold transition hover:bg-rose-700">Logout</button>
             </form>

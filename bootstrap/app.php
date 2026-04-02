@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             headers: Request::HEADER_X_FORWARDED_FOR
                 | Request::HEADER_X_FORWARDED_PROTO
                 | Request::HEADER_X_FORWARDED_PORT
+                | Request::HEADER_X_FORWARDED_HOST
         );
 
         // Enforce a consistent CSP from app-side for all web responses.

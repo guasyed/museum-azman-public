@@ -65,6 +65,18 @@ class ArtworkController extends Controller
             ->withPath($request->getPathInfo())
             ->withQueryString();
 
+        if ($filters['sortColumn'] === 'created_at') {
+            $artworks->setCollection(
+                $artworks->getCollection()
+                    ->sortBy([
+                        fn (Artwork $artwork) => $artwork->primary_image_url ? 0 : 1,
+                        fn (Artwork $artwork) => -((int) optional($artwork->created_at)->getTimestamp()),
+                        fn (Artwork $artwork) => -((int) optional($artwork->updated_at)->getTimestamp()),
+                    ])
+                    ->values()
+            );
+        }
+
         return view('artworks.index', [
             'artworks' => $artworks,
             'q' => $filters['q'],

@@ -13,6 +13,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingController;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 use Illuminate\Support\Facades\Artisan;
 
@@ -44,6 +45,20 @@ Route::middleware('guest')->group(function () {
 Route::get('/manifest.json', function () {
     return response()->file(public_path('manifest.json'));
 });
+
+Route::get('/storage/{path}', function (string $path) {
+	$path = ltrim($path, '/');
+
+	if (str_contains($path, '..')) {
+		abort(404);
+	}
+
+	if (! Storage::disk('public')->exists($path)) {
+		abort(404);
+	}
+
+	return response()->file(Storage::disk('public')->path($path));
+})->where('path', '.*');
 
 
 Route::middleware('auth')->group(function () {

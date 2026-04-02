@@ -62,6 +62,7 @@ class ArtworkController extends Controller
                 'images:id,artwork_id,path,position',
             ])
             ->paginate(24)
+            ->withPath($request->getPathInfo())
             ->withQueryString();
 
         return view('artworks.index', [
@@ -545,18 +546,18 @@ class ArtworkController extends Controller
                 if ($direction === 'asc') {
                     $query
                         ->withCount('images')
-                        ->orderByRaw("CASE WHEN (primary_image_path IS NOT NULL AND primary_image_path <> '') OR images_count > 0 THEN 1 ELSE 0 END DESC")
-                        ->orderBy('updated_at', 'asc')
-                        ->orderBy('created_at', 'asc');
+                        ->orderByRaw("CASE WHEN (primary_image_path IS NOT NULL AND primary_image_path <> '') THEN 2 WHEN images_count > 0 THEN 1 ELSE 0 END DESC")
+                        ->orderBy('created_at', 'asc')
+                        ->orderBy('updated_at', 'asc');
 
                     return;
                 }
 
                 $query
                     ->withCount('images')
-                    ->orderByRaw("CASE WHEN (primary_image_path IS NOT NULL AND primary_image_path <> '') OR images_count > 0 THEN 1 ELSE 0 END DESC")
-                    ->orderByDesc('updated_at')
-                    ->orderByDesc('created_at');
+                    ->orderByRaw("CASE WHEN (primary_image_path IS NOT NULL AND primary_image_path <> '') THEN 2 WHEN images_count > 0 THEN 1 ELSE 0 END DESC")
+                    ->orderByDesc('created_at')
+                    ->orderByDesc('updated_at');
             });
     }
 

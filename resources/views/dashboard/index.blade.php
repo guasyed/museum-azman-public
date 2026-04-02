@@ -110,8 +110,31 @@
         </article>
     </section>
 
-    <script src="{{ asset('vendor/highcharts/highcharts.js') }}"></script>
+    <script src="/vendor/highcharts/highcharts.js"></script>
     <script>
+        const ensureHighcharts = () => {
+            if (typeof Highcharts !== 'undefined') {
+                return Promise.resolve();
+            }
+
+            return new Promise((resolve, reject) => {
+                const existing = document.querySelector('script[data-highcharts-fallback="1"]');
+                if (existing) {
+                    existing.addEventListener('load', () => resolve(), { once: true });
+                    existing.addEventListener('error', () => reject(new Error('Highcharts fallback failed to load.')), { once: true });
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = 'https://cdn.jsdelivr.net/npm/highcharts@12.1.2/highcharts.js';
+                script.async = true;
+                script.dataset.highchartsFallback = '1';
+                script.onload = () => resolve();
+                script.onerror = () => reject(new Error('Highcharts fallback failed to load.'));
+                document.head.appendChild(script);
+            });
+        };
+
         const renderGeoDistributionChart = () => {
             const chartContainer = document.getElementById('geo-distribution-chart');
 
@@ -210,7 +233,18 @@
             chartContainer.dataset.chartReady = '1';
         };
 
-        document.addEventListener('DOMContentLoaded', renderGeoDistributionChart);
-        window.addEventListener('load', renderGeoDistributionChart);
+        const renderGeoDistributionWhenReady = () => {
+            ensureHighcharts()
+                .then(renderGeoDistributionChart)
+                .catch(() => {
+                    const chartContainer = document.getElementById('geo-distribution-chart');
+                    if (chartContainer) {
+                        chartContainer.innerHTML = '<p class="text-sm text-zinc-500">Chart failed to load.</p>';
+                    }
+                });
+        };
+
+        document.addEventListener('DOMContentLoaded', renderGeoDistributionWhenReady);
+        window.addEventListener('load', renderGeoDistributionWhenReady);
     </script>
 </x-layout>

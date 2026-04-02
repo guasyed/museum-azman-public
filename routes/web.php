@@ -57,7 +57,24 @@ Route::get('/storage/{path}', function (string $path) {
 		abort(404);
 	}
 
-	return response()->file(Storage::disk('public')->path($path));
+	$absolutePath = Storage::disk('public')->path($path);
+	$extension = strtolower(pathinfo($absolutePath, PATHINFO_EXTENSION));
+	$mimeMap = [
+		'webp' => 'image/webp',
+		'png' => 'image/png',
+		'jpg' => 'image/jpeg',
+		'jpeg' => 'image/jpeg',
+		'svg' => 'image/svg+xml',
+		'gif' => 'image/gif',
+		'avif' => 'image/avif',
+		'ico' => 'image/x-icon',
+	];
+	$contentType = $mimeMap[$extension] ?? Storage::disk('public')->mimeType($path) ?? 'application/octet-stream';
+
+	return response()->file($absolutePath, [
+		'Content-Type' => $contentType,
+		'Cache-Control' => 'public, max-age=31536000, immutable',
+	]);
 })->where('path', '.*');
 
 

@@ -27,13 +27,13 @@
             && parse_url($returnUrl, PHP_URL_HOST) === request()->getHost()
             && is_string($returnPath)
             && str_starts_with($returnPath, '/');
-        $backRoute = $isSafeReturnUrl ? $returnUrl : ($origin === 'dashboard' ? route('dashboard') : route('artworks.index'));
+        $backRoute = $isSafeReturnUrl ? $returnUrl : ($origin === 'dashboard' ? route('dashboard', [], false) : route('artworks.index', [], false));
         $backLabel = $origin === 'dashboard' ? 'Back to Dashboard' : 'Back to Collection';
         $selfRoute = route('artworks.show', [
             'artwork' => $artwork,
             'from' => $origin,
             'return' => $isSafeReturnUrl ? $returnUrl : null,
-        ]);
+        ], false);
     ?>
 
     <section class="space-y-4">

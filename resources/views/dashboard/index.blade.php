@@ -75,7 +75,7 @@
                     <p class="text-zinc-600">Latest additions to collection</p>
                 </div>
                 @if(auth()->check() && auth()->user()->isAdmin())
-                    <a href="{{ route('artworks.index') }}" class="museum-btn-secondary">Manage Collection</a>
+                    <a href="{{ route('artworks.index', [], false) }}" class="museum-btn-secondary">Manage Collection</a>
                 @else
                     <span class="text-3xl leading-none">→</span>
                 @endif
@@ -84,7 +84,7 @@
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 @forelse($recentArtworks as $artwork)
                     <article id="artwork-{{ $artwork->id }}" class="overflow-hidden rounded-xl border border-zinc-200 bg-white">
-                        <a href="{{ route('artworks.show', ['artwork' => $artwork, 'from' => 'dashboard', 'return' => request()->fullUrl().'#artwork-'.$artwork->id]) }}">
+                        <a href="{{ route('artworks.show', ['artwork' => $artwork, 'from' => 'dashboard', 'return' => request()->getRequestUri().'#artwork-'.$artwork->id], false) }}">
                             @if($artwork->primary_image_url)
                                 <img src="{{ $artwork->primary_image_url }}" alt="{{ $artwork->title }}" class="h-64 w-full object-cover">
                             @else
@@ -98,7 +98,7 @@
 
                             @if(auth()->check() && auth()->user()->isAdmin())
                                 <div class="mt-3">
-                                    <a href="{{ route('artworks.edit', ['artwork' => $artwork, 'from' => 'dashboard', 'return' => request()->fullUrl().'#artwork-'.$artwork->id]) }}" class="museum-btn-secondary w-full justify-center">Edit Artwork</a>
+                                    <a href="{{ route('artworks.edit', ['artwork' => $artwork, 'from' => 'dashboard', 'return' => request()->getRequestUri().'#artwork-'.$artwork->id], false) }}" class="museum-btn-secondary w-full justify-center">Edit Artwork</a>
                                 </div>
                             @endif
                         </div>

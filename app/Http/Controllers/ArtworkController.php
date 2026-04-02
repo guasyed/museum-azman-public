@@ -61,7 +61,6 @@ class ArtworkController extends Controller
                 'location',
                 'images:id,artwork_id,path,position',
             ])
-            ->latest()
             ->paginate(24)
             ->withQueryString();
 
@@ -105,7 +104,6 @@ class ArtworkController extends Controller
 				'location',
 				'images:id,artwork_id,path,position',
 			])
-			->latest()
 			->paginate($perPage, ['*'], 'page', $page)
 			->withQueryString();
 
@@ -542,8 +540,24 @@ class ArtworkController extends Controller
                 fn ($query) => $query->where('status', $selectedStatus)
             )
             ->when($sortColumn === 'title', fn ($query) => $query->orderBy('title', $direction))
-                ->when($sortColumn === 'current_valuation', fn ($query) => $query->orderBy('current_valuation', $direction))
-            ->when($sortColumn === 'created_at', fn ($query) => $query->orderBy('created_at', $direction));
+            ->when($sortColumn === 'current_valuation', fn ($query) => $query->orderBy('current_valuation', $direction))
+            ->when($sortColumn === 'created_at', function ($query) use ($direction) {
+                if ($direction === 'asc') {
+                    $query
+                        ->withCount('images')
+                        ->orderByRaw("CASE WHEN (primary_image_path IS NOT NULL AND primary_image_path <> '') OR images_count > 0 THEN 1 ELSE 0 END DESC")
+                        ->orderBy('updated_at', 'asc')
+                        ->orderBy('created_at', 'asc');
+
+                    return;
+                }
+
+                $query
+                    ->withCount('images')
+                    ->orderByRaw("CASE WHEN (primary_image_path IS NOT NULL AND primary_image_path <> '') OR images_count > 0 THEN 1 ELSE 0 END DESC")
+                    ->orderByDesc('updated_at')
+                    ->orderByDesc('created_at');
+            });
     }
 
     private function payload(StoreArtworkRequest|UpdateArtworkRequest $request): array

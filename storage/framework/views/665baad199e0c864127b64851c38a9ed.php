@@ -84,7 +84,7 @@
                     <p class="text-zinc-600">Latest additions to collection</p>
                 </div>
                 <?php if(auth()->check() && auth()->user()->isAdmin()): ?>
-                    <a href="<?php echo e(route('artworks.index')); ?>" class="museum-btn-secondary">Manage Collection</a>
+                    <a href="<?php echo e(route('artworks.index', [], false)); ?>" class="museum-btn-secondary">Manage Collection</a>
                 <?php else: ?>
                     <span class="text-3xl leading-none">→</span>
                 <?php endif; ?>
@@ -93,7 +93,7 @@
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 <?php $__empty_1 = true; $__currentLoopData = $recentArtworks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $artwork): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     <article id="artwork-<?php echo e($artwork->id); ?>" class="overflow-hidden rounded-xl border border-zinc-200 bg-white">
-                        <a href="<?php echo e(route('artworks.show', ['artwork' => $artwork, 'from' => 'dashboard', 'return' => request()->fullUrl().'#artwork-'.$artwork->id])); ?>">
+                        <a href="<?php echo e(route('artworks.show', ['artwork' => $artwork, 'from' => 'dashboard', 'return' => request()->getRequestUri().'#artwork-'.$artwork->id], false)); ?>">
                             <?php if($artwork->primary_image_url): ?>
                                 <img src="<?php echo e($artwork->primary_image_url); ?>" alt="<?php echo e($artwork->title); ?>" class="h-64 w-full object-cover">
                             <?php else: ?>
@@ -107,7 +107,7 @@
 
                             <?php if(auth()->check() && auth()->user()->isAdmin()): ?>
                                 <div class="mt-3">
-                                    <a href="<?php echo e(route('artworks.edit', ['artwork' => $artwork, 'from' => 'dashboard', 'return' => request()->fullUrl().'#artwork-'.$artwork->id])); ?>" class="museum-btn-secondary w-full justify-center">Edit Artwork</a>
+                                    <a href="<?php echo e(route('artworks.edit', ['artwork' => $artwork, 'from' => 'dashboard', 'return' => request()->getRequestUri().'#artwork-'.$artwork->id], false)); ?>" class="museum-btn-secondary w-full justify-center">Edit Artwork</a>
                                 </div>
                             <?php endif; ?>
                         </div>

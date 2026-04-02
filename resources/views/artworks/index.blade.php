@@ -69,6 +69,12 @@
             'page' => $artworks->currentPage(),
         ];
         $canManageArtworks = auth()->check() && auth()->user()->isAdmin();
+        $currentRequestUri = request()->getRequestUri();
+        $collectionReturnUrl = static function ($artworkId) use ($currentRequestUri): string {
+            $separator = str_contains($currentRequestUri, '?') ? '&' : '?';
+
+            return $currentRequestUri.$separator.'scroll_to='.(string) $artworkId;
+        };
     @endphp
 
     <section class="space-y-6">
@@ -78,7 +84,7 @@
                 <p class="museum-page-subtitle">Master inventory of {{ number_format($artworks->total()) }} artworks</p>
             </div>
             <div class="flex items-center gap-2">
-                <a href="{{ route('artworks.export.pdf', $exportQuery) }}" class="museum-btn-secondary">
+                <a href="{{ route('artworks.export.pdf', $exportQuery, false) }}" class="museum-btn-secondary">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 3v12"></path>
                         <path d="m7 10 5 5 5-5"></path>
@@ -86,7 +92,7 @@
                     </svg>
                     <span>Export PDF</span>
                 </a>
-                <a href="{{ route('artworks.create') }}" class="museum-btn">+ Add Artwork</a>
+                <a href="{{ route('artworks.create', [], false) }}" class="museum-btn">+ Add Artwork</a>
             </div>
         </div>
 
@@ -137,7 +143,7 @@
 
                     <div class="inline-flex rounded-xl border border-zinc-300 bg-white p-1">
                         <a
-                            href="{{ route('artworks.index', array_merge(request()->query(), ['view' => 'grid'])) }}"
+                            href="{{ route('artworks.index', array_merge(request()->query(), ['view' => 'grid']), false) }}"
                             class="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold {{ $view === 'grid' ? 'text-white' : 'text-zinc-600' }}"
                             style="{{ $view === 'grid' ? 'background: var(--museum-accent);' : '' }}"
                         >
@@ -150,7 +156,7 @@
                             <span>Grid</span>
                         </a>
                         <a
-                            href="{{ route('artworks.index', array_merge(request()->query(), ['view' => 'table'])) }}"
+                            href="{{ route('artworks.index', array_merge(request()->query(), ['view' => 'table']), false) }}"
                             class="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold {{ $view === 'table' ? 'text-white' : 'text-zinc-600' }}"
                             style="{{ $view === 'table' ? 'background: var(--museum-accent);' : '' }}"
                         >
@@ -167,7 +173,7 @@
                     </div>
 
                     <a
-                        href="{{ route('artworks.index', ['view' => $view, 'sort' => $sortColumn ?? 'created_at', 'direction' => $direction ?? 'desc']) }}"
+                        href="{{ route('artworks.index', ['view' => $view, 'sort' => $sortColumn ?? 'created_at', 'direction' => $direction ?? 'desc'], false) }}"
                         class="inline-flex items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 transition"
                         style="border-color: color-mix(in srgb, var(--museum-accent) 38%, white); color: var(--museum-accent);"
                     >
@@ -195,7 +201,7 @@
                                         $nextTitleDirection = $isTitleSort && ($direction ?? 'desc') === 'asc' ? 'desc' : 'asc';
                                     @endphp
                                     <a
-                                        href="{{ route('artworks.index', array_merge(request()->query(), ['sort' => 'title', 'direction' => $nextTitleDirection])) }}"
+                                        href="{{ route('artworks.index', array_merge(request()->query(), ['sort' => 'title', 'direction' => $nextTitleDirection]), false) }}"
                                         class="inline-flex items-center gap-1 hover:text-zinc-900"
                                     >
                                         <span>Artwork</span>
@@ -213,7 +219,7 @@
                                         $nextValueDirection = $isValueSort && ($direction ?? 'desc') === 'asc' ? 'desc' : 'asc';
                                     @endphp
                                     <a
-                                        href="{{ route('artworks.index', array_merge(request()->query(), ['sort' => 'current_valuation', 'direction' => $nextValueDirection])) }}"
+                                        href="{{ route('artworks.index', array_merge(request()->query(), ['sort' => 'current_valuation', 'direction' => $nextValueDirection]), false) }}"
                                         class="inline-flex items-center gap-1 hover:text-zinc-900"
                                     >
                                         <span>Value</span>
@@ -241,7 +247,7 @@
                                 @endphp
                                 <tr id="artwork-{{ $artwork->id }}" class="border-b border-zinc-200 last:border-b-0">
                                     <td class="px-4 py-3.5 font-semibold text-zinc-900">
-                                        <a href="{{ route('artworks.show', ['artwork' => $artwork, 'from' => 'collection', 'return' => request()->fullUrlWithQuery(['scroll_to' => $artwork->id])]) }}" class="hover:underline">{{ $artwork->title }}</a>
+                                        <a href="{{ route('artworks.show', ['artwork' => $artwork, 'from' => 'collection', 'return' => $collectionReturnUrl($artwork->id)], false) }}" class="hover:underline">{{ $artwork->title }}</a>
                                     </td>
                                     <td class="px-4 py-3.5 text-zinc-600">{{ $artwork->artist?->name ?? 'Unknown Artist' }}</td>
                                     <td class="px-4 py-3.5 text-zinc-600">{{ $artwork->artist?->country ?? '-' }}</td>
@@ -253,7 +259,7 @@
                                     @if($canManageArtworks)
                                         <td class="px-4 py-3.5 text-right">
                                             <a
-                                                href="{{ route('artworks.edit', ['artwork' => $artwork, 'from' => 'collection', 'return' => request()->fullUrlWithQuery(['scroll_to' => $artwork->id])]) }}"
+                                                href="{{ route('artworks.edit', ['artwork' => $artwork, 'from' => 'collection', 'return' => $collectionReturnUrl($artwork->id)], false) }}"
                                                 class="museum-btn-secondary"
                                             >
                                                 Edit
@@ -286,7 +292,7 @@
                     @endphp
 
                     <article id="artwork-{{ $artwork->id }}" class="overflow-hidden rounded-2xl border border-zinc-300 bg-white">
-                        <a href="{{ route('artworks.show', ['artwork' => $artwork, 'from' => 'collection', 'return' => request()->fullUrlWithQuery(['scroll_to' => $artwork->id])]) }}">
+                        <a href="{{ route('artworks.show', ['artwork' => $artwork, 'from' => 'collection', 'return' => $collectionReturnUrl($artwork->id)], false) }}">
                             @if($artwork->primary_image_url)
                                 <img
                                     src="{{ $artwork->primary_image_url }}"
@@ -302,7 +308,7 @@
 
                         <div class="p-4">
                             <h3 class="museum-card-title leading-snug">
-                                <a href="{{ route('artworks.show', ['artwork' => $artwork, 'from' => 'collection', 'return' => request()->fullUrlWithQuery(['scroll_to' => $artwork->id])]) }}">{{ $artwork->title }}</a>
+                                <a href="{{ route('artworks.show', ['artwork' => $artwork, 'from' => 'collection', 'return' => $collectionReturnUrl($artwork->id)], false) }}">{{ $artwork->title }}</a>
                             </h3>
                             <p class="mt-1 text-sm text-zinc-600">{{ $artwork->artist?->name ?? 'Unknown Artist' }}{{ $artwork->year ? ', '.$artwork->year : '' }}</p>
 
@@ -318,7 +324,7 @@
                                 <span class="inline-flex rounded-lg px-2.5 py-1 text-xs font-semibold {{ $statusClass }}">{{ $artwork->status ?: 'Unknown' }}</span>
                                 @if($canManageArtworks)
                                     <a
-                                        href="{{ route('artworks.edit', ['artwork' => $artwork, 'from' => 'collection', 'return' => request()->fullUrlWithQuery(['scroll_to' => $artwork->id])]) }}"
+                                        href="{{ route('artworks.edit', ['artwork' => $artwork, 'from' => 'collection', 'return' => $collectionReturnUrl($artwork->id)], false) }}"
                                         class="inline-flex items-center rounded-lg border border-zinc-300 px-2.5 py-1 text-xs font-semibold text-zinc-700 hover:bg-zinc-100"
                                     >
                                         Edit
@@ -546,7 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    const suggestionsUrl = '{{ route('artworks.suggestions') }}';
+    const suggestionsUrl = '{{ route('artworks.suggestions', [], false) }}';
     const regionSelect = form.querySelector('select[name="region"]');
     const statusSelect = form.querySelector('select[name="status"]');
     let abortController = null;

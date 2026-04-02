@@ -434,7 +434,7 @@
                     $brandTitle = trim($savedOrganization);
                 }
                 if (is_string($savedLogoPath) && trim($savedLogoPath) !== '' && \Illuminate\Support\Facades\Storage::disk('public')->exists($savedLogoPath)) {
-                    $brandLogoUrl = asset('storage/'.ltrim($savedLogoPath, '/'));
+                    $brandLogoUrl = '/storage/'.ltrim($savedLogoPath, '/');
                 }
             }
         ?>
@@ -463,55 +463,55 @@
         </div>
 
         <nav class="flex-1 space-y-1 p-4 text-sm">
-            <a href="<?php echo e(route('dashboard')); ?>" class="museum-nav-item flex items-center gap-3 <?php echo e(request()->routeIs('dashboard') ? 'active' : ''); ?>">
+            <a href="<?php echo e(route('dashboard', [], false)); ?>" class="museum-nav-item flex items-center gap-3 <?php echo e(request()->routeIs('dashboard') ? 'active' : ''); ?>">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
                 <span>Dashboard</span>
             </a>
 
-            <a href="<?php echo e(route('artworks.index')); ?>" class="museum-nav-item flex items-center gap-3 <?php echo e(request()->routeIs('artworks.*') ? 'active' : ''); ?>">
+            <a href="<?php echo e(route('artworks.index', [], false)); ?>" class="museum-nav-item flex items-center gap-3 <?php echo e(request()->routeIs('artworks.*') ? 'active' : ''); ?>">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125 a1.64 1.64 0 0 1 1.668-1.668h1.996 c3.051 0 5.555-2.503 5.555-5.554 C21.965 6.012 17.461 2 12 2z"></path></svg>
                 <span>Collection</span>
             </a>
 
-            <a href="<?php echo e(route('movements.index')); ?>" class="museum-nav-item flex items-center gap-3 <?php echo e(request()->routeIs('movements.*') ? 'active' : ''); ?>">
+            <a href="<?php echo e(route('movements.index', [], false)); ?>" class="museum-nav-item flex items-center gap-3 <?php echo e(request()->routeIs('movements.*') ? 'active' : ''); ?>">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path><path d="M15 18H9"></path><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"></path><circle cx="17" cy="18" r="2"></circle><circle cx="7" cy="18" r="2"></circle></svg>
                 <span>Movement Tracker</span>
             </a>
 
-            <a href="<?php echo e(route('locations.index')); ?>" class="museum-nav-item flex items-center gap-3 <?php echo e(request()->routeIs('locations.*') ? 'active' : ''); ?>">
+            <a href="<?php echo e(route('locations.index', [], false)); ?>" class="museum-nav-item flex items-center gap-3 <?php echo e(request()->routeIs('locations.*') ? 'active' : ''); ?>">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"></path><circle cx="12" cy="10" r="3"></circle></svg>
                 <span>Locations</span>
             </a>
 
-            <a href="<?php echo e(route('artists.index')); ?>" class="museum-nav-item flex items-center gap-3 <?php echo e(request()->routeIs('artists.*') ? 'active' : ''); ?>">
+            <a href="<?php echo e(route('artists.index', [], false)); ?>" class="museum-nav-item flex items-center gap-3 <?php echo e(request()->routeIs('artists.*') ? 'active' : ''); ?>">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
                 <span>Artists</span>
             </a>
 
-            <a href="<?php echo e(route('reports.index')); ?>" class="museum-nav-item flex items-center gap-3 <?php echo e(request()->routeIs('reports.*') ? 'active' : ''); ?>">
+            <a href="<?php echo e(route('reports.index', [], false)); ?>" class="museum-nav-item flex items-center gap-3 <?php echo e(request()->routeIs('reports.*') ? 'active' : ''); ?>">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
                 <span>Reports & Analytics</span>
             </a>
 
-            <a href="<?php echo e(route('settings.index')); ?>" class="museum-nav-item flex items-center gap-3 <?php echo e(request()->routeIs('settings.*') ? 'active' : ''); ?>">
+            <a href="<?php echo e(route('settings.index', [], false)); ?>" class="museum-nav-item flex items-center gap-3 <?php echo e(request()->routeIs('settings.*') ? 'active' : ''); ?>">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                 <span>Settings</span>
             </a>
 
             <?php if(auth()->check() && auth()->user()->isAdmin()): ?>
-                <a href="<?php echo e(route('admin.imports.csv.index')); ?>" class="museum-nav-item flex items-center gap-3 <?php echo e(request()->routeIs('admin.imports.csv.*') ? 'active' : ''); ?>">
+                <a href="<?php echo e(route('admin.imports.csv.index', [], false)); ?>" class="museum-nav-item flex items-center gap-3 <?php echo e(request()->routeIs('admin.imports.csv.*') ? 'active' : ''); ?>">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                     <span>Import CSV</span>
                 </a>
-                <a href="<?php echo e(route('admin.users.index')); ?>" class="museum-nav-item flex items-center gap-3 <?php echo e(request()->routeIs('admin.users.*') ? 'active' : ''); ?>">
+                <a href="<?php echo e(route('admin.users.index', [], false)); ?>" class="museum-nav-item flex items-center gap-3 <?php echo e(request()->routeIs('admin.users.*') ? 'active' : ''); ?>">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><path d="M20 8v6"></path><path d="M23 11h-6"></path></svg>
                     <span>Manage Users</span>
                 </a>
-                <a href="<?php echo e(route('admin.activity-logs.index')); ?>" class="museum-nav-item flex items-center gap-3 <?php echo e(request()->routeIs('admin.activity-logs.*') ? 'active' : ''); ?>">
+                <a href="<?php echo e(route('admin.activity-logs.index', [], false)); ?>" class="museum-nav-item flex items-center gap-3 <?php echo e(request()->routeIs('admin.activity-logs.*') ? 'active' : ''); ?>">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
                     <span>Activity Logs</span>
                 </a>
-                <a href="<?php echo e(route('admin.docs.technical')); ?>" class="museum-nav-item flex items-center gap-3 <?php echo e(request()->routeIs('admin.docs.technical') ? 'active' : ''); ?>">
+                <a href="<?php echo e(route('admin.docs.technical', [], false)); ?>" class="museum-nav-item flex items-center gap-3 <?php echo e(request()->routeIs('admin.docs.technical') ? 'active' : ''); ?>">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                     <span>Technical Docs</span>
                 </a>
@@ -583,8 +583,8 @@
                                             $notificationUrl = $notification->data['url'] ?? null;
                                             if (! is_string($notificationUrl) || trim($notificationUrl) === '') {
                                                 $notificationUrl = $isRegistrationNotification
-                                                    ? route('admin.users.index', ['sort' => 'status', 'direction' => 'asc'])
-                                                    : route('movements.index');
+                                                    ? route('admin.users.index', ['sort' => 'status', 'direction' => 'asc'], false)
+                                                    : route('movements.index', [], false);
                                             }
                                         ?>
                                         <a href="<?php echo e($notificationUrl); ?>" class="block rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-3 text-[10px] text-zinc-700 transition hover:border-zinc-300 hover:bg-zinc-100">
@@ -620,7 +620,7 @@
                         </div>
                     </details>
 
-                    <a href="<?php echo e(route('profile.edit')); ?>" class="museum-btn-secondary inline-flex items-center gap-2">
+                    <a href="<?php echo e(route('profile.edit', [], false)); ?>" class="museum-btn-secondary inline-flex items-center gap-2">
                         <?php if(auth()->user()->avatar_url): ?>
                             <img src="<?php echo e(auth()->user()->avatar_url); ?>" alt="<?php echo e(auth()->user()->name); ?>" class="h-7 w-7 rounded-full object-cover">
                         <?php else: ?>
@@ -706,23 +706,23 @@
             <span data-install-label>Install App</span>
         </button>
 
-        <a href="<?php echo e(route('dashboard')); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('dashboard') ? 'active' : ''); ?>">Dashboard</a>
-        <a href="<?php echo e(route('artworks.index')); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('artworks.*') ? 'active' : ''); ?>">Collection</a>
-        <a href="<?php echo e(route('movements.index')); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('movements.*') ? 'active' : ''); ?>">Movement Tracker</a>
-        <a href="<?php echo e(route('locations.index')); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('locations.*') ? 'active' : ''); ?>">Locations</a>
-        <a href="<?php echo e(route('artists.index')); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('artists.*') ? 'active' : ''); ?>">Artists</a>
-        <a href="<?php echo e(route('reports.index')); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('reports.*') ? 'active' : ''); ?>">Reports & Analytics</a>
-        <a href="<?php echo e(route('settings.index')); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('settings.*') ? 'active' : ''); ?>">Settings</a>
+        <a href="<?php echo e(route('dashboard', [], false)); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('dashboard') ? 'active' : ''); ?>">Dashboard</a>
+        <a href="<?php echo e(route('artworks.index', [], false)); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('artworks.*') ? 'active' : ''); ?>">Collection</a>
+        <a href="<?php echo e(route('movements.index', [], false)); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('movements.*') ? 'active' : ''); ?>">Movement Tracker</a>
+        <a href="<?php echo e(route('locations.index', [], false)); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('locations.*') ? 'active' : ''); ?>">Locations</a>
+        <a href="<?php echo e(route('artists.index', [], false)); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('artists.*') ? 'active' : ''); ?>">Artists</a>
+        <a href="<?php echo e(route('reports.index', [], false)); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('reports.*') ? 'active' : ''); ?>">Reports & Analytics</a>
+        <a href="<?php echo e(route('settings.index', [], false)); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('settings.*') ? 'active' : ''); ?>">Settings</a>
         <?php if(auth()->check() && auth()->user()->isAdmin()): ?>
-            <a href="<?php echo e(route('admin.imports.csv.index')); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('admin.imports.csv.*') ? 'active' : ''); ?>">Import CSV</a>
-            <a href="<?php echo e(route('settings.index', ['tab' => 'users-roles'])); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('settings.*') && request()->string('tab')->toString() === 'users-roles' ? 'active' : ''); ?>">Users &amp; Roles</a>
-            <a href="<?php echo e(route('admin.users.index')); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('admin.users.*') ? 'active' : ''); ?>">Manage Users</a>
-            <a href="<?php echo e(route('admin.activity-logs.index')); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('admin.activity-logs.*') ? 'active' : ''); ?>">Activity Logs</a>
-            <a href="<?php echo e(route('admin.docs.technical')); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('admin.docs.technical') ? 'active' : ''); ?>">Technical Docs</a>
+            <a href="<?php echo e(route('admin.imports.csv.index', [], false)); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('admin.imports.csv.*') ? 'active' : ''); ?>">Import CSV</a>
+            <a href="<?php echo e(route('settings.index', ['tab' => 'users-roles'], false)); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('settings.*') && request()->string('tab')->toString() === 'users-roles' ? 'active' : ''); ?>">Users &amp; Roles</a>
+            <a href="<?php echo e(route('admin.users.index', [], false)); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('admin.users.*') ? 'active' : ''); ?>">Manage Users</a>
+            <a href="<?php echo e(route('admin.activity-logs.index', [], false)); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('admin.activity-logs.*') ? 'active' : ''); ?>">Activity Logs</a>
+            <a href="<?php echo e(route('admin.docs.technical', [], false)); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('admin.docs.technical') ? 'active' : ''); ?>">Technical Docs</a>
         <?php endif; ?>
         
         <?php if(auth()->guard()->check()): ?>
-            <a href="<?php echo e(route('profile.edit')); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('profile.*') ? 'active' : ''); ?>">My Profile</a>
+            <a href="<?php echo e(route('profile.edit', [], false)); ?>" class="mobile-nav-link <?php echo e(request()->routeIs('profile.*') ? 'active' : ''); ?>">My Profile</a>
             <form method="POST" action="<?php echo e(route('logout', [], false)); ?>" class="mt-8">
                 <?php echo csrf_field(); ?>
                 <button type="submit" class="w-full rounded-lg bg-zinc-900 px-4 py-3 text-white font-semibold transition hover:bg-rose-700">Logout</button>
@@ -951,7 +951,7 @@
 
             markReadRequested = true;
 
-            fetch("<?php echo e(route('notifications.mark-read')); ?>", {
+            fetch("<?php echo e(route('notifications.mark-read', [], false)); ?>", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

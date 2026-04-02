@@ -28,8 +28,8 @@
                         'edit_url' => route('artworks.edit', [
                             'artwork' => $artwork,
                             'from' => 'collection',
-                            'return' => request()->fullUrl(),
-                        ]),
+                            'return' => request()->getRequestUri(),
+                        ], false),
                     ];
                 })->values(),
             ];

@@ -78,6 +78,12 @@
             'page' => $artworks->currentPage(),
         ];
         $canManageArtworks = auth()->check() && auth()->user()->isAdmin();
+        $currentRequestUri = request()->getRequestUri();
+        $collectionReturnUrl = static function ($artworkId) use ($currentRequestUri): string {
+            $separator = str_contains($currentRequestUri, '?') ? '&' : '?';
+
+            return $currentRequestUri.$separator.'scroll_to='.(string) $artworkId;
+        };
     ?>
 
     <section class="space-y-6">
@@ -87,7 +93,7 @@
                 <p class="museum-page-subtitle">Master inventory of <?php echo e(number_format($artworks->total())); ?> artworks</p>
             </div>
             <div class="flex items-center gap-2">
-                <a href="<?php echo e(route('artworks.export.pdf', $exportQuery)); ?>" class="museum-btn-secondary">
+                <a href="<?php echo e(route('artworks.export.pdf', $exportQuery, false)); ?>" class="museum-btn-secondary">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M12 3v12"></path>
                         <path d="m7 10 5 5 5-5"></path>
@@ -95,7 +101,7 @@
                     </svg>
                     <span>Export PDF</span>
                 </a>
-                <a href="<?php echo e(route('artworks.create')); ?>" class="museum-btn">+ Add Artwork</a>
+                <a href="<?php echo e(route('artworks.create', [], false)); ?>" class="museum-btn">+ Add Artwork</a>
             </div>
         </div>
 
@@ -147,7 +153,7 @@
 
                     <div class="inline-flex rounded-xl border border-zinc-300 bg-white p-1">
                         <a
-                            href="<?php echo e(route('artworks.index', array_merge(request()->query(), ['view' => 'grid']))); ?>"
+                            href="<?php echo e(route('artworks.index', array_merge(request()->query(), ['view' => 'grid']), false)); ?>"
                             class="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold <?php echo e($view === 'grid' ? 'text-white' : 'text-zinc-600'); ?>"
                             style="<?php echo e($view === 'grid' ? 'background: var(--museum-accent);' : ''); ?>"
                         >
@@ -160,7 +166,7 @@
                             <span>Grid</span>
                         </a>
                         <a
-                            href="<?php echo e(route('artworks.index', array_merge(request()->query(), ['view' => 'table']))); ?>"
+                            href="<?php echo e(route('artworks.index', array_merge(request()->query(), ['view' => 'table']), false)); ?>"
                             class="inline-flex items-center gap-1 rounded-lg px-3 py-1.5 text-sm font-semibold <?php echo e($view === 'table' ? 'text-white' : 'text-zinc-600'); ?>"
                             style="<?php echo e($view === 'table' ? 'background: var(--museum-accent);' : ''); ?>"
                         >
@@ -177,7 +183,7 @@
                     </div>
 
                     <a
-                        href="<?php echo e(route('artworks.index', ['view' => $view, 'sort' => $sortColumn ?? 'created_at', 'direction' => $direction ?? 'desc'])); ?>"
+                        href="<?php echo e(route('artworks.index', ['view' => $view, 'sort' => $sortColumn ?? 'created_at', 'direction' => $direction ?? 'desc'], false)); ?>"
                         class="inline-flex items-center justify-center rounded-xl border border-zinc-300 bg-white px-4 py-2 text-sm font-semibold text-zinc-700 transition"
                         style="border-color: color-mix(in srgb, var(--museum-accent) 38%, white); color: var(--museum-accent);"
                     >
@@ -205,7 +211,7 @@
                                         $nextTitleDirection = $isTitleSort && ($direction ?? 'desc') === 'asc' ? 'desc' : 'asc';
                                     ?>
                                     <a
-                                        href="<?php echo e(route('artworks.index', array_merge(request()->query(), ['sort' => 'title', 'direction' => $nextTitleDirection]))); ?>"
+                                        href="<?php echo e(route('artworks.index', array_merge(request()->query(), ['sort' => 'title', 'direction' => $nextTitleDirection]), false)); ?>"
                                         class="inline-flex items-center gap-1 hover:text-zinc-900"
                                     >
                                         <span>Artwork</span>
@@ -223,7 +229,7 @@
                                         $nextValueDirection = $isValueSort && ($direction ?? 'desc') === 'asc' ? 'desc' : 'asc';
                                     ?>
                                     <a
-                                        href="<?php echo e(route('artworks.index', array_merge(request()->query(), ['sort' => 'current_valuation', 'direction' => $nextValueDirection]))); ?>"
+                                        href="<?php echo e(route('artworks.index', array_merge(request()->query(), ['sort' => 'current_valuation', 'direction' => $nextValueDirection]), false)); ?>"
                                         class="inline-flex items-center gap-1 hover:text-zinc-900"
                                     >
                                         <span>Value</span>
@@ -251,7 +257,7 @@
                                 ?>
                                 <tr id="artwork-<?php echo e($artwork->id); ?>" class="border-b border-zinc-200 last:border-b-0">
                                     <td class="px-4 py-3.5 font-semibold text-zinc-900">
-                                        <a href="<?php echo e(route('artworks.show', ['artwork' => $artwork, 'from' => 'collection', 'return' => request()->fullUrlWithQuery(['scroll_to' => $artwork->id])])); ?>" class="hover:underline"><?php echo e($artwork->title); ?></a>
+                                        <a href="<?php echo e(route('artworks.show', ['artwork' => $artwork, 'from' => 'collection', 'return' => $collectionReturnUrl($artwork->id)], false)); ?>" class="hover:underline"><?php echo e($artwork->title); ?></a>
                                     </td>
                                     <td class="px-4 py-3.5 text-zinc-600"><?php echo e($artwork->artist?->name ?? 'Unknown Artist'); ?></td>
                                     <td class="px-4 py-3.5 text-zinc-600"><?php echo e($artwork->artist?->country ?? '-'); ?></td>
@@ -263,7 +269,7 @@
                                     <?php if($canManageArtworks): ?>
                                         <td class="px-4 py-3.5 text-right">
                                             <a
-                                                href="<?php echo e(route('artworks.edit', ['artwork' => $artwork, 'from' => 'collection', 'return' => request()->fullUrlWithQuery(['scroll_to' => $artwork->id])])); ?>"
+                                                href="<?php echo e(route('artworks.edit', ['artwork' => $artwork, 'from' => 'collection', 'return' => $collectionReturnUrl($artwork->id)], false)); ?>"
                                                 class="museum-btn-secondary"
                                             >
                                                 Edit
@@ -296,7 +302,7 @@
                     ?>
 
                     <article id="artwork-<?php echo e($artwork->id); ?>" class="overflow-hidden rounded-2xl border border-zinc-300 bg-white">
-                        <a href="<?php echo e(route('artworks.show', ['artwork' => $artwork, 'from' => 'collection', 'return' => request()->fullUrlWithQuery(['scroll_to' => $artwork->id])])); ?>">
+                        <a href="<?php echo e(route('artworks.show', ['artwork' => $artwork, 'from' => 'collection', 'return' => $collectionReturnUrl($artwork->id)], false)); ?>">
                             <?php if($artwork->primary_image_url): ?>
                                 <img
                                     src="<?php echo e($artwork->primary_image_url); ?>"
@@ -312,7 +318,7 @@
 
                         <div class="p-4">
                             <h3 class="museum-card-title leading-snug">
-                                <a href="<?php echo e(route('artworks.show', ['artwork' => $artwork, 'from' => 'collection', 'return' => request()->fullUrlWithQuery(['scroll_to' => $artwork->id])])); ?>"><?php echo e($artwork->title); ?></a>
+                                <a href="<?php echo e(route('artworks.show', ['artwork' => $artwork, 'from' => 'collection', 'return' => $collectionReturnUrl($artwork->id)], false)); ?>"><?php echo e($artwork->title); ?></a>
                             </h3>
                             <p class="mt-1 text-sm text-zinc-600"><?php echo e($artwork->artist?->name ?? 'Unknown Artist'); ?><?php echo e($artwork->year ? ', '.$artwork->year : ''); ?></p>
 
@@ -328,7 +334,7 @@
                                 <span class="inline-flex rounded-lg px-2.5 py-1 text-xs font-semibold <?php echo e($statusClass); ?>"><?php echo e($artwork->status ?: 'Unknown'); ?></span>
                                 <?php if($canManageArtworks): ?>
                                     <a
-                                        href="<?php echo e(route('artworks.edit', ['artwork' => $artwork, 'from' => 'collection', 'return' => request()->fullUrlWithQuery(['scroll_to' => $artwork->id])])); ?>"
+                                        href="<?php echo e(route('artworks.edit', ['artwork' => $artwork, 'from' => 'collection', 'return' => $collectionReturnUrl($artwork->id)], false)); ?>"
                                         class="inline-flex items-center rounded-lg border border-zinc-300 px-2.5 py-1 text-xs font-semibold text-zinc-700 hover:bg-zinc-100"
                                     >
                                         Edit
@@ -557,7 +563,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    const suggestionsUrl = '<?php echo e(route('artworks.suggestions')); ?>';
+    const suggestionsUrl = '<?php echo e(route('artworks.suggestions', [], false)); ?>';
     const regionSelect = form.querySelector('select[name="region"]');
     const statusSelect = form.querySelector('select[name="status"]');
     let abortController = null;

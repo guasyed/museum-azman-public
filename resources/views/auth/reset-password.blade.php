@@ -7,8 +7,13 @@
     <link rel="icon" type="image/x-icon" href="/icons/museum-azman.ico?v=3">
     <link rel="alternate icon" href="/icons/museum-azman.ico?v=3">
     @php
-        $viteCss = \Illuminate\Support\Facades\Vite::asset('resources/css/app.css');
-        $viteJs = \Illuminate\Support\Facades\Vite::asset('resources/js/app.js');
+        $hasViteAssets = file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot'));
+        $viteCss = null;
+        $viteJs = null;
+        if ($hasViteAssets) {
+            $viteCss = \Illuminate\Support\Facades\Vite::asset('resources/css/app.css');
+            $viteJs = \Illuminate\Support\Facades\Vite::asset('resources/js/app.js');
+        }
         $toRelativeAsset = static function (string $url): string {
             $path = (string) parse_url($url, PHP_URL_PATH);
             $query = (string) parse_url($url, PHP_URL_QUERY);
@@ -16,8 +21,10 @@
             return $query !== '' ? $path.'?'.$query : $path;
         };
     @endphp
-    <link rel="stylesheet" href="{{ $toRelativeAsset($viteCss) }}">
-    <script type="module" src="{{ $toRelativeAsset($viteJs) }}"></script>
+    @if($viteCss && $viteJs)
+        <link rel="stylesheet" href="{{ $toRelativeAsset($viteCss) }}">
+        <script type="module" src="{{ $toRelativeAsset($viteJs) }}"></script>
+    @endif
 </head>
 <body class="museum-shell flex min-h-screen items-center justify-center bg-[#f6f5f4] p-4">
     <div class="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm">

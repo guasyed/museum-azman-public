@@ -15,11 +15,3 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
-
-# Set X-Forwarded-Proto when terminating TLS at this server
-# (harmless when a CDN/proxy already sets it)
-<IfModule mod_headers.c>
-    <If "expr=%{HTTPS} == 'on'">
-        RequestHeader set X-Forwarded-Proto "https"
-    </If>
-</IfModule>

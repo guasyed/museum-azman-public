@@ -71,8 +71,13 @@
             }
         }
 
-        $viteCss = \Illuminate\Support\Facades\Vite::asset('resources/css/app.css');
-        $viteJs = \Illuminate\Support\Facades\Vite::asset('resources/js/app.js');
+        $hasViteAssets = file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot'));
+        $viteCss = null;
+        $viteJs = null;
+        if ($hasViteAssets) {
+            $viteCss = \Illuminate\Support\Facades\Vite::asset('resources/css/app.css');
+            $viteJs = \Illuminate\Support\Facades\Vite::asset('resources/js/app.js');
+        }
         $toRelativeAsset = static function (string $url): string {
             $path = (string) parse_url($url, PHP_URL_PATH);
             $query = (string) parse_url($url, PHP_URL_QUERY);
@@ -86,8 +91,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=Lora:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.7/build/css/intlTelInput.css">
-    <link rel="stylesheet" href="{{ $toRelativeAsset($viteCss) }}">
-    <script type="module" src="{{ $toRelativeAsset($viteJs) }}"></script>
+    @if($viteCss && $viteJs)
+        <link rel="stylesheet" href="{{ $toRelativeAsset($viteCss) }}">
+        <script type="module" src="{{ $toRelativeAsset($viteJs) }}"></script>
+    @endif
 
     <style>
         body.museum-shell {

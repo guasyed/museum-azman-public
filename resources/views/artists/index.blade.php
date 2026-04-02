@@ -94,23 +94,24 @@
                 $activeSortButtonStyle = 'background: var(--museum-accent); color: #fff; border-color: var(--museum-accent);';
             @endphp
             <div class="flex items-center gap-2">
-                <a href="{{ route('artists.index', array_merge(request()->query(), ['sort' => 'value'])) }}" class="museum-btn-secondary" style="{{ $sort === 'value' ? $activeSortButtonStyle : '' }}">Sort by Value</a>
-                <a href="{{ route('artists.index', array_merge(request()->query(), ['sort' => 'works'])) }}" class="museum-btn-secondary" style="{{ $sort === 'works' ? $activeSortButtonStyle : '' }}">Sort by Works</a>
-                <a href="{{ route('artists.index', array_merge(request()->query(), ['sort' => 'name'])) }}" class="museum-btn-secondary" style="{{ $sort === 'name' ? $activeSortButtonStyle : '' }}">Sort by Name</a>
-                <a href="{{ route('artists.index') }}" class="museum-btn-secondary">Reset</a>
+                <a href="{{ route('artists.index', array_merge(request()->query(), ['sort' => 'value']), false) }}" class="museum-btn-secondary" style="{{ $sort === 'value' ? $activeSortButtonStyle : '' }}">Sort by Value</a>
+                <a href="{{ route('artists.index', array_merge(request()->query(), ['sort' => 'works']), false) }}" class="museum-btn-secondary" style="{{ $sort === 'works' ? $activeSortButtonStyle : '' }}">Sort by Works</a>
+                <a href="{{ route('artists.index', array_merge(request()->query(), ['sort' => 'name']), false) }}" class="museum-btn-secondary" style="{{ $sort === 'name' ? $activeSortButtonStyle : '' }}">Sort by Name</a>
+                <a href="{{ route('artists.index', [], false) }}" class="museum-btn-secondary">Reset</a>
             </div>
         </div>
 
         <article class="museum-panel">
             <div class="mb-4">
                 <h3 class="museum-section-title">Artist Directory</h3>
-                <p class="mt-1 text-zinc-600">{{ number_format($artists->count()) }} artists in collection</p>
+                <p class="mt-1 text-zinc-600">{{ number_format($artists->total()) }} artists in collection</p>
             </div>
 
             <div class="overflow-x-auto rounded-2xl border border-zinc-200 bg-white">
                 <table class="w-full min-w-[1080px] text-sm">
                     <thead class="sticky top-0 z-10 bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/70" style="color: color-mix(in srgb, var(--museum-accent) 78%, #374151);">
                         <tr class="border-b border-zinc-200 text-left text-xs font-semibold uppercase tracking-wide">
+                            <th class="px-4 py-3 text-center">No.</th>
                             <th class="px-4 py-3">Artist</th>
                             <th class="px-4 py-3">Nationality</th>
                             <th class="px-4 py-3">Birth</th>
@@ -121,11 +122,18 @@
                         </tr>
                     </thead>
 
-                    <tbody class="divide-y divide-zinc-100">
+                    <tbody id="artist-results-table-body" class="divide-y divide-zinc-100">
                         @forelse($artists as $artist)
+                            @php
+                                $rowNumber = (($artists->firstItem() ?? 1) + $loop->index);
+                            @endphp
                             <tr
                                 class="group bg-white transition hover:bg-zinc-50"
                             >
+                                <td class="px-4 py-3 text-center font-semibold text-zinc-500 tabular-nums">
+                                    {{ number_format($rowNumber) }}
+                                </td>
+
                                 {{-- Artist --}}
                                 <td class="px-4 py-3">
                                     <div class="flex items-center gap-3">
@@ -136,9 +144,6 @@
                                         <div class="min-w-0">
                                             <p class="truncate font-semibold text-zinc-900" title="{{ $artist->name }}">
                                                 {{ \Illuminate\Support\Str::limit($artist->name, 30) }}
-                                            </p>
-                                            <p class="mt-0.5 text-xs text-zinc-500">
-                                                ID #{{ $artist->id }}
                                             </p>
                                         </div>
                                     </div>
@@ -188,6 +193,7 @@
                                             class="inline-flex items-center gap-2 rounded-xl border bg-white px-3 py-2 text-xs font-semibold shadow-sm transition group-hover:shadow js-open-artist-modal"
                                             style="border-color: color-mix(in srgb, var(--museum-accent) 38%, white); color: var(--museum-accent);"
                                             data-artist-id="{{ $artist->id }}"
+                                            data-artist='@json($artistModalData->firstWhere('id', (int) $artist->id))'
                                             aria-label="View {{ $artist->name }}"
                                         >
                                             <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
@@ -216,13 +222,21 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="px-4 py-10 text-center text-zinc-500">
+                                <td colspan="8" class="px-4 py-10 text-center text-zinc-500">
                                     No artists found.
                                 </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
+            </div>
+
+            <div id="artist-pagination" class="hidden px-1 pb-1 pt-4">
+                {{ $artists->appends(request()->query())->links('pagination::bootstrap-5') }}
+            </div>
+
+            <div id="artist-load-more-wrap" class="pt-4 text-center {{ $artists->hasMorePages() ? '' : 'hidden' }}">
+                <button id="artist-load-more-btn" type="button" class="museum-btn-secondary">Load More</button>
             </div>
         </article>
     </section>
@@ -496,11 +510,13 @@ document.addEventListener('DOMContentLoaded', () => {
         return 'bg-zinc-100 text-zinc-700';
     };
 
-    const openArtistModal = (artistId) => {
-        const artist = artistMap.get(String(artistId));
+    const openArtistModal = (artistId, fallbackArtist = null) => {
+        const artist = fallbackArtist || artistMap.get(String(artistId));
         if (!artist || !modal) {
             return;
         }
+
+        artistMap.set(String(artist.id), artist);
 
         titleEl.textContent = artist.name;
         metaEl.textContent = `${artist.country} • Born ${artist.birth_year ?? '-'} • ${artist.style}`;
@@ -562,8 +578,24 @@ document.addEventListener('DOMContentLoaded', () => {
         modal.classList.add('is-open');
     };
 
-    document.querySelectorAll('.js-open-artist-modal').forEach((button) => {
-        button.addEventListener('click', () => openArtistModal(button.dataset.artistId));
+    document.addEventListener('click', (event) => {
+        const viewButton = event.target.closest('.js-open-artist-modal');
+        if (viewButton) {
+            const payload = viewButton.dataset.artist ? JSON.parse(viewButton.dataset.artist) : null;
+            openArtistModal(viewButton.dataset.artistId, payload);
+            return;
+        }
+
+        const editButton = event.target.closest('.js-open-edit-artist');
+        if (editButton) {
+            openFormModal({
+                id: editButton.dataset.artistId,
+                name: editButton.dataset.artistName,
+                country: editButton.dataset.artistCountry,
+                birth_year: editButton.dataset.artistBirth,
+                biography: editButton.dataset.artistBio,
+            });
+        }
     });
 
     const closeArtistModal = () => {
@@ -634,16 +666,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     openAddBtn?.addEventListener('click', () => openFormModal());
 
-    document.querySelectorAll('.js-open-edit-artist').forEach((btn) => {
-        btn.addEventListener('click', () => openFormModal({
-            id:         btn.dataset.artistId,
-            name:       btn.dataset.artistName,
-            country:    btn.dataset.artistCountry,
-            birth_year: btn.dataset.artistBirth,
-            biography:  btn.dataset.artistBio,
-        }));
-    });
-
     document.getElementById('artist-form-close')?.addEventListener('click', closeFormModal);
     document.getElementById('artist-form-cancel')?.addEventListener('click', closeFormModal);
     formModal?.addEventListener('click', (e) => { if (e.target === formModal) closeFormModal(); });
@@ -653,6 +675,71 @@ document.addEventListener('DOMContentLoaded', () => {
             deleteForm?.submit();
         }
     });
+
+    const paginationWrap = document.getElementById('artist-pagination');
+    const loadMoreWrap = document.getElementById('artist-load-more-wrap');
+    const loadMoreButton = document.getElementById('artist-load-more-btn');
+    const tableBody = document.getElementById('artist-results-table-body');
+
+    if (paginationWrap && loadMoreWrap && loadMoreButton && tableBody) {
+        const getNextUrl = () => paginationWrap.querySelector('a[rel="next"]')?.getAttribute('href') || null;
+        let nextUrl = getNextUrl();
+
+        const updateLoadMoreVisibility = () => {
+            loadMoreWrap.classList.toggle('hidden', !nextUrl);
+        };
+
+        const setLoading = (loading) => {
+            loadMoreButton.disabled = loading;
+            loadMoreButton.textContent = loading ? 'Loading...' : 'Load More';
+        };
+
+        updateLoadMoreVisibility();
+
+        loadMoreButton.addEventListener('click', async () => {
+            if (!nextUrl) {
+                return;
+            }
+
+            setLoading(true);
+
+            try {
+                const response = await fetch(nextUrl, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'text/html',
+                    },
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to load next page.');
+                }
+
+                const html = await response.text();
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const sourceBody = doc.getElementById('artist-results-table-body');
+                const nextPagination = doc.getElementById('artist-pagination');
+
+                if (sourceBody) {
+                    sourceBody.querySelectorAll(':scope > tr').forEach((row) => {
+                        tableBody.appendChild(row);
+                    });
+                }
+
+                if (nextPagination) {
+                    paginationWrap.innerHTML = nextPagination.innerHTML;
+                }
+
+                nextUrl = getNextUrl();
+                updateLoadMoreVisibility();
+            } catch (error) {
+                console.error(error);
+            } finally {
+                setLoading(false);
+            }
+        });
+    }
 });
     </script>
 </x-layout>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Artist;
 use App\Models\Country;
 use App\Services\ActivityLogger;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -111,7 +112,26 @@ class ArtistController extends Controller
             'total_portfolio_value' => (float) $artists->sum('portfolio_value'),
         ];
 
-        return view('artists.index', compact('artists', 'stats', 'q', 'sort', 'artistSuggestions'));
+        $perPage = 20;
+        $currentPage = max(1, (int) $request->integer('page', 1));
+        $paginatedArtists = new LengthAwarePaginator(
+            items: $artists->slice(($currentPage - 1) * $perPage, $perPage)->values(),
+            total: $artists->count(),
+            perPage: $perPage,
+            currentPage: $currentPage,
+            options: [
+                'path' => $request->getPathInfo(),
+                'query' => $request->query(),
+            ],
+        );
+
+        return view('artists.index', [
+            'artists' => $paginatedArtists,
+            'stats' => $stats,
+            'q' => $q,
+            'sort' => $sort,
+            'artistSuggestions' => $artistSuggestions,
+        ]);
     }
 
     public function store(Request $request): RedirectResponse

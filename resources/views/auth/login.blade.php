@@ -43,7 +43,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('login.perform') }}" class="mt-6 space-y-4">
+        <form method="POST" action="{{ route('login.perform', [], false) }}" class="mt-6 space-y-4">
             @csrf
             <label class="museum-field">
                 <span>Email</span>

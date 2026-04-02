@@ -37,7 +37,7 @@
             </div>
         @endif
 
-        <form method="POST" action="{{ route('register.perform') }}" enctype="multipart/form-data" class="mt-6 space-y-4">
+        <form method="POST" action="{{ route('register.perform', [], false) }}" enctype="multipart/form-data" class="mt-6 space-y-4">
             @csrf
             <label class="museum-field">
                 <span>Name</span>

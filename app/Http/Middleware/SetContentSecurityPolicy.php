@@ -28,7 +28,7 @@ class SetContentSecurityPolicy
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
             "style-src-elem 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net",
             "font-src 'self' https://fonts.gstatic.com data:",
-            "connect-src 'self'",
+            "connect-src 'self' https://www.google-analytics.com https://region1.google-analytics.com https://*.google-analytics.com",
             "manifest-src 'self'",
             "worker-src 'self' blob:",
         ]);

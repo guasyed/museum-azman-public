@@ -1,12 +1,6 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Redirect HTTP → HTTPS (skip on localhost / 127.0.0.1)
-    RewriteCond "%{HTTPS}" "!=on"
-    RewriteCond "%{HTTP_HOST}" "!=localhost"
-    RewriteCond "%{HTTP_HOST}" "!^127\.0\.0\.1"
-    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
     # Propagate Authorization header to PHP-FPM
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]

@@ -31,16 +31,7 @@
                 <h3 class="museum-section-title">Geographic Distribution</h3>
                 <p class="text-zinc-600">Collection by origin</p>
 
-            <div id="geo-distribution-chart" class="dashboard-geo-chart mx-auto mt-4 mb-4 w-full max-w-95"></div>
-
-                <div class="mt-6 flex flex-nowrap justify-between gap-2 border-t border-zinc-200 pt-4 text-center sm:gap-3">
-                    @foreach(array_slice($geoByCountry, 0, 8, true) as $country => $count)
-                        <div>
-                            <p class="font-bold leading-tight text-zinc-900" style="font-size:20px">{{ number_format($count) }}</p>
-                            <p class="leading-tight text-zinc-600" style="font-size:10px">{{ $country }}</p>
-                        </div>
-                    @endforeach
-                </div>
+            <div id="geo-distribution-chart" class="dashboard-geo-chart mt-4 mb-2 w-full" style="max-width: 580px;"></div>
             </article>
 
             <article class="museum-panel p-6">
@@ -146,8 +137,10 @@
                 return;
             }
 
+            const isMobile = window.matchMedia('(max-width: 640px)').matches;
+
             if (!chartContainer.style.minHeight) {
-                chartContainer.style.minHeight = '240px';
+                chartContainer.style.minHeight = isMobile ? '300px' : '360px';
             }
 
             const geoSeriesData = @json(
@@ -156,45 +149,12 @@
                 )->values()
             );
 
-            const totalGeo = geoSeriesData.reduce((sum, item) => sum + item.y, 0);
-
             Highcharts.chart('geo-distribution-chart', {
                 chart: {
                     type: 'pie',
-                    custom: {},
-                    events: {
-                        render() {
-                            const chart = this;
-                            const series = chart.series[0];
-                            let customLabel = chart.options.chart.custom.label;
-
-                            if (!series || !series.center) {
-                                return;
-                            }
-
-                            if (!customLabel) {
-                                customLabel = chart.options.chart.custom.label = chart.renderer
-                                    .label(
-                                        'Total<br/><strong>' + Highcharts.numberFormat(totalGeo, 0) + '</strong>'
-                                    )
-                                    .css({
-                                        color: '#18181b',
-                                        textAnchor: 'middle'
-                                    })
-                                    .add();
-                            }
-
-                            const x = series.center[0] + chart.plotLeft;
-                            const y = series.center[1] + chart.plotTop - (customLabel.attr('height') / 2);
-
-                            customLabel.attr({ x, y });
-                            customLabel.css({
-                                fontSize: `${series.center[2] / 12}px`
-                            });
-                        }
-                    },
                     backgroundColor: 'transparent',
-                    spacing: [0, 0, 0, 0],
+                    height: isMobile ? 300 : 360,
+                    spacing: isMobile ? [10, 8, 10, 8] : [24, 40, 24, 40],
                     style: {
                         fontFamily: 'Inter, sans-serif'
                     }
@@ -215,17 +175,38 @@
                         allowPointSelect: true,
                         cursor: 'pointer',
                         borderRadius: 8,
-                        dataLabels: [{
-                            enabled: false
-                        }],
+                        dataLabels: {
+                            enabled: true,
+                            format: '{point.name}: {point.y}',
+                            distance: isMobile ? 10 : 18,
+                            connectorPadding: isMobile ? 2 : 4,
+                            connectorWidth: isMobile ? 1 : 1.5,
+                            softConnector: true,
+                            crookDistance: '70%',
+                            overflow: 'allow',
+                            crop: false,
+                            allowOverlap: false,
+                            filter: {
+                                property: 'percentage',
+                                operator: '>',
+                                value: isMobile ? 2.5 : 0
+                            },
+                            style: {
+                                fontSize: isMobile ? '12px' : '16px',
+                                fontWeight: '600',
+                                color: '#52525b',
+                                textOutline: 'none'
+                            }
+                        },
                         showInLegend: false
                     }
                 },
                 series: [{
                     name: 'Collection',
                     type: 'pie',
-                    innerSize: '62%',
-                    center: ['50%', '50%'],
+                    size: isMobile ? '82%' : '88%',
+                    innerSize: '58%',
+                    center: isMobile ? ['56%', '55%'] : ['58%', '52%'],
                     data: geoSeriesData
                 }]
             });

@@ -658,32 +658,6 @@
     </main>
 </div>
 
-<div
-    class="fixed right-0 top-1/2 z-50 flex -translate-y-1/2 flex-col gap-2"
-    style="position:fixed; right:0; top:50%; transform:translateY(-50%); z-index:2147483000; display:flex; flex-direction:column; gap:8px; pointer-events:auto;"
->
-    <button
-        id="global-scroll-top-btn"
-        type="button"
-        class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border text-white shadow-lg transition"
-        style="width:40px; height:40px; border-radius:9999px; border:1px solid var(--museum-accent); background:var(--museum-accent); color:#fff; box-shadow:0 6px 16px rgba(0,0,0,.25); cursor:pointer;"
-        title="Back to top"
-        aria-label="Back to top"
-    >
-        ↑
-    </button>
-    <button
-        id="global-scroll-bottom-btn"
-        type="button"
-        class="inline-flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border text-white shadow-lg transition"
-        style="width:40px; height:40px; border-radius:9999px; border:1px solid var(--museum-accent); background:var(--museum-accent); color:#fff; box-shadow:0 6px 16px rgba(0,0,0,.25); cursor:pointer;"
-        title="Go to bottom"
-        aria-label="Go to bottom"
-    >
-        ↓
-    </button>
-</div>
-
 <div id="mobileMenu" class="mobile-nav">
     <div class="flex items-center justify-between mb-8">
         <span class="text-xl font-bold">Menu</span>

@@ -71,7 +71,7 @@ class Artwork extends Model
         $disk = Storage::disk('public');
 
         if ($this->primary_image_path && $disk->exists($this->primary_image_path)) {
-            return asset('storage/'.$this->primary_image_path);
+            return Storage::url($this->primary_image_path);
         }
 
         $fallbackPath = null;
@@ -83,7 +83,7 @@ class Artwork extends Model
         }
 
         if ($fallbackPath && $disk->exists($fallbackPath)) {
-            return asset('storage/'.$fallbackPath);
+            return Storage::url($fallbackPath);
         }
 
         $sourceImageUrl = is_string($this->source_image_url) ? trim($this->source_image_url) : '';

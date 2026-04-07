@@ -210,7 +210,7 @@
         </article>
     </section>
 
-    <script src="{{ asset('vendor/highcharts/highcharts.js') }}"></script>
+    <script src="/vendor/highcharts/highcharts.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const geoSeries = @json($geography->map(fn ($row) => ['name' => $row['name'], 'y' => $row['count']])->values());
@@ -497,7 +497,7 @@
                 }
 
                 const fallback = document.createElement('script');
-                fallback.src = 'https://cdnjs.cloudflare.com/ajax/libs/highcharts/12.1.2/highcharts.js';
+                fallback.src = 'https://cdn.jsdelivr.net/npm/highcharts@12.1.2/highcharts.js';
                 fallback.onload = () => {
                     if (typeof Highcharts !== 'undefined') {
                         renderCharts();

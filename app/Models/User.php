@@ -85,7 +85,7 @@ class User extends Authenticatable
         }
 
         return Storage::disk('public')->exists($this->avatar_path)
-            ? asset('storage/'.$this->avatar_path)
+            ? Storage::url($this->avatar_path)
             : null;
     }
 

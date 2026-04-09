@@ -117,6 +117,7 @@
                 <table class="w-full min-w-[980px] text-sm">
                     <thead>
                     <tr class="border-b border-zinc-200 text-left text-zinc-600">
+                        <th class="py-2 w-14">No.</th>
                         <th class="py-2">
                             @php
                                 $isArtworkSort = ($sortColumn ?? 'date_out') === 'artwork_title';
@@ -238,7 +239,7 @@
                             </a>
                         </th>
                         @if($showActionsColumn)
-                            <th class="py-2">Actions</th>
+                            <th class="py-2 text-right">Actions</th>
                         @endif
                     </tr>
                     </thead>
@@ -261,8 +262,10 @@
                             $canEditMovement = auth()->user()?->isAdmin()
                                 || (($isAssignedOnlyView ?? false)
                                     && strtolower(trim((string) $movement->responsible_handler)) === strtolower(trim((string) auth()->user()?->name)));
+                            $rowNumber = (($movements->currentPage() - 1) * $movements->perPage()) + $loop->iteration;
                         @endphp
                         <tr class="border-b border-zinc-100 align-top">
+                            <td class="py-3 font-medium text-zinc-500">{{ $rowNumber }}</td>
                             <td class="py-3">
                                 <p class="font-semibold">{{ $movement->artwork?->title }}</p>
                                 <p class="text-zinc-500">{{ $movement->artwork?->artist?->name }}</p>
@@ -274,15 +277,26 @@
                             <td class="py-3">{{ $movement->responsible_handler }}</td>
                             <td class="py-3"><span class="rounded-md border border-zinc-200 px-2 py-1">{{ $movement->reason }}</span></td>
                             <td class="py-3"><span class="rounded-lg px-2.5 py-1 text-xs font-semibold {{ $statusClass }}">{{ $status }}</span></td>
-                            @if($canEditMovement)
-                                <td class="py-3">
-                                    <a href="{{ route('movements.edit', $movement) }}" class="museum-btn-secondary px-3 py-1.5 text-xs">Edit</a>
+                            @if($showActionsColumn)
+                                <td class="py-3 text-right">
+                                    @if($canEditMovement)
+                                        <div class="inline-flex items-center justify-end gap-2 whitespace-nowrap">
+                                            <a href="{{ route('movements.edit', $movement, false) }}" class="museum-btn-secondary px-3 py-1.5 text-xs">Edit</a>
+                                            <form method="POST" action="{{ route('movements.destroy', $movement, false) }}" onsubmit="return confirm('Delete this movement record? This action cannot be undone.')">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-100">Delete</button>
+                                            </form>
+                                        </div>
+                                    @else
+                                        <span class="text-xs text-zinc-400">-</span>
+                                    @endif
                                 </td>
                             @endif
                         </tr>
                     @empty
                         <tr>
-                            <td class="py-4 text-zinc-500" colspan="{{ $showActionsColumn ? 9 : 8 }}">No movement records yet.</td>
+                            <td class="py-4 text-zinc-500" colspan="{{ $showActionsColumn ? 10 : 9 }}">No movement records yet.</td>
                         </tr>
                     @endforelse
                     </tbody>

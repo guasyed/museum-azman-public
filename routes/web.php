@@ -100,6 +100,7 @@ Route::middleware('auth')->group(function () {
 	Route::post('movements', [MovementController::class, 'store'])->name('movements.store');
 	Route::get('movements/{movement}/edit', [MovementController::class, 'edit'])->name('movements.edit');
 	Route::put('movements/{movement}', [MovementController::class, 'update'])->name('movements.update');
+	Route::delete('movements/{movement}', [MovementController::class, 'destroy'])->name('movements.destroy');
 	Route::get('locations', [LocationController::class, 'index'])->name('locations.index');
 	Route::get('locations/create', [LocationController::class, 'create'])->name('locations.create')->middleware('admin');
 	Route::post('locations', [LocationController::class, 'store'])->name('locations.store')->middleware('admin');

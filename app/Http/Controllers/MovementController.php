@@ -184,6 +184,24 @@ class MovementController extends Controller
         return redirect()->route('movements.index')->with('success', 'Movement updated successfully.');
     }
 
+    public function destroy(Request $request, Movement $movement): RedirectResponse
+    {
+        $currentUser = $request->user();
+        if (! $this->canEditMovement($currentUser, $movement)) {
+            abort(403, 'You are not allowed to delete this movement.');
+        }
+
+        $artworkId = (int) $movement->artwork_id;
+
+        $movement->delete();
+
+        $this->syncArtworkStatus($artworkId);
+
+        ActivityLogger::log('movement.deleted', "Movement deleted for artwork ID {$artworkId}");
+
+        return redirect()->route('movements.index')->with('success', 'Movement deleted successfully.');
+    }
+
     private function notifyResponsibleHandlerAssignment(Movement $movement, ?string $previousHandler = null): void
     {
         $handlerName = trim((string) $movement->responsible_handler);

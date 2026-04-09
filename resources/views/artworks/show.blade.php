@@ -54,6 +54,27 @@
         $displayYear = (string) ($artwork->year ?: ($derivedYear ?? '-'));
         $displayMedium = (string) ($artwork->medium ?: ($derivedMedium ?? '-'));
 
+        $derivedAcquisitionDate = null;
+        if ($descriptionText !== '') {
+            if (preg_match('/\b(\d{4}-\d{1,2}-\d{1,2})\b/u', $descriptionText, $isoDateMatch) === 1) {
+                $derivedAcquisitionDate = $isoDateMatch[1];
+            } elseif (preg_match('/\b(\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})\b/u', $descriptionText, $slashDateMatch) === 1) {
+                $normalizedDate = str_replace('/', '-', $slashDateMatch[1]);
+                if (strtotime($normalizedDate) !== false) {
+                    $derivedAcquisitionDate = date('Y-m-d', strtotime($normalizedDate));
+                }
+            }
+        }
+
+        $displayAcquisitionDate = \App\Support\DateFormat::display($artwork->acquisition_date);
+        if ($displayAcquisitionDate === '-') {
+            if ($derivedAcquisitionDate) {
+                $displayAcquisitionDate = \App\Support\DateFormat::display($derivedAcquisitionDate);
+            } elseif ($derivedYear) {
+                $displayAcquisitionDate = $derivedYear;
+            }
+        }
+
         $hasStoredDimensions = !is_null($artwork->size_from_cm) && !is_null($artwork->size_to_cm);
         if ($hasStoredDimensions) {
             $displayDimensions = $artwork->size_from_cm.' × '.$artwork->size_to_cm.' cm';
@@ -102,7 +123,7 @@
                             <div><p class="text-zinc-500">Dimensions</p><p class="font-medium">{{ $displayDimensions }}</p></div>
                             <div><p class="text-zinc-500">Country of Origin</p><p class="font-medium">{{ $artwork->artist?->country ?: 'Malaysia' }}</p></div>
                             <div><p class="text-zinc-500">Region</p><p class="font-medium">{{ $artwork->artist?->country ?: '-' }}</p></div>
-                            <div><p class="text-zinc-500">Acquisition Date</p><p class="font-medium">{{ \App\Support\DateFormat::display($artwork->acquisition_date) }}</p></div>
+                            <div><p class="text-zinc-500">Acquisition Date</p><p class="font-medium">{{ $displayAcquisitionDate }}</p></div>
                         </div>
 
                         <div class="space-y-2 border-b border-zinc-200 pb-4 text-sm">

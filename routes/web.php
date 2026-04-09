@@ -115,6 +115,9 @@ Route::middleware('auth')->group(function () {
 	Route::get('reports/export/pdf', [ReportController::class, 'exportPdf'])->name('reports.export.pdf');
 	Route::get('reports/export/excel', [ReportController::class, 'exportExcel'])->name('reports.export.excel');
 	Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
+	Route::post('settings/statuses', [SettingController::class, 'storeStatus'])->name('settings.statuses.store')->middleware('admin');
+	Route::post('settings/statuses/{status}/toggle', [SettingController::class, 'toggleStatus'])->name('settings.statuses.toggle')->middleware('admin');
+	Route::delete('settings/statuses/{status}', [SettingController::class, 'destroyStatus'])->name('settings.statuses.destroy')->middleware('admin');
 	Route::post('settings/{section}', [SettingController::class, 'update'])->name('settings.update');
 	Route::post('settings/backup/generate', [SettingController::class, 'generateBackup'])->name('settings.backup.generate')->middleware('admin');
 	Route::get('settings/backup/download', [SettingController::class, 'downloadBackup'])->name('settings.backup.download')->middleware('admin');

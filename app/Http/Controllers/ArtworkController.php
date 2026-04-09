@@ -359,7 +359,14 @@ class ArtworkController extends Controller
             ->unique()
             ->values();
 
-        $statusOptions = collect(Status::allowedNames());
+        Status::ensureDefaultRows();
+
+        $statusOptions = Status::query()
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('name')
+            ->pluck('name')
+            ->values();
 
         return compact('locationOptions', 'locationTypeOptions', 'statusOptions');
     }

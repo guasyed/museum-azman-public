@@ -1,5 +1,5 @@
 @php
-$statuses = collect($statusOptions ?? \App\Models\Status::DEFAULT_NAMES)->values();
+$statuses = collect($statusOptions ?? [])->values();
 $locationOptions = collect($locationOptions ?? []);
 $locationTypeOptions = collect($locationTypeOptions ?? []);
 $selectedLocationName = (string) old('location_name', $artwork?->location?->name);

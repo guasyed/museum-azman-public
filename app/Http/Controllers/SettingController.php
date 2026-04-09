@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Role;
 use App\Models\Setting;
+use App\Models\Status;
 use App\Services\ImageOptimizer;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Carbon;
@@ -137,7 +138,7 @@ class SettingController extends Controller
         $canAccessAdminTabs = $canManageSettings;
 
         $allowedTabs = $canAccessAdminTabs
-            ? ['general', 'users-roles', 'notifications', 'appearance']
+            ? ['general', 'users-roles', 'statuses', 'notifications', 'appearance']
             : ['notifications', 'appearance'];
         $activeTab = (string) $request->string('tab', 'general');
 
@@ -239,6 +240,14 @@ class SettingController extends Controller
             ? Role::query()->orderByRaw("CASE slug WHEN 'owner' THEN 1 WHEN 'curator' THEN 2 WHEN 'admin' THEN 3 WHEN 'logistics-handler' THEN 4 ELSE 99 END")->get()
             : collect();
 
+        if ($activeTab === 'statuses') {
+            Status::ensureDefaultRows();
+        }
+
+        $statuses = $activeTab === 'statuses'
+            ? Status::query()->orderBy('sort_order')->orderBy('name')->get()
+            : collect();
+
         return view('settings.index', compact(
             'activeTab',
             'canManageSettings',
@@ -253,7 +262,8 @@ class SettingController extends Controller
             'users',
             'roles',
             'userSortColumn',
-            'userDirection'
+            'userDirection',
+            'statuses'
         ));
     }
 
@@ -405,6 +415,63 @@ class SettingController extends Controller
         return redirect()
             ->route('settings.index', ['tab' => 'general'])
             ->withErrors(['settings' => 'Invalid settings section.']);
+    }
+
+    public function storeStatus(Request $request): RedirectResponse
+    {
+        if (! $request->user()?->isAdmin()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:80', 'unique:statuses,name'],
+        ]);
+
+        $maxSortOrder = Status::query()->max('sort_order') ?? 0;
+
+        Status::query()->create([
+            'name' => trim((string) $validated['name']),
+            'sort_order' => (int) $maxSortOrder + 1,
+            'is_active' => true,
+        ]);
+
+        return redirect()
+            ->route('settings.index', ['tab' => 'statuses'])
+            ->with('success', 'Status "'.trim((string) $validated['name']).'" added successfully.');
+    }
+
+    public function toggleStatus(Request $request, Status $status): RedirectResponse
+    {
+        if (! $request->user()?->isAdmin()) {
+            abort(403);
+        }
+
+        $status->update(['is_active' => ! $status->is_active]);
+
+        $label = $status->refresh()->is_active ? 'enabled' : 'disabled';
+
+        return redirect()
+            ->route('settings.index', ['tab' => 'statuses'])
+            ->with('success', 'Status "'.$status->name.'" '.$label.'.');
+    }
+
+    public function destroyStatus(Request $request, Status $status): RedirectResponse
+    {
+        if (! $request->user()?->isAdmin()) {
+            abort(403);
+        }
+
+        if (in_array($status->name, Status::DEFAULT_NAMES, true)) {
+            return redirect()
+                ->route('settings.index', ['tab' => 'statuses'])
+                ->withErrors(['status' => 'Default statuses cannot be deleted.']);
+        }
+
+        $status->delete();
+
+        return redirect()
+            ->route('settings.index', ['tab' => 'statuses'])
+            ->with('success', 'Status deleted.');
     }
 
     /**

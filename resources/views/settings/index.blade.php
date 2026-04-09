@@ -28,6 +28,7 @@
                 ? [
                     ['key' => 'general',       'label' => 'General',        'icon' => '⚙️'],
                     ['key' => 'users-roles',   'label' => 'Users & Roles',  'icon' => '👥'],
+                    ['key' => 'statuses',      'label' => 'Statuses',       'icon' => '🔖'],
                     ['key' => 'notifications', 'label' => 'Notifications',  'icon' => '🔔'],
                     ['key' => 'appearance',    'label' => 'Appearance',     'icon' => '🎨'],
                 ]
@@ -485,6 +486,88 @@
                         <div class="rounded-xl border border-zinc-200 bg-zinc-50 p-3 text-sm text-zinc-500">No role definitions found.</div>
                     @endforelse
                 </div>
+            </article>
+        @elseif($activeTab === 'statuses')
+            <article class="museum-panel p-4 sm:p-5">
+                <h3 class="museum-section-title text-base!">Artwork Statuses</h3>
+                <p class="mt-1 text-sm text-zinc-600">Manage the status options available when editing artworks. Active statuses appear in the status dropdown.</p>
+
+                @if($errors->has('status'))
+                    <p class="mt-3 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{{ $errors->first('status') }}</p>
+                @endif
+
+                <div class="mt-5 overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-zinc-200 text-left text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                                <th class="pb-2 pr-4">Name</th>
+                                <th class="pb-2 pr-4">State</th>
+                                <th class="pb-2 pr-4">Type</th>
+                                <th class="pb-2 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse($statuses as $status)
+                                <tr class="border-b border-zinc-100 last:border-0">
+                                    <td class="py-3 pr-4 font-medium text-zinc-900">{{ $status->name }}</td>
+                                    <td class="py-3 pr-4">
+                                        @if($status->is_active)
+                                            <span class="inline-flex rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">Active</span>
+                                        @else
+                                            <span class="inline-flex rounded-full bg-zinc-100 px-2.5 py-0.5 text-xs font-semibold text-zinc-500">Inactive</span>
+                                        @endif
+                                    </td>
+                                    <td class="py-3 pr-4 text-zinc-500">
+                                        {{ in_array($status->name, \App\Models\Status::DEFAULT_NAMES) ? 'Default' : 'Custom' }}
+                                    </td>
+                                    <td class="py-3 text-right">
+                                        <div class="inline-flex gap-2">
+                                            <form method="POST" action="{{ route('settings.statuses.toggle', $status) }}">
+                                                @csrf
+                                                <button type="submit" class="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-50">
+                                                    {{ $status->is_active ? 'Disable' : 'Enable' }}
+                                                </button>
+                                            </form>
+                                            @if(!in_array($status->name, \App\Models\Status::DEFAULT_NAMES))
+                                                <form method="POST" action="{{ route('settings.statuses.destroy', $status) }}" onsubmit="return confirm('Delete status &quot;{{ $status->name }}&quot;? This cannot be undone.')">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-100">Delete</button>
+                                                </form>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr><td colspan="4" class="py-4 text-zinc-500">No statuses found.</td></tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </article>
+
+            <article class="museum-panel p-4 sm:p-5">
+                <h3 class="museum-section-title text-base!">Add New Status</h3>
+                <p class="mt-1 text-sm text-zinc-600">Add a custom status that will appear in the artwork status dropdown.</p>
+
+                <form method="POST" action="{{ route('settings.statuses.store') }}" class="mt-4 flex items-end gap-3">
+                    @csrf
+                    <label class="museum-field flex-1">
+                        <span>Status Name <em class="not-italic text-rose-500">*</em></span>
+                        <input
+                            type="text"
+                            name="name"
+                            value="{{ old('name') }}"
+                            placeholder="e.g., In Conservation"
+                            maxlength="80"
+                            required
+                        >
+                        @error('name')
+                            <p class="mt-1 text-xs text-rose-600">{{ $message }}</p>
+                        @enderror
+                    </label>
+                    <button type="submit" class="museum-btn shrink-0">Add Status</button>
+                </form>
             </article>
         @elseif($activeTab === 'notifications')
             <article class="museum-panel p-4 sm:p-5">

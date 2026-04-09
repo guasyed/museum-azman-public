@@ -30,11 +30,36 @@ class Status extends Model
         ];
     }
 
+    public static function ensureDefaultRows(): void
+    {
+        if (! Schema::hasTable('statuses')) {
+            return;
+        }
+
+        if (self::query()->exists()) {
+            return;
+        }
+
+        $now = now();
+
+        foreach (self::DEFAULT_NAMES as $index => $name) {
+            self::query()->create([
+                'name' => $name,
+                'sort_order' => $index + 1,
+                'is_active' => true,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ]);
+        }
+    }
+
     public static function allowedNames(): array
     {
         if (! Schema::hasTable('statuses')) {
             return self::DEFAULT_NAMES;
         }
+
+        self::ensureDefaultRows();
 
         return self::query()
             ->where('is_active', true)

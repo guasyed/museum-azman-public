@@ -317,12 +317,12 @@
 
     <div class="museum-modal-overlay {{ $errors->any() ? 'is-open' : '' }}" id="record-movement">
         <div class="museum-modal" role="dialog" aria-modal="true" aria-labelledby="movement-modal-title">
-            <a href="{{ route('movements.index') }}" class="museum-modal-close" aria-label="Close">&times;</a>
+            <a href="{{ route('movements.index', [], false) }}" class="museum-modal-close" aria-label="Close">&times;</a>
 
             <span id="movement-modal-title" class="museum-section-title block">Record Movement</span>
             <p class="mt-2 text-zinc-600">Create a new movement record for artwork transfer, loan, or exhibition</p>
 
-            <form action="{{ route('movements.store') }}" method="POST" class="mt-6 grid gap-5 md:grid-cols-2">
+            <form action="{{ route('movements.store', [], false) }}" method="POST" class="mt-6 grid gap-5 md:grid-cols-2">
                 @csrf
                 <label class="museum-field md:col-span-2">
                     <span>Artwork <em class="text-rose-500 not-italic">*</em></span>
@@ -433,7 +433,7 @@
                 </label>
 
                 <div class="md:col-span-2 flex justify-end gap-3 pt-1">
-                    <a href="{{ route('movements.index') }}" class="museum-btn-secondary museum-modal-cancel">Cancel</a>
+                    <a href="{{ route('movements.index', [], false) }}" class="museum-btn-secondary museum-modal-cancel">Cancel</a>
                     <button type="submit" class="museum-btn museum-modal-submit">Record Movement</button>
                 </div>
             </form>
@@ -446,7 +446,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('movement-artwork-search');
     const artworkIdInput = document.getElementById('movement-artwork-id');
     const suggestionBox = document.getElementById('movement-artwork-suggestions');
-    const movementForm = modal ? modal.querySelector('form[action="{{ route('movements.store') }}"]') : null;
+    const movementForm = modal ? modal.querySelector('form[action="{{ route('movements.store', [], false) }}"]') : null;
 
     if (!modal || !searchInput || !artworkIdInput || !suggestionBox || !movementForm) {
         return;

@@ -237,7 +237,7 @@
 
             <span id="artwork-movement-modal-title" class="museum-section-title block">Record Artwork Movement</span>
 
-            <form action="{{ route('movements.store') }}" method="POST" class="mt-5 grid gap-4 md:grid-cols-2">
+            <form action="{{ route('movements.store', [], false) }}" method="POST" class="mt-5 grid gap-4 md:grid-cols-2">
                 @csrf
                 <input type="hidden" name="artwork_id" value="{{ $artwork->id }}">
 

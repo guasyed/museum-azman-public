@@ -5,11 +5,11 @@
                 <h2 class="museum-page-title">Edit Movement</h2>
                 <p class="museum-page-subtitle">Update transfer details for {{ $movement->artwork?->title ?? 'selected artwork' }}</p>
             </div>
-            <a href="{{ route('movements.index') }}" class="museum-btn-secondary">Back to Movement Tracker</a>
+            <a href="{{ route('movements.index', [], false) }}" class="museum-btn-secondary">Back to Movement Tracker</a>
         </div>
 
         <article class="museum-panel p-5">
-            <form action="{{ route('movements.update', $movement) }}" method="POST" class="grid gap-5 md:grid-cols-2">
+            <form action="{{ route('movements.update', $movement, false) }}" method="POST" class="grid gap-5 md:grid-cols-2">
                 @csrf
                 @method('PUT')
 
@@ -120,7 +120,7 @@
                 </label>
 
                 <div class="md:col-span-2 flex justify-end gap-3 pt-1">
-                    <a href="{{ route('movements.index') }}" class="museum-btn-secondary">Cancel</a>
+                    <a href="{{ route('movements.index', [], false) }}" class="museum-btn-secondary">Cancel</a>
                     <button type="submit" class="museum-btn">Save Changes</button>
                 </div>
             </form>

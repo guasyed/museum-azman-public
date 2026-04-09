@@ -522,14 +522,14 @@
                                     </td>
                                     <td class="py-3 text-right">
                                         <div class="inline-flex gap-2">
-                                            <form method="POST" action="{{ route('settings.statuses.toggle', $status) }}">
+                                            <form method="POST" action="{{ route('settings.statuses.toggle', $status, false) }}">
                                                 @csrf
                                                 <button type="submit" class="rounded-lg border border-zinc-200 px-3 py-1.5 text-xs font-semibold text-zinc-700 transition hover:bg-zinc-50">
                                                     {{ $status->is_active ? 'Disable' : 'Enable' }}
                                                 </button>
                                             </form>
                                             @if(!in_array($status->name, \App\Models\Status::DEFAULT_NAMES))
-                                                <form method="POST" action="{{ route('settings.statuses.destroy', $status) }}" onsubmit="return confirm('Delete status &quot;{{ $status->name }}&quot;? This cannot be undone.')">
+                                                <form method="POST" action="{{ route('settings.statuses.destroy', $status, false) }}" onsubmit="return confirm('Delete status &quot;{{ $status->name }}&quot;? This cannot be undone.')">
                                                     @csrf
                                                     @method('DELETE')
                                                     <button type="submit" class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-100">Delete</button>
@@ -550,7 +550,7 @@
                 <h3 class="museum-section-title text-base!">Add New Status</h3>
                 <p class="mt-1 text-sm text-zinc-600">Add a custom status that will appear in the artwork status dropdown.</p>
 
-                <form method="POST" action="{{ route('settings.statuses.store') }}" class="mt-4 flex items-end gap-3">
+                <form method="POST" action="{{ route('settings.statuses.store', [], false) }}" class="mt-4 flex items-end gap-3">
                     @csrf
                     <label class="museum-field flex-1">
                         <span>Status Name <em class="not-italic text-rose-500">*</em></span>

@@ -25,6 +25,41 @@
             'from' => $origin,
             'return' => $isSafeReturnUrl ? $returnUrl : null,
         ], false);
+
+        $descriptionText = trim((string) ($artwork->description ?? ''));
+
+        $derivedYear = null;
+        if ($descriptionText !== '' && preg_match('/\b(1[89]\d{2}|20\d{2}|21\d{2})\b/u', $descriptionText, $yearMatch) === 1) {
+            $derivedYear = $yearMatch[1];
+        }
+
+        $derivedDimensions = null;
+        if ($descriptionText !== '' && preg_match('/(\d+(?:\.\d+)?)\s*(?:cm)?\s*[x×]\s*(\d+(?:\.\d+)?)\s*(?:cm)?/iu', $descriptionText, $dimensionMatch) === 1) {
+            $left = rtrim(rtrim($dimensionMatch[1], '0'), '.');
+            $right = rtrim(rtrim($dimensionMatch[2], '0'), '.');
+            $derivedDimensions = $left.' × '.$right.' cm';
+        }
+
+        $derivedMedium = null;
+        if ($descriptionText !== '') {
+            $mediumCandidate = preg_replace('/\b(1[89]\d{2}|20\d{2}|21\d{2})\b/u', '', $descriptionText, 1);
+            $mediumCandidate = preg_replace('/(\d+(?:\.\d+)?)\s*(?:cm)?\s*[x×]\s*(\d+(?:\.\d+)?)\s*(?:cm)?/iu', '', (string) $mediumCandidate, 1);
+            $mediumCandidate = trim((string) preg_replace('/\s{2,}/', ' ', (string) $mediumCandidate));
+
+            if ($mediumCandidate !== '') {
+                $derivedMedium = $mediumCandidate;
+            }
+        }
+
+        $displayYear = (string) ($artwork->year ?: ($derivedYear ?? '-'));
+        $displayMedium = (string) ($artwork->medium ?: ($derivedMedium ?? '-'));
+
+        $hasStoredDimensions = !is_null($artwork->size_from_cm) && !is_null($artwork->size_to_cm);
+        if ($hasStoredDimensions) {
+            $displayDimensions = $artwork->size_from_cm.' × '.$artwork->size_to_cm.' cm';
+        } else {
+            $displayDimensions = $derivedDimensions ?? '-';
+        }
     @endphp
 
     <section class="space-y-4">
@@ -62,9 +97,9 @@
                         </div>
 
                         <div class="grid gap-x-8 gap-y-3 border-b border-zinc-200 pb-4 text-sm md:grid-cols-2">
-                            <div><p class="text-zinc-500">Year</p><p class="font-medium">{{ $artwork->year ?: '-' }}</p></div>
-                            <div><p class="text-zinc-500">Medium</p><p class="font-medium">{{ $artwork->medium ?: '-' }}</p></div>
-                            <div><p class="text-zinc-500">Dimensions</p><p class="font-medium">{{ $artwork->size_from_cm ?: '-' }} × {{ $artwork->size_to_cm ?: '-' }} cm</p></div>
+                            <div><p class="text-zinc-500">Year</p><p class="font-medium">{{ $displayYear }}</p></div>
+                            <div><p class="text-zinc-500">Medium</p><p class="font-medium">{{ $displayMedium }}</p></div>
+                            <div><p class="text-zinc-500">Dimensions</p><p class="font-medium">{{ $displayDimensions }}</p></div>
                             <div><p class="text-zinc-500">Country of Origin</p><p class="font-medium">{{ $artwork->artist?->country ?: 'Malaysia' }}</p></div>
                             <div><p class="text-zinc-500">Region</p><p class="font-medium">{{ $artwork->artist?->country ?: '-' }}</p></div>
                             <div><p class="text-zinc-500">Acquisition Date</p><p class="font-medium">{{ \App\Support\DateFormat::display($artwork->acquisition_date) }}</p></div>

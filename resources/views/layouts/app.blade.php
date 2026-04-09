@@ -178,38 +178,88 @@
         .mobile-nav {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.98);
+            inset: 0;
             z-index: 1000;
-            flex-direction: column;
-            padding: 2rem;
+            align-items: stretch;
+            justify-content: flex-end;
+            background: rgba(24, 24, 27, 0.36);
+            backdrop-filter: blur(3px);
         }
 
         .mobile-nav.active {
             display: flex;
         }
 
-        .mobile-nav-link {
-            font-size: 1.25rem;
-            font-weight: 500;
-            padding: 1rem 0;
-            color: #18181b;
+        .mobile-nav-panel {
+            width: min(92vw, 24rem);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background: #fafafa;
+            border-left: 1px solid #e4e4e7;
+            box-shadow: -18px 0 42px rgba(24, 24, 27, 0.18);
+            transform: translateX(100%);
+            transition: transform 0.24s ease;
+        }
+
+        .mobile-nav.active .mobile-nav-panel {
+            transform: translateX(0);
+        }
+
+        .mobile-nav-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem 1rem 0.85rem;
             border-bottom: 1px solid #e4e4e7;
-            transition: background-color 0.2s ease, color 0.2s ease;
+            background: #fafafa;
+        }
+
+        .mobile-nav-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem 0.85rem 0.9rem;
+        }
+
+        .mobile-nav-link {
+            display: block;
+            font-size: 1.12rem;
+            line-height: 1.3;
+            font-weight: 500;
+            margin: 0.15rem 0;
+            padding: 0.82rem 0.9rem;
+            color: #18181b;
+            border: 1px solid transparent;
+            border-radius: 0.85rem;
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
         }
 
         .mobile-nav-link:hover {
-            background-color: color-mix(in srgb, var(--museum-accent) 16%, white);
+            background-color: color-mix(in srgb, var(--museum-accent) 10%, white);
+            border-color: color-mix(in srgb, var(--museum-accent) 26%, white);
             color: var(--museum-accent);
         }
 
         .mobile-nav-link.active {
             color: var(--museum-accent);
             font-weight: 700;
-            background-color: color-mix(in srgb, var(--museum-accent) 20%, white);
+            border-color: color-mix(in srgb, var(--museum-accent) 34%, white);
+            background-color: color-mix(in srgb, var(--museum-accent) 15%, white);
+        }
+
+        .mobile-nav-logout {
+            margin-top: 0.8rem;
+            width: 100%;
+            border-radius: 0.85rem;
+            background: #18181b;
+            padding: 0.8rem 1rem;
+            color: #fff;
+            font-weight: 600;
+            transition: background-color 0.2s ease;
+        }
+
+        .mobile-nav-logout:hover {
+            background: #a11d2e;
         }
 
         .museum-nav-item {
@@ -402,6 +452,10 @@
 			aside.lg\:flex {
 				display: flex !important;
 			}
+
+            .mobile-nav {
+                display: none !important;
+            }
 		}
 		
 		/* Ensure main content takes full width on mobile */
@@ -444,7 +498,7 @@
         <p class="text-lg font-bold text-zinc-900">{{ $brandTitle }}</p>
     </div>
     <div class="flex items-center gap-2">
-        <button id="hamburgerBtn" class="p-2 text-zinc-600" type="button" aria-label="Open menu">
+        <button id="hamburgerBtn" class="p-2 text-zinc-600" type="button" aria-label="Open menu" aria-controls="mobileMenu" aria-expanded="false">
             <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
         </button>
     </div>
@@ -658,26 +712,16 @@
     </main>
 </div>
 
-<div id="mobileMenu" class="mobile-nav">
-    <div class="flex items-center justify-between mb-8">
-        <span class="text-xl font-bold">Menu</span>
-        <button id="closeBtn" class="p-2 text-zinc-600">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-        </button>
-    </div>
-    <nav class="flex flex-col">
-        <button
-            type="button"
-            class="museum-install-trigger mb-4"
-            data-install-trigger
-            data-install-variant="menu"
-            title="Install app"
-            aria-label="Install app"
-        >
-            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3v11"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m7.5 10.5 4.5 4.5 4.5-4.5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 17.5a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 17.5"></path></svg>
-            <span data-install-label>Install App</span>
-        </button>
+<div id="mobileMenu" class="mobile-nav" aria-hidden="true">
+    <div class="mobile-nav-panel" role="dialog" aria-modal="true" aria-label="Navigation menu">
+        <div class="mobile-nav-header">
+            <span class="text-xl font-bold">Menu</span>
+            <button id="closeBtn" class="rounded-lg p-2 text-zinc-600 transition hover:bg-zinc-100" type="button" aria-label="Close menu">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
 
+        <nav class="mobile-nav-list" aria-label="Mobile navigation">
         <a href="{{ route('dashboard', [], false) }}" class="mobile-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a>
         <a href="{{ route('artworks.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('artworks.*') ? 'active' : '' }}">Collection</a>
         <a href="{{ route('movements.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('movements.*') ? 'active' : '' }}">Movement Tracker</a>
@@ -695,12 +739,13 @@
         
         @auth
             <a href="{{ route('profile.edit', [], false) }}" class="mobile-nav-link {{ request()->routeIs('profile.*') ? 'active' : '' }}">My Profile</a>
-            <form method="POST" action="{{ route('logout', [], false) }}" class="mt-8">
+            <form method="POST" action="{{ route('logout', [], false) }}" class="mt-2">
                 @csrf
-                <button type="submit" class="w-full rounded-lg bg-zinc-900 px-4 py-3 text-white font-semibold transition hover:bg-rose-700">Logout</button>
+                <button type="submit" class="mobile-nav-logout">Logout</button>
             </form>
         @endauth
-    </nav>
+        </nav>
+    </div>
 </div>
 
 <div id="installModal" class="museum-install-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="installModalTitle">
@@ -733,19 +778,63 @@
         const closeBtn = document.getElementById('closeBtn');
         const mobileMenu = document.getElementById('mobileMenu');
 
+        const openMenu = () => {
+            if (!mobileMenu) {
+                return;
+            }
+
+            mobileMenu.classList.add('active');
+            mobileMenu.setAttribute('aria-hidden', 'false');
+            hamburgerBtn?.setAttribute('aria-expanded', 'true');
+            document.body.classList.add('overflow-hidden');
+        };
+
+        const closeMenu = () => {
+            if (!mobileMenu) {
+                return;
+            }
+
+            mobileMenu.classList.remove('active');
+            mobileMenu.setAttribute('aria-hidden', 'true');
+            hamburgerBtn?.setAttribute('aria-expanded', 'false');
+            document.body.classList.remove('overflow-hidden');
+        };
+
         const toggleMenu = () => {
-            mobileMenu.classList.toggle('active');
-            document.body.classList.toggle('overflow-hidden');
+            if (!mobileMenu) {
+                return;
+            }
+
+            if (mobileMenu.classList.contains('active')) {
+                closeMenu();
+                return;
+            }
+
+            openMenu();
         };
 
         hamburgerBtn?.addEventListener('click', toggleMenu);
-        closeBtn?.addEventListener('click', toggleMenu);
+        closeBtn?.addEventListener('click', closeMenu);
+        mobileMenu?.addEventListener('click', (event) => {
+            if (event.target === mobileMenu) {
+                closeMenu();
+            }
+        });
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && mobileMenu?.classList.contains('active')) {
+                closeMenu();
+            }
+        });
+        window.addEventListener('resize', () => {
+            if (window.innerWidth >= 1024) {
+                closeMenu();
+            }
+        });
 
         // Close menu on link click
         document.querySelectorAll('.mobile-nav-link').forEach(link => {
             link.addEventListener('click', () => {
-                mobileMenu.classList.remove('active');
-                document.body.classList.remove('overflow-hidden');
+                closeMenu();
             });
         });
 

@@ -75,6 +75,35 @@
 
             return $currentRequestUri.$separator.'scroll_to='.(string) $artworkId;
         };
+        $deriveArtworkFallbacks = static function ($artwork): array {
+            $descriptionText = trim((string) ($artwork->description ?? ''));
+            $derivedMedium = null;
+            $derivedSizeFrom = null;
+            $derivedSizeTo = null;
+
+            if ($descriptionText !== '' && preg_match('/(\d+(?:\.\d+)?)\s*(?:cm)?\s*[x×]\s*(\d+(?:\.\d+)?)\s*(?:cm)?/iu', $descriptionText, $dimensionMatch) === 1) {
+                $derivedSizeFrom = (float) $dimensionMatch[1];
+                $derivedSizeTo = (float) $dimensionMatch[2];
+            }
+
+            if ($descriptionText !== '') {
+                $mediumCandidate = preg_replace('/\b(1[89]\d{2}|20\d{2}|21\d{2})\b/u', '', $descriptionText, 1);
+                $mediumCandidate = preg_replace('/\b(\d{4}-\d{1,2}-\d{1,2}|\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})\b/u', '', (string) $mediumCandidate, 1);
+                $mediumCandidate = preg_replace('/(\d+(?:\.\d+)?)\s*(?:cm)?\s*[x×]\s*(\d+(?:\.\d+)?)\s*(?:cm)?/iu', '', (string) $mediumCandidate, 1);
+                $mediumCandidate = preg_replace('/\s{2,}/u', ' ', (string) $mediumCandidate);
+                $mediumCandidate = trim((string) $mediumCandidate, " ,.;:-\t\n\r\0\x0B");
+
+                if ($mediumCandidate !== '') {
+                    $derivedMedium = $mediumCandidate;
+                }
+            }
+
+            return [
+                'medium' => $derivedMedium,
+                'size_from_cm' => $derivedSizeFrom,
+                'size_to_cm' => $derivedSizeTo,
+            ];
+        };
     @endphp
 
     <section class="space-y-6">
@@ -244,6 +273,8 @@
                                         'in transit' => 'bg-amber-100 text-amber-700',
                                         default => 'bg-zinc-100 text-zinc-700',
                                     };
+                                    $fallbacks = $deriveArtworkFallbacks($artwork);
+                                    $displayMedium = (string) ($artwork->medium ?: ($fallbacks['medium'] ?? '-'));
                                 @endphp
                                 <tr id="artwork-{{ $artwork->id }}" class="border-b border-zinc-200 last:border-b-0">
                                     <td class="px-4 py-3.5 font-semibold text-zinc-900">
@@ -251,7 +282,7 @@
                                     </td>
                                     <td class="px-4 py-3.5 text-zinc-600">{{ $artwork->artist?->name ?? 'Unknown Artist' }}</td>
                                     <td class="px-4 py-3.5 text-zinc-600">{{ $artwork->artist?->country ?? '-' }}</td>
-                                    <td class="px-4 py-3.5 text-zinc-600">{{ $artwork->medium ?: '-' }}</td>
+                                    <td class="px-4 py-3.5 text-zinc-600">{{ $displayMedium }}</td>
                                     <td class="px-4 py-3.5 text-right font-semibold">{{ \App\Support\Currency::short((float) $artwork->current_valuation) }}</td>
                                     <td class="px-4 py-3.5 text-right">
                                         <span class="inline-flex rounded-lg px-2.5 py-1 text-xs font-semibold {{ $statusClass }}">{{ $artwork->status ?: 'Unknown' }}</span>
@@ -286,9 +317,22 @@
                             default => 'bg-zinc-100 text-zinc-700',
                         };
 
-                        $sizeText = ($artwork->size_from_cm && $artwork->size_to_cm)
-                            ? number_format((float) $artwork->size_from_cm, 0).' × '.number_format((float) $artwork->size_to_cm, 0).' cm'
-                            : ($artwork->size_from_cm ? number_format((float) $artwork->size_from_cm, 0).' cm' : '-');
+                        $fallbacks = $deriveArtworkFallbacks($artwork);
+                        $displayMedium = (string) ($artwork->medium ?: ($fallbacks['medium'] ?? '-'));
+                        $sizeFrom = $artwork->size_from_cm;
+                        $sizeTo = $artwork->size_to_cm;
+
+                        if (($sizeFrom === null || $sizeFrom === '') && $fallbacks['size_from_cm'] !== null) {
+                            $sizeFrom = $fallbacks['size_from_cm'];
+                        }
+
+                        if (($sizeTo === null || $sizeTo === '') && $fallbacks['size_to_cm'] !== null) {
+                            $sizeTo = $fallbacks['size_to_cm'];
+                        }
+
+                        $sizeText = ($sizeFrom && $sizeTo)
+                            ? number_format((float) $sizeFrom, 0).' × '.number_format((float) $sizeTo, 0).' cm'
+                            : ($sizeFrom ? number_format((float) $sizeFrom, 0).' cm' : '-');
                     @endphp
 
                     <article id="artwork-{{ $artwork->id }}" class="overflow-hidden rounded-2xl border border-zinc-300 bg-white">
@@ -313,7 +357,7 @@
                             <p class="mt-1 text-sm text-zinc-600">{{ $artwork->artist?->name ?? 'Unknown Artist' }}{{ $artwork->year ? ', '.$artwork->year : '' }}</p>
 
                             <div class="mt-3 space-y-1 text-sm text-zinc-600">
-                                <p>{{ $artwork->medium ?: '-' }}</p>
+                                <p>{{ $displayMedium }}</p>
                                 <p>{{ $sizeText }}</p>
                             </div>
                         </div>

@@ -5,6 +5,38 @@ $locationTypeOptions = collect($locationTypeOptions ?? []);
 $selectedLocationName = (string) old('location_name', $artwork?->location?->name);
 $selectedLocationType = (string) old('location_type', $artwork?->location?->type);
 $selectedLocationAddress = (string) old('location_address', $artwork?->location?->address);
+
+$descriptionText = trim((string) old('description', $artwork?->description));
+$derivedYear = null;
+$derivedMedium = null;
+$derivedSizeFrom = null;
+$derivedSizeTo = null;
+
+if ($descriptionText !== '' && preg_match('/\b(1[89]\d{2}|20\d{2}|21\d{2})\b/u', $descriptionText, $yearMatch) === 1) {
+    $derivedYear = $yearMatch[1];
+}
+
+if ($descriptionText !== '' && preg_match('/(\d+(?:\.\d+)?)\s*(?:cm)?\s*[x×]\s*(\d+(?:\.\d+)?)\s*(?:cm)?/iu', $descriptionText, $dimensionMatch) === 1) {
+    $derivedSizeFrom = $dimensionMatch[1];
+    $derivedSizeTo = $dimensionMatch[2];
+}
+
+if ($descriptionText !== '') {
+    $mediumCandidate = preg_replace('/\b(1[89]\d{2}|20\d{2}|21\d{2})\b/u', '', $descriptionText, 1);
+    $mediumCandidate = preg_replace('/\b(\d{4}-\d{1,2}-\d{1,2}|\d{1,2}[\/\-]\d{1,2}[\/\-]\d{2,4})\b/u', '', (string) $mediumCandidate, 1);
+    $mediumCandidate = preg_replace('/(\d+(?:\.\d+)?)\s*(?:cm)?\s*[x×]\s*(\d+(?:\.\d+)?)\s*(?:cm)?/iu', '', (string) $mediumCandidate, 1);
+    $mediumCandidate = preg_replace('/\s{2,}/u', ' ', (string) $mediumCandidate);
+    $mediumCandidate = trim((string) $mediumCandidate, " ,.;:-\t\n\r\0\x0B");
+
+    if ($mediumCandidate !== '') {
+        $derivedMedium = $mediumCandidate;
+    }
+}
+
+$yearDefault = $artwork?->year ?: $derivedYear;
+$mediumDefault = $artwork?->medium ?: $derivedMedium;
+$sizeFromDefault = $artwork?->size_from_cm ?: $derivedSizeFrom;
+$sizeToDefault = $artwork?->size_to_cm ?: $derivedSizeTo;
 @endphp
 
 <div class="grid gap-4 md:grid-cols-2">
@@ -15,7 +47,7 @@ $selectedLocationAddress = (string) old('location_address', $artwork?->location?
 
     <label class="museum-field">
         <span>Year</span>
-        <input name="year" type="number" value="{{ old('year', $artwork?->year) }}">
+        <input name="year" type="number" value="{{ old('year', $yearDefault) }}">
     </label>
 
     <label class="museum-field">
@@ -35,17 +67,17 @@ $selectedLocationAddress = (string) old('location_address', $artwork?->location?
 
     <label class="museum-field">
         <span>Medium</span>
-        <input name="medium" value="{{ old('medium', $artwork?->medium) }}" placeholder="e.g., Oil on Canvas">
+        <input name="medium" value="{{ old('medium', $mediumDefault) }}" placeholder="e.g., Oil on Canvas">
     </label>
 
     <label class="museum-field">
         <span>Size From (cm)</span>
-        <input name="size_from_cm" type="number" step="0.01" value="{{ old('size_from_cm', $artwork?->size_from_cm) }}">
+        <input name="size_from_cm" type="number" step="0.01" value="{{ old('size_from_cm', $sizeFromDefault) }}">
     </label>
 
     <label class="museum-field">
         <span>Size To (cm)</span>
-        <input name="size_to_cm" type="number" step="0.01" value="{{ old('size_to_cm', $artwork?->size_to_cm) }}">
+        <input name="size_to_cm" type="number" step="0.01" value="{{ old('size_to_cm', $sizeToDefault) }}">
     </label>
 
     <label class="museum-field">

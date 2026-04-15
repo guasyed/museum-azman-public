@@ -31,15 +31,13 @@ class DashboardController extends Controller
 
         $recentArtworks = Artwork::query()
             ->with(['artist', 'images:id,artwork_id,path,position'])
-            ->orderByDesc('acquisition_date')
-            ->orderByDesc('created_at')
+            ->orderByDesc('updated_at')
             ->take(32)
             ->get();
 
         $recentArtworks = $recentArtworks
             ->sortBy([
                 fn (Artwork $artwork) => $artwork->primary_image_url ? 0 : 1,
-                fn (Artwork $artwork) => -((int) optional($artwork->created_at)->getTimestamp()),
                 fn (Artwork $artwork) => -((int) optional($artwork->updated_at)->getTimestamp()),
             ])
             ->take(4)

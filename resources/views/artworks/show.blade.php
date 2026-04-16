@@ -83,32 +83,22 @@
         $artworkUrl = route('artworks.show', $artwork);
         $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data='.rawurlencode($artworkUrl);
         $origin = request()->string('from')->toString() === 'dashboard' ? 'dashboard' : 'collection';
-        $refererUrl = url()->previous();
-        $refererPath = is_string($refererUrl) ? parse_url($refererUrl, PHP_URL_PATH) : null;
-        $refererQuery = is_string($refererUrl) ? parse_url($refererUrl, PHP_URL_QUERY) : null;
-        $refererRoute = is_string($refererPath)
-            ? $refererPath.($refererQuery ? '?'.$refererQuery : '')
-            : null;
-        $isSafeRefererUrl = is_string($refererRoute)
-            && $refererRoute !== ''
-            && parse_url($refererUrl, PHP_URL_HOST) === request()->getHost()
-            && str_starts_with($refererRoute, '/');
-        $isSelfReferer = $isSafeRefererUrl && $refererRoute === request()->getRequestUri();
+        $artworksIndexRoute = route('artworks.index', [], false);
+        $artworksIndexPath = parse_url($artworksIndexRoute, PHP_URL_PATH) ?: $artworksIndexRoute;
         $returnUrl = request()->query('return');
         $returnPath = is_string($returnUrl) ? parse_url($returnUrl, PHP_URL_PATH) : null;
-        $isSafeReturnUrl = is_string($returnUrl)
+        $isSafeArtworksReturnUrl = is_string($returnUrl)
             && $returnUrl !== ''
             && parse_url($returnUrl, PHP_URL_HOST) === request()->getHost()
             && is_string($returnPath)
+            && $returnPath === $artworksIndexPath
             && str_starts_with($returnPath, '/');
-        $backRoute = (!$isSelfReferer && $isSafeRefererUrl)
-            ? $refererRoute
-            : ($isSafeReturnUrl ? $returnUrl : ($origin === 'dashboard' ? route('dashboard', [], false) : route('artworks.index', [], false)));
-        $backLabel = $origin === 'dashboard' ? 'Back to Dashboard' : 'Back to Collection';
+        $backRoute = $artworksIndexRoute;
+        $backLabel = 'Back to Artworks';
         $selfRoute = route('artworks.show', [
             'artwork' => $artwork,
             'from' => $origin,
-            'return' => $isSafeReturnUrl ? $returnUrl : null,
+            'return' => $isSafeArtworksReturnUrl ? $returnUrl : null,
         ], false);
 
         $descriptionText = trim((string) ($artwork->description ?? ''));
@@ -312,7 +302,7 @@
                 </article>
 
                 <article class="museum-panel">
-                    <a href="{{ route('artworks.edit', ['artwork' => $artwork, 'from' => $origin, 'return' => $isSafeReturnUrl ? $returnUrl : null]) }}" class="museum-btn w-full justify-center">Edit Artwork</a>
+                    <a href="{{ route('artworks.edit', ['artwork' => $artwork, 'from' => $origin, 'return' => $isSafeArtworksReturnUrl ? $returnUrl : null]) }}" class="museum-btn w-full justify-center">Edit Artwork</a>
                 </article>
             </aside>
         </div>

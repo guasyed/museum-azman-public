@@ -83,6 +83,17 @@
         $artworkUrl = route('artworks.show', $artwork);
         $qrCodeUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data='.rawurlencode($artworkUrl);
         $origin = request()->string('from')->toString() === 'dashboard' ? 'dashboard' : 'collection';
+        $refererUrl = url()->previous();
+        $refererPath = is_string($refererUrl) ? parse_url($refererUrl, PHP_URL_PATH) : null;
+        $refererQuery = is_string($refererUrl) ? parse_url($refererUrl, PHP_URL_QUERY) : null;
+        $refererRoute = is_string($refererPath)
+            ? $refererPath.($refererQuery ? '?'.$refererQuery : '')
+            : null;
+        $isSafeRefererUrl = is_string($refererRoute)
+            && $refererRoute !== ''
+            && parse_url($refererUrl, PHP_URL_HOST) === request()->getHost()
+            && str_starts_with($refererRoute, '/');
+        $isSelfReferer = $isSafeRefererUrl && $refererRoute === request()->getRequestUri();
         $returnUrl = request()->query('return');
         $returnPath = is_string($returnUrl) ? parse_url($returnUrl, PHP_URL_PATH) : null;
         $isSafeReturnUrl = is_string($returnUrl)
@@ -90,7 +101,9 @@
             && parse_url($returnUrl, PHP_URL_HOST) === request()->getHost()
             && is_string($returnPath)
             && str_starts_with($returnPath, '/');
-        $backRoute = $isSafeReturnUrl ? $returnUrl : ($origin === 'dashboard' ? route('dashboard', [], false) : route('artworks.index', [], false));
+        $backRoute = (!$isSelfReferer && $isSafeRefererUrl)
+            ? $refererRoute
+            : ($isSafeReturnUrl ? $returnUrl : ($origin === 'dashboard' ? route('dashboard', [], false) : route('artworks.index', [], false)));
         $backLabel = $origin === 'dashboard' ? 'Back to Dashboard' : 'Back to Collection';
         $selfRoute = route('artworks.show', [
             'artwork' => $artwork,

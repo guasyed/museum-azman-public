@@ -223,8 +223,8 @@
     </div>
     <h1>Museum Azman Technical Documentation</h1>
     <p class="meta">
-      <strong>Version:</strong> 1.2<br>
-      <strong>Date:</strong> 2026-03-10<br>
+      <strong>Version:</strong> 1.3<br>
+      <strong>Date:</strong> 2026-05-12<br>
       <strong>System:</strong> Museum Azman (Laravel 12)
     </p>
 
@@ -254,6 +254,7 @@
           <li><a href="#commands">Command Reference</a></li>
           <li><a href="#gaps">Known Gaps and Future Improvements</a></li>
           <li><a href="#index">Source Reference Index</a></li>
+          <li><a href="#appendix-routes">Route Access Matrix</a></li>
         </ol>
       </aside>
 
@@ -272,18 +273,19 @@
       <li>Artist and location management</li>
       <li>Artwork movement tracking</li>
       <li>Reporting and export (CSV/PDF)</li>
-      <li>User and role administration</li>
-      <li>Settings and backup operations</li>
+      <li>CSV/XLSX import workflows with optional image download</li>
+      <li>User approval, role administration, notification preferences, and activity logs</li>
+      <li>Configurable statuses, regional settings, timezone, and backup operations</li>
       <li>Installable PWA behavior</li>
     </ul>
 
     <h2 id="stack">3. Technology Stack</h2>
     <h3>3.1 Backend</h3>
     <ul>
-      <li><code>php ^8.2</code></li>
+      <li><code>php &gt;=8.2 &lt;8.6</code></li>
       <li><code>laravel/framework ^12.0</code></li>
       <li><code>laravel/tinker</code></li>
-      <li><code>barryvdh/laravel-dompdf</code></li>
+      <li><code>barryvdh/laravel-dompdf</code> / <code>dompdf/dompdf</code> runtime PDF fallback currently present in <code>vendor/</code></li>
       <li><code>bupple/laravel-ai-engine</code> (optional)</li>
     </ul>
 
@@ -292,7 +294,7 @@
       <li>Blade templates in <code>resources/views</code></li>
       <li>Vite build pipeline</li>
       <li>Tailwind CSS 4</li>
-      <li>Vanilla JavaScript for suggestions, modal interactions, AJAX flows, and PWA</li>
+      <li>Vanilla JavaScript for suggestions, modal interactions, AJAX flows, notifications, install prompts, and PWA</li>
     </ul>
 
     <h3>3.3 Data and Storage</h3>
@@ -300,6 +302,7 @@
       <li>Database configurable via Laravel (<code>sqlite</code> default in <code>.env.example</code>)</li>
       <li>Backup table-snapshot support for <code>mysql</code>, <code>pgsql</code>, and <code>sqlite</code></li>
       <li>Public disk for media and local private disk for backup JSON files</li>
+      <li>Application responses receive CSP headers through <code>SetContentSecurityPolicy</code></li>
     </ul>
 
     <h2 id="structure">4. Project Structure</h2>
@@ -319,8 +322,8 @@
       <li>Middleware checks (<code>guest</code>, <code>auth</code>, <code>admin</code>)</li>
       <li>Controller orchestration</li>
       <li>Eloquent model operations</li>
-      <li>Optional service layer processing</li>
-      <li>Blade/JSON/file response</li>
+      <li>Optional service layer processing through <code>ImageOptimizer</code> and <code>ActivityLogger</code></li>
+      <li>Blade, JSON, streamed CSV, PDF, file download, or redirect response</li>
     </ol>
 
     <h3>5.2 Scheduled Operations</h3>
@@ -333,10 +336,18 @@
 
     <h3>6.1 Authentication Module</h3>
     <p>Controller: <code>app/Http/Controllers/AuthController.php</code></p>
+    <ul>
+      <li>Guest routes include login, registration, forgot password, and reset password.</li>
+      <li>Registration excludes <code>owner</code> and <code>admin</code> role requests, creates users as unapproved, and notifies approved admins.</li>
+      <li>Login blocks users whose <code>is_approved</code> flag is false.</li>
+      <li>Login, logout, and registration actions are recorded in <code>activity_logs</code>.</li>
+    </ul>
     <pre><code>// routes/web.php
 Route::middleware('guest')-&gt;group(function () {
   Route::get('login', [AuthController::class, 'showLogin'])-&gt;name('login');
   Route::post('login', [AuthController::class, 'login'])-&gt;name('login.perform');
+  Route::get('register', [AuthController::class, 'showRegister'])-&gt;name('register');
+  Route::post('register', [AuthController::class, 'register'])-&gt;name('register.perform');
 });
 
 Route::middleware('auth')-&gt;group(function () {
@@ -347,7 +358,10 @@ Route::middleware('auth')-&gt;group(function () {
     <p>Controller: <code>app/Http/Controllers/DashboardController.php</code></p>
     <pre><code>$stats = [
   'total_artworks' =&gt; $artworks-&gt;count(),
+  'total_artists' =&gt; $artworks-&gt;pluck('artist_id')-&gt;filter()-&gt;unique()-&gt;count(),
+  'total_locations' =&gt; $artworks-&gt;pluck('location_id')-&gt;filter()-&gt;unique()-&gt;count(),
   'collection_value' =&gt; (float) $artworks-&gt;sum('current_valuation'),
+  'in_stage' =&gt; $artworks-&gt;where('status', 'In Stage')-&gt;count(),
   'on_loan' =&gt; $artworks-&gt;where('status', 'On Loan')-&gt;count(),
 ];</code></pre>
 
@@ -394,10 +408,16 @@ private function mapUrl(string $query): ?string
 
     <h3>6.6 Movement Module</h3>
     <p>Controller: <code>app/Http/Controllers/MovementController.php</code></p>
+    <ul>
+      <li>Routes cover movement list, create, edit, update, and delete.</li>
+      <li>Movements sync the linked artwork status and destination location from the latest movement.</li>
+      <li>Logistics-handler users see only movements assigned to their exact <code>responsible_handler</code> name.</li>
+      <li>Admins can create/edit/delete any movement; assigned logistics handlers can edit/delete their own assigned movements but cannot create new movements.</li>
+      <li>Assignment changes notify responsible handlers when their notification preferences allow it; handler-originated updates notify approved admins.</li>
+    </ul>
     <pre><code>$movement = Movement::create($request-&gt;validated());
-$movement-&gt;artwork()-&gt;update([
-  'status' =&gt; $movement-&gt;status,
-]);</code></pre>
+$this-&gt;notifyResponsibleHandlerAssignment($movement);
+$this-&gt;syncArtworkStatus((int) $movement-&gt;artwork_id);</code></pre>
 
     <h3>6.7 Reporting Module</h3>
     <p>Controller: <code>app/Http/Controllers/ReportController.php</code></p>
@@ -410,6 +430,17 @@ $movement-&gt;artwork()-&gt;update([
 
     <h3>6.8 Settings and Backup Module</h3>
     <p>Controller: <code>app/Http/Controllers/SettingController.php</code></p>
+    <ul>
+      <li>General organization profile, regional settings, notification preferences, and appearance settings</li>
+      <li>Configurable active/default artwork and movement statuses</li>
+      <li>Manual backup generation, backup download, backup deletion, and backup listing</li>
+      <li>Settings persistence through the key-value <code>settings</code> table</li>
+      <li>Admin-only sections: general, regional, backup, statuses, users/roles</li>
+      <li>User-accessible sections: notifications and appearance</li>
+      <li>Notification preferences are stored on the current user; admins also persist defaults in <code>settings</code></li>
+      <li>Appearance supports light/dark theme, density, accent color, heading font, and body font</li>
+      <li>Saving settings clears cached currency/date-format helpers</li>
+    </ul>
     <pre><code>$timezone = $this-&gt;getConfiguredTimezone();
 $relativePath = $this-&gt;createBackupFile($timezone);
 
@@ -430,17 +461,37 @@ $this-&gt;saveSettings([
       Listing modules support query-based sorting with controller allowlists and clickable table headers.
     </p>
     <ul>
-      <li><code>/admin/users</code>: <code>name</code>, <code>email</code>, <code>role</code></li>
-      <li><code>/settings?tab=users-roles</code>: <code>name</code>, <code>email</code>, <code>role</code></li>
+      <li><code>/admin/users</code>: <code>name</code>, <code>email</code>, <code>role</code>, <code>status</code></li>
+      <li><code>/settings?tab=users-roles</code>: <code>name</code>, <code>email</code>, <code>role</code>, <code>status</code></li>
       <li><code>/artworks?view=table</code>: <code>title</code>, <code>current_valuation</code>, <code>created_at</code> (default)</li>
       <li><code>/locations?view=list</code>: <code>name</code>, <code>type</code></li>
       <li><code>/movements</code>: <code>artwork_title</code>, <code>from_location</code>, <code>to_location</code>, <code>date_out</code>, <code>expected_return_date</code>, <code>responsible_handler</code>, <code>reason</code>, <code>status</code></li>
     </ul>
     <ul>
       <li>Query params: <code>sort</code> and <code>direction</code> (<code>asc</code>/<code>desc</code>)</li>
+      <li>Settings users table uses <code>user_sort</code> and <code>user_direction</code></li>
       <li>Active sort indicator in headers: <code>▲</code> / <code>▼</code></li>
       <li>Filter state and view mode are preserved while switching sort</li>
       <li>Related-field sorting uses controlled joins with base-table selection</li>
+    </ul>
+
+    <h3>6.11 Import and Activity Modules</h3>
+    <ul>
+      <li>CSV import UI: <code>GET/POST /admin/imports/csv</code></li>
+      <li>CSV command: <code>museum:import-csv {path} {--connection=} {--download-images} {--skip-images} {--fresh}</code></li>
+      <li>XLSX command: <code>museum:import-xlsx {path} {--download-images}</code></li>
+      <li>Activity logs: <code>GET /admin/activity-logs</code> and <code>app/Services/ActivityLogger.php</code></li>
+      <li>Activity logs capture action, description, authenticated user, IP address, user agent, optional subject type/id/label, and can be searched/filtered by admins.</li>
+      <li>Notifications cover new user registrations and movement assignment/update events when the notifications table is available.</li>
+    </ul>
+
+    <h3>6.12 Profile Module</h3>
+    <ul>
+      <li>Controller: <code>app/Http/Controllers/ProfileController.php</code></li>
+      <li>Routes: <code>GET /profile</code>, <code>PUT /profile</code>, <code>PUT /profile/password</code></li>
+      <li>Users can update profile name/avatar; only admins can update their own email address from the profile form.</li>
+      <li>Password updates require the current password and reject reusing the current password.</li>
+      <li>Profile and password changes are logged through <code>ActivityLogger</code>.</li>
     </ul>
 
     <h2 id="model">7. Data Model</h2>
@@ -449,7 +500,12 @@ $this-&gt;saveSettings([
       <li><code>Artist</code> hasMany <code>Artwork</code>; <code>Location</code> hasMany <code>Artwork</code></li>
       <li><code>Artwork</code> belongsTo <code>Artist</code> and <code>Location</code></li>
       <li><code>Artwork</code> hasMany <code>ArtworkImage</code> and <code>Movement</code></li>
+      <li><code>Country</code> normalizes artist country references</li>
+      <li><code>Status</code> stores active/default status options</li>
+      <li><code>ActivityLog</code> stores auditable user/admin events</li>
       <li><code>Setting</code> stores key-value configuration</li>
+      <li><code>User::isLogisticsHandler()</code> recognizes the <code>logistics-handler</code> role slug and legacy handler role labels</li>
+      <li><code>User::isApproved()</code> defaults legacy/null approval state to approved</li>
     </ul>
 
     <h2 id="routing">8. Routing and Access Control</h2>
@@ -457,7 +513,11 @@ $this-&gt;saveSettings([
       <li>Routes in <code>routes/web.php</code> and <code>routes/console.php</code></li>
       <li>Middleware boundaries: <code>guest</code>, <code>auth</code>, <code>admin</code></li>
       <li><code>admin</code> alias configured in <code>bootstrap/app.php</code></li>
+      <li>Guest boundaries cover login, registration, forgot password, and reset password routes</li>
+      <li>Logistics-handler movement restrictions are enforced inside <code>MovementController</code></li>
       <li>PWA manifest route: <code>GET /manifest.json</code></li>
+      <li>Maintenance route: <code>GET /optimize-clear</code> is protected by <code>auth</code> and <code>admin</code> middleware</li>
+      <li>Admin documentation route: <code>GET /admin/technical-documentation</code> serves this HTML file with <code>X-Robots-Tag: noindex, nofollow</code></li>
     </ul>
 
     <h2 id="files">9. File and Image Handling</h2>
@@ -467,6 +527,7 @@ $this-&gt;saveSettings([
       <li>Resizes/compresses via GD</li>
       <li>Writes WebP/JPEG optimized images to public disk</li>
       <li>Fallback stores original binary if transform unsupported</li>
+      <li>Stores gallery images in <code>artwork_images</code>; the first valid imported image can become <code>primary_image_path</code></li>
     </ul>
 
     <h2 id="backup">10. Backup and Recovery</h2>
@@ -483,6 +544,7 @@ $this-&gt;saveSettings([
       <li><code>public/manifest.json</code>, <code>public/sw.js</code>, and icons in <code>public/icons/</code></li>
       <li>Manifest uses standalone display mode and maskable icons</li>
       <li>Service worker provides cache-first fetch strategy for core assets</li>
+      <li>Layout head includes Apple mobile web app metadata and icon links</li>
     </ul>
 
     <h2 id="env">12. Environment Configuration</h2>
@@ -494,6 +556,7 @@ $this-&gt;saveSettings([
       <li>Mail: <code>MAIL_*</code></li>
       <li>Filesystem/cloud: <code>FILESYSTEM_DISK</code>, <code>AWS_*</code></li>
       <li>Optional AI engine: <code>BUPPLE_*</code></li>
+      <li>PDF Chrome override: <code>REPORTS_PDF_CHROME_BINARY</code></li>
     </ul>
 
     <h2 id="build">13. Build and Run</h2>
@@ -528,7 +591,7 @@ php artisan view:cache</code></pre>
     <h2 id="deploy">15. Deployment Guide</h2>
     <ul>
       <li>Recommended runtime: Ubuntu LTS, Nginx, PHP-FPM, MySQL, TLS</li>
-      <li>Deployment flow: pull, install, build assets, migrate, cache, restart services</li>
+      <li>Deployment flow: pull, install, build assets, migrate, verify <code>php artisan storage:link</code>, cache, restart services</li>
       <li>Required cron shown below</li>
     </ul>
     <pre><code>* * * * * cd /path/to/project && php artisan schedule:run >> /dev/null 2>&1</code></pre>
@@ -538,8 +601,11 @@ php artisan view:cache</code></pre>
       <li>Enforce HTTPS in production</li>
       <li>Use strong <code>APP_KEY</code> and credentials</li>
       <li>Restrict administrative accounts</li>
+      <li>Keep registration approval enabled for non-admin/owner role requests</li>
       <li>Validate upload inputs and URL sources</li>
       <li>Harden file permissions and backup access</li>
+      <li>Keep maintenance and documentation routes behind admin/auth boundaries</li>
+      <li>Verify <code>composer.json</code> and <code>composer.lock</code> are aligned before deployment</li>
     </ul>
 
     <h2 id="perf">17. Performance Notes</h2>
@@ -551,7 +617,7 @@ php artisan view:cache</code></pre>
     </ul>
 
     <h2 id="ops">18. Operations and Monitoring</h2>
-    <p>Monitor uptime, latency, system resources, DB health, queue status, backup freshness, and <code>storage/logs</code>.</p>
+    <p>Monitor uptime, latency, system resources, DB health, queue status, backup freshness, failed notification/email delivery, pending registrations, handler assignment name mismatches, and <code>storage/logs</code>.</p>
 
     <h2 id="troubleshoot">19. Troubleshooting Guide</h2>
     <h3>19.1 Common Issues</h3>
@@ -560,6 +626,7 @@ php artisan view:cache</code></pre>
       <li>Images missing: run <code>php artisan storage:link</code></li>
       <li>Assets missing: run <code>npm run build</code></li>
       <li>Schedule not running: verify cron + <code>php artisan schedule:list</code></li>
+      <li>PDF fallback fails: verify DomPDF dependencies are committed in Composer metadata</li>
     </ul>
 
     <h3>19.2 Useful Commands</h3>
@@ -573,6 +640,7 @@ php artisan backup:auto</code></pre>
     <ul>
       <li><code>backup:auto</code>: generates automatic DB snapshot backup</li>
       <li><code>museum:import-xlsx {path} {--download-images}</code>: imports spreadsheet data to artist/artwork/location entities</li>
+      <li><code>museum:import-csv {path} {--connection=} {--download-images} {--skip-images} {--fresh}</code>: imports CSV artwork data with optional image and fresh-import modes</li>
     </ul>
 
     <h2 id="gaps">21. Known Gaps and Future Improvements</h2>
@@ -581,6 +649,7 @@ php artisan backup:auto</code></pre>
       <li>Expand automated test coverage for backup/reporting paths</li>
       <li>Add ERD and sequence diagrams</li>
       <li>Consider async export for large datasets</li>
+      <li>Align Composer manifests with runtime PDF fallback dependencies before a clean production install</li>
     </ul>
 
     <h2 id="index">22. Source Reference Index</h2>
@@ -588,9 +657,17 @@ php artisan backup:auto</code></pre>
       <li>Routes: <code>routes/web.php</code>, <code>routes/console.php</code></li>
       <li>Controllers: <code>app/Http/Controllers/*.php</code></li>
       <li>Models: <code>app/Models/*.php</code></li>
-      <li>Services: <code>app/Services/ImageOptimizer.php</code></li>
-      <li>Commands: <code>app/Console/Commands/AutoBackupCommand.php</code>, <code>app/Console/Commands/ImportMuseumXlsxCommand.php</code></li>
+      <li>Services: <code>app/Services/ImageOptimizer.php</code>, <code>app/Services/ActivityLogger.php</code></li>
+      <li>Commands: <code>app/Console/Commands/AutoBackupCommand.php</code>, <code>app/Console/Commands/ImportMuseumXlsxCommand.php</code>, <code>app/Console/Commands/ImportMuseumCsvCommand.php</code></li>
       <li>PWA: <code>public/manifest.json</code>, <code>public/sw.js</code></li>
+    </ul>
+
+    <h2 id="appendix-routes">Appendix A: Route Access Matrix</h2>
+    <ul>
+      <li>Public: <code>GET /manifest.json</code>, public storage proxy route for validated <code>storage/*</code> paths</li>
+      <li>Guest-only: login, registration, forgot-password, reset-password routes</li>
+      <li>Authenticated: dashboard, profile, notification mark-read, artworks, movements, locations index/show, artists, reports, settings routes</li>
+      <li>Admin-only: <code>GET /optimize-clear</code>, location create/store/edit/update, artist create/update/delete, admin imports, admin technical documentation, admin activity logs, admin user CRUD/approval routes, backup generate/download/delete actions, status management actions</li>
     </ul>
 
       </section>

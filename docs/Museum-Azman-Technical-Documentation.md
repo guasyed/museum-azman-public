@@ -1,7 +1,7 @@
 # Museum Azman Technical Documentation
 
-Version: 1.2  
-Date: 2026-03-10  
+Version: 1.3  
+Date: 2026-05-12  
 System: Museum Azman (Laravel 12)
 
 ## 1. Document Purpose
@@ -19,17 +19,18 @@ Museum Azman is a web-based collection management platform for museum artwork op
 - Artist and location management
 - Artwork movement tracking
 - Reports and exports (CSV and PDF)
-- User and role management
-- Settings, timezone management, and backup operations
+- CSV/XLSX import workflows with optional image download
+- User approval, role management, notification preferences, and activity logs
+- Configurable statuses, regional settings, timezone management, and backup operations
 - Installable PWA behavior for mobile shortcut/app mode
 
 ## 3. Technology Stack
 ### 3.1 Backend
-- PHP: `^8.2`
+- PHP: `>=8.2 <8.6`
 - Framework: `laravel/framework ^12.0`
 - Key packages:
 - `laravel/tinker`
-- `barryvdh/laravel-dompdf` (for PDF fallback generation)
+- `barryvdh/laravel-dompdf` / `dompdf/dompdf` (runtime PDF fallback currently present in `vendor/`)
 - `bupple/laravel-ai-engine` (optional, environment-configurable)
 
 ### 3.2 Frontend
@@ -40,6 +41,7 @@ Museum Azman is a web-based collection management platform for museum artwork op
 - AJAX flows (including JSON create/update responses)
 - Modal interactions
 - Search suggestions/autocomplete
+- Notification dropdown and install prompt behavior
 - PWA/service worker behavior
 
 ### 3.3 Data and Storage
@@ -48,6 +50,7 @@ Museum Azman is a web-based collection management platform for museum artwork op
 - File storage:
 - `public` disk for images/assets (`storage/app/public`)
 - `local` disk for private JSON backup snapshots (`storage/app/private/backups`)
+- Browser security headers are applied by `SetContentSecurityPolicy`
 
 ## 4. Project Structure
 Top-level structure:
@@ -76,7 +79,7 @@ Key implementation directories:
 4. Controller orchestration in `app/Http/Controllers`.
 5. Domain/model operations through Eloquent in `app/Models`.
 6. Optional service invocation (`ImageOptimizer`).
-7. Response rendering as Blade HTML, JSON, file download, or redirect.
+7. Response rendering as Blade HTML, JSON, streamed CSV, PDF download, file download, or redirect.
 
 ### 5.2 Scheduled Operations Architecture
 1. OS cron executes `php artisan schedule:run` every minute.
@@ -88,7 +91,7 @@ Key implementation directories:
 - Presentation layer: Blade templates and JS UI logic
 - Application layer: controllers and form requests (`app/Http/Requests`)
 - Domain layer: Eloquent models and relationships
-- Service layer: reusable operation services (`ImageOptimizer`)
+- Service layer: reusable operation services (`ImageOptimizer`, `ActivityLogger`)
 - Infrastructure layer: route config, scheduler, filesystem, database and environment config
 
 ## 6. Core Modules
@@ -97,8 +100,17 @@ Key implementation directories:
 - Guest routes:
 - `GET /login`
 - `POST /login`
+- `GET /register`
+- `POST /register`
+- `GET /forgot-password`
+- `POST /forgot-password`
+- `GET /reset-password/{token}`
+- `POST /reset-password`
 - Auth route:
 - `POST /logout`
+- Registration excludes `owner` and `admin` role requests, creates users as unapproved, and notifies approved admins.
+- Login blocks users whose `is_approved` flag is false.
+- Auth actions are recorded in `activity_logs`.
 
 Sample code:
 ```php
@@ -128,8 +140,11 @@ Route::middleware('auth')->group(function () {
 // app/Http/Controllers/DashboardController.php
 $stats = [
   'total_artworks' => $artworks->count(),
+  'total_artists' => $artworks->pluck('artist_id')->filter()->unique()->count(),
+  'total_locations' => $artworks->pluck('location_id')->filter()->unique()->count(),
   'collection_value' => (float) $artworks->sum('current_valuation'),
-  'in_transit' => $artworks->where('status', 'In Transit')->count(),
+  'in_stage' => $artworks->where('status', 'In Stage')->count(),
+  'on_loan' => $artworks->where('status', 'On Loan')->count(),
 ];
 ```
 
@@ -222,16 +237,22 @@ private function mapUrl(string $query): ?string
 - Routes:
 - `GET /movements`
 - `POST /movements`
-- Tracks movement and updates linked artwork status from movement status.
+- `GET /movements/{movement}/edit`
+- `PUT /movements/{movement}`
+- `DELETE /movements/{movement}`
+- Tracks movement and syncs linked artwork status/location from the latest movement.
+- Logistics-handler users see only movements assigned to their exact `responsible_handler` name.
+- Admins can create/edit/delete any movement; assigned logistics handlers can edit/delete their own assigned movements but cannot create new movements.
+- Assignment changes notify the responsible handler when notification preferences allow it.
+- Handler-originated updates notify approved admins.
 
 Sample code:
 ```php
 // app/Http/Controllers/MovementController.php (store excerpt)
 $movement = Movement::create($request->validated());
 
-$movement->artwork()->update([
-  'status' => $movement->status,
-]);
+$this->notifyResponsibleHandlerAssignment($movement);
+$this->syncArtworkStatus((int) $movement->artwork_id);
 
 return redirect()->back()->with('success', 'Movement recorded successfully.');
 ```
@@ -262,10 +283,18 @@ return response()->streamDownload(function () use ($stats) {
 - Routes:
 - `GET /settings`
 - `POST /settings/{section}`
+- `POST /settings/statuses`
+- `POST /settings/statuses/{status}/toggle`
+- `DELETE /settings/statuses/{status}`
 - `POST /settings/backup/generate`
 - `GET /settings/backup/download`
 - `POST /settings/backup/delete`
-- Features timezone-aware backup metadata, backup listing, and settings persistence in key-value table.
+- Features organization profile, regional settings, user notification preferences, appearance settings, configurable artwork/movement statuses, timezone-aware backup metadata, backup listing, and key-value settings persistence.
+- Admin-only settings sections: general, regional, backup, statuses, users/roles.
+- User-accessible settings sections: notifications and appearance.
+- Notification preferences are stored on the current user; admins also persist defaults in the `settings` table.
+- Appearance settings support light/dark theme, density, accent color, heading font, and body font.
+- Saving settings clears the cached currency/date-format support helpers.
 
 Sample code:
 ```php
@@ -314,17 +343,37 @@ User::query()->create($validated);
 The listing modules support query-based sorting with strict allowlists in controllers and clickable table headers in Blade views.
 
 Implemented sortable columns:
-- `Admin Users` (`/admin/users`): `name`, `email`, `role`
-- `Settings > Users & Roles` (`/settings?tab=users-roles`): `name`, `email`, `role`
+- `Admin Users` (`/admin/users`): `name`, `email`, `role`, `status`
+- `Settings > Users & Roles` (`/settings?tab=users-roles`): `name`, `email`, `role`, `status`
 - `Collection` table view (`/artworks?view=table`): `title`, `current_valuation`, `created_at` (default)
 - `Locations` list view (`/locations?view=list`): `name`, `type`
 - `Movement History` (`/movements`): `artwork_title`, `from_location`, `to_location`, `date_out`, `expected_return_date`, `responsible_handler`, `reason`, `status`
 
 Sorting conventions:
 - Query parameters: `sort` and `direction` (`asc` or `desc`)
+- Settings users table uses `user_sort` and `user_direction`
 - Active sort indicator: arrow marker in header (`▲` or `▼`)
 - Existing filters and view mode are preserved when changing sort order
 - Related model sort fields (for example role/artwork title) are handled via controlled joins with `select(base_table.*)`
+
+### 6.11 Import and Activity Modules
+- CSV import UI: `GET/POST /admin/imports/csv`
+- CSV command: `museum:import-csv {path} {--connection=} {--download-images} {--skip-images} {--fresh}`
+- XLSX command: `museum:import-xlsx {path} {--download-images}`
+- Activity log UI: `GET /admin/activity-logs`
+- Activity logging service: `app/Services/ActivityLogger.php`
+- Activity logs capture action, description, authenticated user, IP address, user agent, optional subject type/id/label, and can be searched/filtered by admins.
+- Notifications: new-user registration and movement assignment/update notifications are stored in the Laravel notifications table when available.
+
+### 6.12 Profile Module
+- Controller: `app/Http/Controllers/ProfileController.php`
+- Routes:
+- `GET /profile`
+- `PUT /profile`
+- `PUT /profile/password`
+- Users can update profile name/avatar; only admins can update their own email address from the profile form.
+- Password updates require the current password and reject reusing the current password.
+- Profile and password changes are logged through `ActivityLogger`.
 
 ## 7. Data Model
 Primary models and relationships:
@@ -338,10 +387,15 @@ Primary models and relationships:
 - `Artwork` hasMany `Movement`
 - `ArtworkImage` belongsTo `Artwork`
 - `Movement` belongsTo `Artwork`
+- `Country` normalizes artist country references
+- `Status` stores active/default status options
+- `ActivityLog` stores auditable user/admin events
 - `Setting` is key-value configuration storage
 
 Notable model behavior:
 - `User::isAdmin()` treats both `admin` and `owner` as privileged
+- `User::isLogisticsHandler()` recognizes the `logistics-handler` role slug and legacy handler role labels
+- `User::isApproved()` defaults legacy/null approval state to approved
 - `Artwork` exposes computed `primary_image_url`
 - `ArtworkImage` exposes computed `url`
 - `User` exposes computed `avatar_url`
@@ -353,11 +407,12 @@ Routes files:
 
 Access boundaries:
 - `guest` middleware:
-- login routes only
+- login, registration, forgot password, and reset password routes
 - `auth` middleware:
 - main application routes
 - `admin` middleware (`App\Http\Middleware\AdminOnly`):
 - privileged mutating routes and admin user management
+- logistics-handler behavior is enforced inside `MovementController` for assigned-only movement access
 
 Middleware wiring:
 - Alias configured in `bootstrap/app.php`
@@ -367,7 +422,8 @@ PWA manifest route:
 - `GET /manifest.json` returns `public/manifest.json` via file response
 
 Operational endpoint note:
-- `GET /optimize-clear` runs optimize/cache/config/route/view clear commands and is currently publicly reachable in `routes/web.php`.
+- `GET /optimize-clear` is protected by `auth` and `admin` middleware and clears Laravel optimize/cache/config/route/view caches.
+- `GET /admin/technical-documentation` serves `docs/Museum-Azman-Technical-Documentation.html` with `X-Robots-Tag: noindex, nofollow`.
 
 ## 9. File and Image Handling
 Service: `app/Services/ImageOptimizer.php`
@@ -378,6 +434,7 @@ Capabilities:
 - Resize/compress image via GD to max side 1800px
 - Save optimized output as WebP or JPEG
 - Fallback to original binary storage for unsupported transforms
+- Store gallery images in `artwork_images`; the first valid imported image can become `primary_image_path`
 
 Storage locations:
 - Public disk path (`storage/app/public/...`) for web-accessible assets
@@ -424,6 +481,7 @@ Current behavior:
 - App can be installed from supported mobile browsers.
 - Manifest sets `display: standalone` and includes maskable icons.
 - Service worker uses cache-first fetch strategy for predefined core files.
+- Layout head includes Apple mobile web app metadata and icon links.
 - URL bar hides only when launched as installed app (browser/device dependent).
 
 ## 12. Environment Configuration
@@ -443,6 +501,8 @@ Important groups:
 - `FILESYSTEM_DISK`, `AWS_*`
 - AI engine (optional):
 - `BUPPLE_*`
+- PDF Chrome override:
+- `REPORTS_PDF_CHROME_BINARY`
 
 ## 13. Build and Run
 ### 13.1 Initial Setup
@@ -507,7 +567,8 @@ composer run test
 4. Run migrations.
 5. Cache configs/routes/views.
 6. Ensure writable permissions on `storage` and `bootstrap/cache`.
-7. Restart PHP-FPM and any queue workers.
+7. Ensure `php artisan storage:link` exists for uploaded public media.
+8. Restart PHP-FPM and any queue workers.
 
 ### 15.3 Required Cron
 ```cron
@@ -518,10 +579,12 @@ composer run test
 - Enforce HTTPS in production.
 - Use strong `APP_KEY` and non-default credentials.
 - Restrict administrative accounts and role assignments.
+- Keep registration approval enabled for non-admin/owner role requests.
 - Validate and sanitize upload sources.
 - Keep framework and dependencies patched.
 - Restrict file permissions and backup file access.
-- Move `GET /optimize-clear` behind admin/auth or remove in production.
+- Keep maintenance and documentation routes behind admin/auth boundaries.
+- Verify `composer.json` and `composer.lock` are aligned before deployment.
 
 ## 17. Performance Notes
 - Use Laravel production caches (`config:cache`, `route:cache`, `view:cache`).
@@ -536,6 +599,9 @@ Monitor:
 - Database health and storage growth
 - Queue worker status
 - Backup job status and backup freshness
+- Failed notification/email delivery
+- Pending user registrations awaiting approval
+- Movement assignments with responsible-handler names that do not match an approved logistics-handler user
 - Laravel logs in `storage/logs`
 
 ## 19. Troubleshooting Guide
@@ -557,6 +623,7 @@ Manifest/icon stale on mobile:
 
 PDF export fails:
 - Verify Chrome/Chromium binary availability or configure `REPORTS_PDF_CHROME_BINARY`
+- Verify DomPDF dependencies are committed in Composer metadata if relying on fallback rendering
 
 ### 19.2 Useful Commands
 ```bash
@@ -577,12 +644,15 @@ Custom commands in repository:
 - Imports museum Excel workbook format into artists/artworks/locations
 - Optionally downloads and optimizes first image URL
 
+`museum:import-csv {path} {--connection=} {--download-images} {--skip-images} {--fresh}`
+- Imports CSV artwork data, supports optional alternate DB connection, optional image download, and a fresh artwork import mode
+
 ## 21. Known Gaps and Future Improvements
 - Add official restore-from-backup workflow and UI with validations.
 - Add test coverage for backup generation/deletion and report export edge cases.
-- Restrict or remove public maintenance endpoint (`/optimize-clear`).
 - Add formal ERD and sequence diagrams.
 - Consider asynchronous export generation for large datasets.
+- Align Composer manifests with runtime PDF fallback dependencies before a clean production install.
 
 ## 22. Source Reference Index
 Routes:
@@ -597,10 +667,12 @@ Models:
 
 Services:
 - `app/Services/ImageOptimizer.php`
+- `app/Services/ActivityLogger.php`
 
 Console Commands:
 - `app/Console/Commands/AutoBackupCommand.php`
 - `app/Console/Commands/ImportMuseumXlsxCommand.php`
+- `app/Console/Commands/ImportMuseumCsvCommand.php`
 
 PWA files:
 - `public/manifest.json`
@@ -613,16 +685,16 @@ Bootstrap and middleware:
 ---
 
 ## Appendix A: Route Access Matrix (Operational Quick Reference)
-- Public: `GET /optimize-clear`, `GET /manifest.json`
-- Guest-only: login routes
-- Authenticated: dashboard, artworks, movements, locations index/show, artists, reports, settings routes
-- Admin-only: location create/store/edit/update, admin user CRUD routes, backup generate/download/delete actions (controller-level checks)
+- Public: `GET /manifest.json`, public storage proxy route for validated `storage/*` paths
+- Guest-only: login, registration, forgot-password, reset-password routes
+- Authenticated: dashboard, profile, notification mark-read, artworks, movements, locations index/show, artists, reports, settings routes
+- Admin-only: `GET /optimize-clear`, location create/store/edit/update, artist create/update/delete, admin imports, admin technical documentation, admin activity logs, admin user CRUD/approval routes, backup generate/download/delete actions, status management actions
 
 ## Appendix B: Backup Payload Contract
 Example high-level structure:
 ```json
 {
-  "generated_at": "2026-03-10T03:00:00+08:00",
+  "generated_at": "2026-05-12T03:00:00+08:00",
   "timezone": "Asia/Kuala_Lumpur",
   "connection": "mysql",
   "tables": {

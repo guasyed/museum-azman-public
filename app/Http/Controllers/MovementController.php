@@ -14,6 +14,7 @@ use App\Services\ActivityLogger;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\View\View;
 
 class MovementController extends Controller
@@ -79,9 +80,8 @@ class MovementController extends Controller
         $locationOptions = Location::query()
             ->whereNotNull('name')
             ->where('name', '!=', '')
-            ->orderBy('name')
+            ->tap(fn (Builder $query) => $this->orderLocationsByCleanedInventory($query))
             ->pluck('name')
-            ->sort()
             ->values();
 
         // Stats come from a lightweight count query (not affected by pagination)
@@ -90,14 +90,14 @@ class MovementController extends Controller
             $statsQuery->whereRaw('LOWER(responsible_handler) = ?', [strtolower((string) $currentUser->name)]);
         }
         $stats = [
-            'in_stage' => (clone $statsQuery)->where('status', 'In Stage')->count(),
-            'on_loan' => (clone $statsQuery)->where('status', 'On Loan')->count(),
+            'in_stage' => (clone $statsQuery)->whereIn('status', ['In Stage', 'In Storage', 'In Residence', 'In Office'])->count(),
+            'on_loan' => (clone $statsQuery)->whereIn('status', ['On Loan', 'Loaned Out'])->count(),
             'under_restoration' => (clone $statsQuery)->where('status', 'Under Restoration')->count(),
         ];
 
         // Active movements are paginated separately
         $activeQuery = Movement::query()->with('artwork.artist')
-            ->whereIn('status', ['In Stage', 'On Loan', 'Under Restoration']);
+            ->whereNotIn('status', ['On Display', 'Sold or Left']);
         if ($isAssignedOnlyView) {
             $activeQuery->whereRaw('LOWER(responsible_handler) = ?', [strtolower((string) $currentUser->name)]);
         }
@@ -105,7 +105,9 @@ class MovementController extends Controller
 
         $canRecordMovement = ! $isAssignedOnlyView;
 
-        return view('movements.index', compact('movements', 'artworks', 'stats', 'activeMovements', 'locationOptions', 'statusOptions', 'handlerOptions', 'sortColumn', 'direction', 'canRecordMovement', 'isAssignedOnlyView'));
+        $reasonOptions = $this->reasonOptions();
+
+        return view('movements.index', compact('movements', 'artworks', 'stats', 'activeMovements', 'locationOptions', 'statusOptions', 'handlerOptions', 'reasonOptions', 'sortColumn', 'direction', 'canRecordMovement', 'isAssignedOnlyView'));
     }
 
     public function store(StoreMovementRequest $request): RedirectResponse
@@ -141,12 +143,11 @@ class MovementController extends Controller
         $locationOptions = Location::query()
             ->whereNotNull('name')
             ->where('name', '!=', '')
-            ->orderBy('name')
+            ->tap(fn (Builder $query) => $this->orderLocationsByCleanedInventory($query))
             ->pluck('name')
-            ->sort()
             ->values();
 
-        $reasonOptions = ['Loan', 'Exhibition', 'Storage', 'Restoration', 'Sale Prep'];
+        $reasonOptions = $this->reasonOptions();
         $statusOptions = Status::allowedNames();
         $handlerOptions = $this->handlerUsersQuery()
             ->orderBy('name')
@@ -297,8 +298,35 @@ class MovementController extends Controller
 
         $allowedStatuses = Status::allowedNames();
         $nextArtworkStatus = Status::DEFAULT_NAMES[0];
-        if ($latestMovement && in_array((string) $latestMovement->status, $allowedStatuses, true)) {
+
+        // Prefer explicit movement status when present and allowed
+        if ($latestMovement && is_string($latestMovement->status) && trim($latestMovement->status) !== '' && in_array((string) $latestMovement->status, $allowedStatuses, true)) {
             $nextArtworkStatus = (string) $latestMovement->status;
+        } else {
+            // Fallback: infer status from destination location type (cleaned inventory mapping)
+            $nextLocationName = trim((string) ($latestMovement?->to_location ?? ''));
+            if ($nextLocationName !== '') {
+                $locationType = Location::query()->where('name', $nextLocationName)->value('type');
+                $mapping = [
+                    'storage' => 'In Storage',
+                    'residence' => 'In Residence',
+                    'office' => 'In Office',
+                    'museum' => 'On Display',
+                    'garden' => 'On Display',
+                    'library' => 'On Display',
+                    'hall' => 'On Display',
+                    'external' => 'External',
+                    'disposition' => 'Sold or Left',
+                    'restaurant' => 'On Display',
+                ];
+
+                if (is_string($locationType) && $locationType !== '') {
+                    $key = strtolower(trim($locationType));
+                    if (isset($mapping[$key]) && in_array($mapping[$key], $allowedStatuses, true)) {
+                        $nextArtworkStatus = $mapping[$key];
+                    }
+                }
+            }
         }
 
         $updatePayload = [
@@ -317,5 +345,42 @@ class MovementController extends Controller
         }
 
         Artwork::query()->whereKey($artworkId)->update($updatePayload);
+    }
+
+    private function orderLocationsByCleanedInventory(Builder $query): void
+    {
+        if (Schema::hasColumn('locations', 'code')) {
+            if (Location::query()->whereNotNull('code')->exists()) {
+                $query->whereNotNull('code');
+            }
+
+            $query->orderByRaw('code IS NULL')->orderBy('id');
+
+            return;
+        }
+
+        $query->orderBy('name');
+    }
+
+    private function reasonOptions(): array
+    {
+        return [
+            'Display',
+            'Storage',
+            'Loan Out',
+            'Loan Return',
+            'Restoration',
+            'Transit',
+            'Photography',
+            'Conservation',
+            'Internal Transfer',
+            'Sale',
+            'Deaccession',
+            'Loan',
+            'Auction Evaluation',
+            'Auction Consignment',
+            'Third-Party Evaluation',
+            'Other External Custody',
+        ];
     }
 }

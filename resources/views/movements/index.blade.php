@@ -362,33 +362,34 @@
 
                 <label class="museum-field">
                     <span>From Location <em class="text-rose-500 not-italic">*</em></span>
-                    <input
-                        type="text"
-                        name="from_location"
-                        list="movement-location-options"
-                        value="{{ old('from_location') }}"
-                        placeholder="e.g., Museum 3"
-                        required
-                    >
+                    @php
+                        $selectedFromLocation = old('from_location');
+                        $selectedToLocation = old('to_location');
+                        $locationOptionsList = collect($locationOptions);
+                    @endphp
+                    <select name="from_location" required>
+                        <option value="">Select origin</option>
+                        @foreach($locationOptions as $loc)
+                            <option value="{{ $loc }}" @selected($selectedFromLocation === $loc)>{{ $loc }}</option>
+                        @endforeach
+                        @if($selectedFromLocation && !$locationOptionsList->contains($selectedFromLocation))
+                            <option value="{{ $selectedFromLocation }}" selected>{{ $selectedFromLocation }}</option>
+                        @endif
+                    </select>
                 </label>
 
                 <label class="museum-field">
                     <span>To Location <em class="text-rose-500 not-italic">*</em></span>
-                    <input
-                        type="text"
-                        name="to_location"
-                        list="movement-location-options"
-                        value="{{ old('to_location') }}"
-                        placeholder="e.g., Hall 1"
-                        required
-                    >
+                    <select name="to_location" required>
+                        <option value="">Select destination</option>
+                        @foreach($locationOptions as $loc)
+                            <option value="{{ $loc }}" @selected($selectedToLocation === $loc)>{{ $loc }}</option>
+                        @endforeach
+                        @if($selectedToLocation && !$locationOptionsList->contains($selectedToLocation))
+                            <option value="{{ $selectedToLocation }}" selected>{{ $selectedToLocation }}</option>
+                        @endif
+                    </select>
                 </label>
-
-                <datalist id="movement-location-options">
-                    @foreach($locationOptions as $loc)
-                        <option value="{{ $loc }}"></option>
-                    @endforeach
-                </datalist>
 
                 <label class="museum-field">
                     <span>Date Out <em class="text-rose-500 not-italic">*</em></span>
@@ -420,8 +421,8 @@
                 <label class="museum-field">
                     <span>Reason <em class="text-rose-500 not-italic">*</em></span>
                     <select name="reason" required>
-                        @foreach(['Loan','Exhibition','Storage','Restoration','Sale Prep'] as $reason)
-                            <option value="{{ $reason }}" @selected(old('reason', 'Exhibition')===$reason)>{{ $reason }}</option>
+                        @foreach($reasonOptions as $reason)
+                            <option value="{{ $reason }}" @selected(old('reason', 'Display')===$reason)>{{ $reason }}</option>
                         @endforeach
                     </select>
                 </label>

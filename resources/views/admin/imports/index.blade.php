@@ -1,22 +1,22 @@
-<x-layout title="CSV Import - Museum Azman">
+<x-layout title="Inventory Import - Museum Azman">
     <section class="space-y-6">
         <div class="flex items-start justify-between gap-4">
             <div>
-                <h2 class="museum-page-title">CSV Import</h2>
-                <p class="museum-page-subtitle">Admin-only tool to import artworks, artists, and locations from CSV</p>
+                <h2 class="museum-page-title">Inventory Import</h2>
+                <p class="museum-page-subtitle">Admin-only tool to import artworks, locations, statuses, and movement logs</p>
             </div>
             <a href="{{ route('settings.index', ['tab' => 'general']) }}" class="museum-btn-secondary">Back to Settings</a>
         </div>
 
         <article class="museum-panel p-5">
-            <h3 class="museum-section-title text-base!">Upload CSV File</h3>
+            <h3 class="museum-section-title text-base!">Upload Inventory File</h3>
             <form action="{{ route('admin.imports.csv.store') }}" method="POST" enctype="multipart/form-data" class="mt-4 space-y-4">
                 @csrf
 
                 <label class="museum-field block">
-                    <span>CSV file</span>
-                    <input type="file" name="csv_file" accept=".csv,text/csv" required>
-                    <small class="text-zinc-500">Supported: .csv files up to 20MB</small>
+                    <span>Inventory file</span>
+                    <input type="file" name="csv_file" accept=".csv,text/csv,.xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" required>
+                    <small class="text-zinc-500">Supported: .csv or .xlsx files up to 20MB. XLSX imports use the Cleaned Inventory workbook tabs.</small>
                 </label>
 
                 <label class="museum-field block">

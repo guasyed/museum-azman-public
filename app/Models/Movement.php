@@ -11,6 +11,7 @@ class Movement extends Model
     use HasFactory;
 
     protected $fillable = [
+        'external_movement_id',
         'artwork_id',
         'from_location',
         'to_location',

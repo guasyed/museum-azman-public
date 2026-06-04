@@ -25,7 +25,7 @@ class AdminImportController extends Controller
         }
 
         $validated = $request->validate([
-            'csv_file' => ['required', 'file', 'mimes:csv,txt', 'max:20480'],
+            'csv_file' => ['required', 'file', 'mimes:csv,txt,xlsx', 'max:20480'],
             'download_images' => ['nullable', 'boolean'],
             'connection' => ['nullable', 'string', 'max:64'],
         ]);
@@ -34,16 +34,21 @@ class AdminImportController extends Controller
         $absolutePath = Storage::disk('local')->path($relativePath);
 
         try {
+            $extension = strtolower((string) $request->file('csv_file')->getClientOriginalExtension());
             $arguments = [
                 'path' => $absolutePath,
                 '--download-images' => (bool) ($validated['download_images'] ?? false),
             ];
 
-            if (! empty($validated['connection'])) {
-                $arguments['--connection'] = (string) $validated['connection'];
-            }
+            if ($extension === 'xlsx') {
+                $exitCode = Artisan::call('museum:import-xlsx', $arguments);
+            } else {
+                if (! empty($validated['connection'])) {
+                    $arguments['--connection'] = (string) $validated['connection'];
+                }
 
-            $exitCode = Artisan::call('museum:import-csv', $arguments);
+                $exitCode = Artisan::call('museum:import-csv', $arguments);
+            }
             $output = trim(Artisan::output());
         } finally {
             Storage::disk('local')->delete($relativePath);

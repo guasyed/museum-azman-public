@@ -137,7 +137,7 @@
                         name="q"
                         id="artwork-search-input"
                         value="{{ $q }}"
-                        placeholder="Search by title, artist, or medium..."
+                        placeholder="Search by ID, title, artist, or medium..."
                         class="w-full rounded-full border border-zinc-300 bg-white py-3 pl-10 pr-4 text-zinc-800 placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none"
                         autocomplete="off"
                         spellcheck="false"
@@ -224,6 +224,7 @@
                     <table class="w-full min-w-245 text-sm">
                         <thead>
                             <tr class="border-b border-zinc-200 text-left font-semibold text-zinc-800">
+                                <th class="px-4 py-3">ID</th>
                                 <th class="px-4 py-3">
                                     @php
                                         $isTitleSort = ($sortColumn ?? 'created_at') === 'title';
@@ -277,6 +278,7 @@
                                     $displayMedium = (string) ($artwork->medium ?: ($fallbacks['medium'] ?? '-'));
                                 @endphp
                                 <tr id="artwork-{{ $artwork->id }}" class="border-b border-zinc-200 last:border-b-0">
+                                    <td class="px-4 py-3.5 font-mono text-xs font-semibold text-zinc-500">{{ $artwork->display_inventory_code }}</td>
                                     <td class="px-4 py-3.5 font-semibold text-zinc-900">
                                         <a href="{{ route('artworks.show', ['artwork' => $artwork, 'from' => 'collection', 'return' => $collectionReturnUrl($artwork->id)], false) }}" class="hover:underline">{{ $artwork->title }}</a>
                                     </td>
@@ -299,7 +301,7 @@
                                     @endif
                                 </tr>
                             @empty
-                                <tr><td colspan="{{ $canManageArtworks ? 7 : 6 }}" class="px-4 py-5 text-zinc-500">No artworks found for this filter.</td></tr>
+                                <tr><td colspan="{{ $canManageArtworks ? 8 : 7 }}" class="px-4 py-5 text-zinc-500">No artworks found for this filter.</td></tr>
                             @endforelse
                         </tbody>
                     </table>
@@ -351,6 +353,7 @@
                         </a>
 
                         <div class="p-4">
+                            <p class="mb-2 font-mono text-xs font-semibold uppercase tracking-wide text-zinc-500">{{ $artwork->display_inventory_code }}</p>
                             <h3 class="museum-card-title leading-snug">
                                 <a href="{{ route('artworks.show', ['artwork' => $artwork, 'from' => 'collection', 'return' => $collectionReturnUrl($artwork->id)], false) }}">{{ $artwork->title }}</a>
                             </h3>
@@ -363,7 +366,7 @@
                         </div>
 
                         <div class="flex items-center justify-between border-t border-zinc-200 px-4 py-2.5">
-                            <p class="font-semibold text-zinc-800">{{ \App\Support\Currency::short((float) $artwork->current_valuation) }}</p>
+                            <!--<p class="font-semibold text-zinc-800">{{ \App\Support\Currency::short((float) $artwork->current_valuation) }}</p>-->
                             <div class="flex items-center gap-2">
                                 <span class="inline-flex rounded-lg px-2.5 py-1 text-xs font-semibold {{ $statusClass }}">{{ $artwork->status ?: 'Unknown' }}</span>
                                 @if($canManageArtworks)

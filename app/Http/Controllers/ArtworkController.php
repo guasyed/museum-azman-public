@@ -21,6 +21,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\View\View;
@@ -212,6 +213,10 @@ class ArtworkController extends Controller
                     $inner->whereRaw('LOWER(title) LIKE ?', [$like])
                         ->orWhereRaw('LOWER(medium) LIKE ?', [$like])
                         ->orWhereHas('artist', fn ($artistQuery) => $artistQuery->whereRaw('LOWER(name) LIKE ?', [$like]));
+
+                    if (Schema::hasColumn('artworks', 'inventory_code')) {
+                        $inner->orWhereRaw('LOWER(inventory_code) LIKE ?', [$like]);
+                    }
                 });
             })
             ->latest('id')
@@ -280,6 +285,10 @@ class ArtworkController extends Controller
             $artwork->artist()->associate($artist);
             $artwork->location()->associate($location);
             $artwork->slug = $this->uniqueSlug($title);
+            $nextInventoryCode = $this->nextInventoryCode();
+            if ($nextInventoryCode !== null) {
+                $artwork->inventory_code = $nextInventoryCode;
+            }
 
             if ($request->hasFile('primary_image')) {
                 $primary = $this->imageOptimizer->storeUploaded($request->file('primary_image'));
@@ -313,23 +322,44 @@ class ArtworkController extends Controller
     {
         $artwork->load(['artist', 'location', 'images', 'movements']);
 
-        $locationOptions = Location::query()
+        $locations = Location::query()
+            ->select('name', 'type')
             ->whereNotNull('name')
             ->where('name', '!=', '')
-            ->orderBy('name')
-            ->pluck('name')
-            ->sort()
+            ->tap(fn (Builder $query) => $this->orderLocationsByCleanedInventory($query))
+            ->get()
+            ->unique('name')
             ->values();
 
-        $reasonOptions = ['Loan', 'Exhibition', 'Storage', 'Restoration', 'Sale Prep'];
-        $statusOptions = ['Scheduled', 'In Transit', 'Completed', 'Overdue'];
+        $locationOptions = $locations->pluck('name')->values();
+        $locationMeta = $locations->mapWithKeys(fn ($l) => [($l->name ?? '') => ($l->type ?? null)])->all();
 
-        return view('artworks.show', compact(
+        $reasonOptions = [
+            'Display',
+            'Storage',
+            'Loan Out',
+            'Loan Return',
+            'Restoration',
+            'Transit',
+            'Photography',
+            'Conservation',
+            'Internal Transfer',
+            'Sale',
+            'Deaccession',
+            'Loan',
+            'Auction Evaluation',
+            'Auction Consignment',
+            'Third-Party Evaluation',
+            'Other External Custody',
+        ];
+        $statusOptions = Status::allowedNames();
+
+        return view('artworks.show', array_merge(compact(
             'artwork',
             'locationOptions',
             'reasonOptions',
             'statusOptions'
-        ));
+        ), ['locationMeta' => $locationMeta]));
     }
 
     public function edit(Artwork $artwork): View
@@ -348,7 +378,7 @@ class ArtworkController extends Controller
             ->select('name', 'type', 'address')
             ->whereNotNull('name')
             ->where('name', '!=', '')
-            ->orderBy('name')
+            ->tap(fn (Builder $query) => $this->orderLocationsByCleanedInventory($query))
             ->get()
             ->unique('name')
             ->values();
@@ -595,6 +625,45 @@ class ArtworkController extends Controller
             'status' => $request->input('status', Status::DEFAULT_NAMES[0]),
             'provenance' => $request->input('provenance'),
         ];
+    }
+
+    private function orderLocationsByCleanedInventory(Builder $query): void
+    {
+        if (Schema::hasColumn('locations', 'code')) {
+            if (Location::query()->whereNotNull('code')->exists()) {
+                $query->whereNotNull('code');
+            }
+
+            $query->orderByRaw('code IS NULL')->orderBy('id');
+
+            return;
+        }
+
+        $query->orderBy('name');
+    }
+
+    private function nextInventoryCode(): ?string
+    {
+        if (! Schema::hasColumn('artworks', 'inventory_code')) {
+            return null;
+        }
+
+        $lastNumber = Artwork::query()
+            ->whereNotNull('inventory_code')
+            ->pluck('inventory_code')
+            ->map(function ($code) {
+                preg_match('/^ART-(\d+)$/', (string) $code, $matches);
+
+                return isset($matches[1]) ? (int) $matches[1] : 0;
+            })
+            ->max() ?? 0;
+
+        do {
+            $lastNumber++;
+            $code = 'ART-'.str_pad((string) $lastNumber, 4, '0', STR_PAD_LEFT);
+        } while (Artwork::query()->where('inventory_code', $code)->exists());
+
+        return $code;
     }
 
     private function uniqueSlug(string $title, ?int $ignoreId = null): string

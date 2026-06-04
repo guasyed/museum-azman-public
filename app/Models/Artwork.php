@@ -13,6 +13,7 @@ class Artwork extends Model
     use HasFactory;
 
     protected $fillable = [
+        'inventory_code',
         'artist_id',
         'location_id',
         'title',
@@ -33,6 +34,7 @@ class Artwork extends Model
 
     protected $appends = [
         'primary_image_url',
+        'display_inventory_code',
     ];
 
     protected function casts(): array
@@ -97,5 +99,16 @@ class Artwork extends Model
         }
 
         return null;
+    }
+
+    public function getDisplayInventoryCodeAttribute(): string
+    {
+        $inventoryCode = trim((string) ($this->attributes['inventory_code'] ?? ''));
+
+        if ($inventoryCode !== '') {
+            return $inventoryCode;
+        }
+
+        return 'ART-'.str_pad((string) $this->getKey(), 4, '0', STR_PAD_LEFT);
     }
 }

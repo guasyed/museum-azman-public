@@ -12,9 +12,15 @@ class Status extends Model
 
     public const DEFAULT_NAMES = [
         'On Display',
-        'In Stage',
-        'On Loan',
+        'In Storage',
+        'In Residence',
+        'In Office',
+        'Loaned Out',
         'Under Restoration',
+        'Under Evaluation',
+        'In Transit',
+        'External',
+        'Sold or Left',
     ];
 
     protected $fillable = [

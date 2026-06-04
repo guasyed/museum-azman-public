@@ -188,6 +188,7 @@
                     <div class="space-y-5 p-5">
                         <div class="flex items-end justify-between gap-3 border-b border-zinc-200 pb-3">
                             <div>
+                                <!--<p class="mb-2 font-mono text-sm font-semibold uppercase tracking-wide text-zinc-500">{{ $artwork->display_inventory_code }}</p>-->
                                 <h2 class="museum-page-title text-[2rem]!">{{ $artwork->title }}</h2>
                                 <p class="mt-1 text-zinc-600">{{ $artwork->artist?->name ?? 'Unknown Artist' }}</p>
                             </div>
@@ -195,6 +196,7 @@
                         </div>
 
                         <div class="grid gap-x-8 gap-y-3 border-b border-zinc-200 pb-4 text-sm md:grid-cols-2">
+                            <div><p class="text-zinc-500">Artwork ID</p><p class="font-mono font-medium">{{ $artwork->display_inventory_code }}</p></div>
                             <div><p class="text-zinc-500">Year</p><p class="font-medium">{{ $displayYear }}</p></div>
                             <div><p class="text-zinc-500">Medium</p><p class="font-medium">{{ $displayMedium }}</p></div>
                             <div><p class="text-zinc-500">Dimensions</p><p class="font-medium">{{ $displayDimensions }}</p></div>
@@ -320,33 +322,34 @@
 
                 <label class="museum-field md:col-span-2">
                     <span>From Location <em class="text-rose-500 not-italic">*</em></span>
-                    <input
-                        type="text"
-                        name="from_location"
-                        list="movement-location-options"
-                        value="{{ old('from_location', $artwork->location?->name) }}"
-                        placeholder="e.g., Private Residence - Main Gallery"
-                        required
-                    >
+                    @php
+                        $selectedFromLocation = old('from_location', $artwork->location?->name);
+                        $selectedToLocation = old('to_location');
+                        $locationOptionsList = collect($locationOptions);
+                    @endphp
+                    <select id="from_location" name="from_location" required>
+                        <option value="">Select origin</option>
+                        @foreach($locationOptions as $loc)
+                            <option value="{{ $loc }}" @selected($selectedFromLocation === $loc)>{{ $loc }}</option>
+                        @endforeach
+                        @if($selectedFromLocation && !$locationOptionsList->contains($selectedFromLocation))
+                            <option value="{{ $selectedFromLocation }}" selected>{{ $selectedFromLocation }}</option>
+                        @endif
+                    </select>
                 </label>
 
                 <label class="museum-field md:col-span-2">
                     <span>To Location <em class="text-rose-500 not-italic">*</em></span>
-                    <input
-                        type="text"
-                        name="to_location"
-                        list="movement-location-options"
-                        value="{{ old('to_location') }}"
-                        placeholder="e.g., Main Gallery - Wall B"
-                        required
-                    >
+                    <select id="to_location" name="to_location" required>
+                        <option value="">Select destination</option>
+                        @foreach($locationOptions as $loc)
+                            <option value="{{ $loc }}" @selected($selectedToLocation === $loc)>{{ $loc }}</option>
+                        @endforeach
+                        @if($selectedToLocation && !$locationOptionsList->contains($selectedToLocation))
+                            <option value="{{ $selectedToLocation }}" selected>{{ $selectedToLocation }}</option>
+                        @endif
+                    </select>
                 </label>
-
-                <datalist id="movement-location-options">
-                    @foreach($locationOptions as $loc)
-                        <option value="{{ $loc }}"></option>
-                    @endforeach
-                </datalist>
 
                 <label class="museum-field">
                     <span>Date Out <em class="text-rose-500 not-italic">*</em></span>
@@ -374,7 +377,7 @@
 
                 <label class="museum-field md:col-span-2">
                     <span>Status <em class="text-rose-500 not-italic">*</em></span>
-                    <select name="status" required>
+                    <select id="movement_status" name="status" required>
                         @foreach($statusOptions as $status)
                             <option value="{{ $status }}" @selected(old('status', 'Scheduled') === $status)>{{ $status }}</option>
                         @endforeach
@@ -398,6 +401,54 @@
             </form>
         </div>
     </div>
+
+    <script>
+        (function () {
+            const locationMeta = @json($locationMeta ?? []);
+            const toSel = document.getElementById('to_location');
+            const statusSel = document.getElementById('movement_status');
+
+            if (! toSel || ! statusSel) {
+                return;
+            }
+
+            function suggestStatusForLocation(type, name) {
+                const t = (type || '').toLowerCase();
+                const n = (name || '').toLowerCase();
+
+                if (t.includes('storage') || n.includes('store')) return 'In Storage';
+                if (t.includes('museum') || t.includes('garden') || t.includes('hall') || t.includes('library')) return 'On Display';
+                if (t.includes('external')) return 'External';
+                if (t.includes('disposition') || n.includes('sold') || n.includes('left')) return 'Sold or Left';
+                if (t.includes('office')) return 'In Office';
+                if (t.includes('residence')) return 'In Residence';
+
+                return null;
+            }
+
+            function applySuggested() {
+                const sel = toSel.value;
+                if (! sel) return;
+                const type = locationMeta[sel] ?? null;
+                const suggested = suggestStatusForLocation(type, sel);
+                if (! suggested) return;
+
+                let opt = Array.from(statusSel.options).find(o => o.value === suggested);
+                if (! opt) {
+                    opt = document.createElement('option');
+                    opt.value = suggested;
+                    opt.text = suggested;
+                    statusSel.appendChild(opt);
+                }
+
+                statusSel.value = suggested;
+            }
+
+            toSel.addEventListener('change', applySuggested);
+            // Initialize on load if a destination is preselected
+            document.addEventListener('DOMContentLoaded', function () { applySuggested(); });
+        })();
+    </script>
 
     <!-- Artwork Lightbox Modal -->
     <div class="artwork-lightbox" id="artworkLightbox" onclick="if(event.target === this) this.classList.remove('active')">

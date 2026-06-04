@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Artwork;
+use App\Models\Movement;
 use Illuminate\Support\Collection;
 
 class DashboardController extends Controller
@@ -16,17 +17,16 @@ class DashboardController extends Controller
             'total_artists' => $artworks->pluck('artist_id')->filter()->unique()->count(),
             'total_locations' => $artworks->pluck('location_id')->filter()->unique()->count(),
             'collection_value' => (float) $artworks->sum('current_valuation'),
-            'in_stage' => $artworks->where('status', 'In Stage')->count(),
-            'on_loan' => $artworks->where('status', 'On Loan')->count(),
+            'in_stage' => $artworks->whereIn('status', ['In Stage', 'In Storage', 'In Residence', 'In Office'])->count(),
+            'on_loan' => $artworks->whereIn('status', ['On Loan', 'Loaned Out'])->count(),
         ];
 
         $geoByCountry = $this->geographyCounts($artworks);
 
-        $recentMovements = Artwork::query()
-            ->with('location')
-            ->whereIn('status', ['In Stage', 'On Loan', 'Under Restoration'])
-            ->latest()
-            ->take(3)
+        $recentMovements = Movement::query()
+            ->with('artwork.artist')
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
             ->get();
 
         $recentArtworks = Artwork::query()

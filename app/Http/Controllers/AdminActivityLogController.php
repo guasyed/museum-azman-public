@@ -33,7 +33,7 @@ class AdminActivityLogController extends Controller
             $query->where('user_id', $userId);
         }
 
-        $logs = $query->orderByDesc('created_at')->paginate(50)->withQueryString();
+        $logs = $query->orderByDesc('created_at')->paginate(20)->withQueryString();
 
         $actionOptions = ActivityLog::query()
             ->select('action')

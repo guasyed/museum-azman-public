@@ -238,11 +238,15 @@
 
                                 <div class="grid gap-4 md:grid-cols-2">
                                     <div class="space-y-1.5 text-[0.8rem] text-zinc-700">
-                                        <p><span class="text-zinc-500">From:</span> {{ $movement->from_location ?: '-' }}</p>
-                                        <p><span class="text-zinc-500">To:</span> {{ $movement->to_location ?: '-' }}</p>
-                                        <p><span class="text-zinc-500">Responsible Handler:</span> {{ $movement->responsible_handler ?: '-' }}</p>
-                                        <p><span class="text-zinc-500">Reason:</span> {{ $movement->reason ?: '-' }}</p>
+                                        <p><span class="text-zinc-500">From Location:</span> {{ $movement->from_location ?: '-' }}{{ $movement->from_location_code ? ' ('.$movement->from_location_code.')' : '' }}</p>
+                                        <p><span class="text-zinc-500">To Location:</span> {{ $movement->to_location ?: '-' }}{{ $movement->to_location_code ? ' ('.$movement->to_location_code.')' : '' }}</p>
+                                        <p><span class="text-zinc-500">Movement Type:</span> {{ $movement->movement_type ?: '-' }}</p>
+                                        <p><span class="text-zinc-500">External Reason:</span> {{ $movement->external_reason ?: '-' }}</p>
+                                        <p><span class="text-zinc-500">External Party:</span> {{ $movement->external_party ?: '-' }}</p>
+                                        <p><span class="text-zinc-500">Moved By:</span> {{ $movement->responsible_handler ?: '-' }}</p>
+                                        <p><span class="text-zinc-500">Approved By:</span> {{ $movement->approved_by ?: '-' }}</p>
                                         <p><span class="text-zinc-500">Expected Return:</span> {{ \App\Support\DateFormat::display($movement->expected_return_date) }}</p>
+                                        <p><span class="text-zinc-500">Completed Date:</span> {{ \App\Support\DateFormat::display($movement->completed_date) }}</p>
                                     </div>
 
                                     <div class="space-y-2 rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2.5">
@@ -253,11 +257,7 @@
                                             <p class="text-sm text-zinc-500">Notes: -</p>
                                         @endif
 
-                                        @if($movement->condition_report)
-                                            <p class="text-sm text-zinc-700"><span class="text-zinc-500">Condition:</span> {{ $movement->condition_report }}</p>
-                                        @else
-                                            <p class="text-sm text-zinc-500">Condition: -</p>
-                                        @endif
+                                        <p class="text-sm text-zinc-500">Status After Movement: {{ $movement->status ?: '-' }}</p>
                                     </div>
                                 </div>
                             </div>
@@ -352,7 +352,7 @@
                 </label>
 
                 <label class="museum-field">
-                    <span>Date Out <em class="text-rose-500 not-italic">*</em></span>
+                    <span>Movement Timestamp <em class="text-rose-500 not-italic">*</em></span>
                     <input type="date" name="date_out" value="{{ old('date_out', now()->toDateString()) }}" required>
                 </label>
 
@@ -362,21 +362,16 @@
                 </label>
 
                 <label class="museum-field">
-                    <span>Reason <em class="text-rose-500 not-italic">*</em></span>
-                    <select name="reason" required>
-                        @foreach($reasonOptions as $reason)
-                            <option value="{{ $reason }}" @selected(old('reason', 'Storage') === $reason)>{{ $reason }}</option>
+                    <span>Movement Type <em class="text-rose-500 not-italic">*</em></span>
+                    <select name="movement_type" required>
+                        @foreach($movementTypeOptions as $movementType)
+                            <option value="{{ $movementType }}" @selected(old('movement_type', 'Storage') === $movementType)>{{ $movementType }}</option>
                         @endforeach
                     </select>
                 </label>
 
                 <label class="museum-field">
-                    <span>Responsible Handler <em class="text-rose-500 not-italic">*</em></span>
-                    <input name="responsible_handler" value="{{ old('responsible_handler') }}" placeholder="Your name or handler's name" required>
-                </label>
-
-                <label class="museum-field md:col-span-2">
-                    <span>Status <em class="text-rose-500 not-italic">*</em></span>
+                    <span>Status After Movement <em class="text-rose-500 not-italic">*</em></span>
                     <select id="movement_status" name="status" required>
                         @foreach($statusOptions as $status)
                             <option value="{{ $status }}" @selected(old('status', 'Scheduled') === $status)>{{ $status }}</option>
@@ -385,13 +380,33 @@
                 </label>
 
                 <label class="museum-field md:col-span-2">
-                    <span>Notes (Optional)</span>
-                    <textarea name="notes" rows="3" placeholder="Add any relevant notes about this movement...">{{ old('notes') }}</textarea>
+                    <span>External Reason</span>
+                    <select name="external_reason">
+                        <option value="">Select external reason</option>
+                        @foreach($externalReasonOptions as $externalReason)
+                            <option value="{{ $externalReason }}" @selected(old('external_reason') === $externalReason)>{{ $externalReason }}</option>
+                        @endforeach
+                    </select>
+                </label>
+
+                <label class="museum-field">
+                    <span>External Party</span>
+                    <input name="external_party" value="{{ old('external_party') }}" placeholder="External party, auction house, or borrower">
+                </label>
+
+                <label class="museum-field">
+                    <span>Moved By <em class="text-rose-500 not-italic">*</em></span>
+                    <input name="responsible_handler" value="{{ old('responsible_handler') }}" placeholder="Mover or handler name" required>
                 </label>
 
                 <label class="museum-field md:col-span-2">
-                    <span>Condition Report</span>
-                    <textarea name="condition_report" rows="2" placeholder="Document the artwork condition before movement...">{{ old('condition_report') }}</textarea>
+                    <span>Approved By</span>
+                    <input name="approved_by" value="{{ old('approved_by') }}" placeholder="Approver name">
+                </label>
+
+                <label class="museum-field md:col-span-2">
+                    <span>Notes</span>
+                    <textarea name="notes" rows="3" placeholder="Movement Log notes...">{{ old('notes') }}</textarea>
                 </label>
 
                 <div class="md:col-span-2 flex justify-end gap-3">
@@ -417,7 +432,7 @@
                 const n = (name || '').toLowerCase();
 
                 if (t.includes('storage') || n.includes('store')) return 'In Storage';
-                if (t.includes('museum') || t.includes('garden') || t.includes('hall') || t.includes('library')) return 'On Display';
+                if (t.includes('museum') || t.includes('garden') || t.includes('hall') || t.includes('library') || t.includes('restaurant')) return 'On Display';
                 if (t.includes('external')) return 'External';
                 if (t.includes('disposition') || n.includes('sold') || n.includes('left')) return 'Sold or Left';
                 if (t.includes('office')) return 'In Office';

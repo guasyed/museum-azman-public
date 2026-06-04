@@ -240,20 +240,32 @@ class ImportMuseumXlsxCommand extends Command
                 $toName = $this->firstNonEmpty($row, ['to_location_name'])
                     ?? $this->locationNameByCode($locationLookup, $this->firstNonEmpty($row, ['to_location_id']))
                     ?? 'Unknown Location';
+                $fromCode = $this->firstNonEmpty($row, ['from_location_id']);
+                $toCode = $this->firstNonEmpty($row, ['to_location_id']);
                 $dateOut = $this->parseDate($this->firstNonEmpty($row, ['movement_timestamp', 'date_out'])) ?? now()->toDateString();
                 $completedDate = $this->parseDate($this->firstNonEmpty($row, ['completed_date']));
+                $movementType = $this->firstNonEmpty($row, ['movement_type']) ?? 'Internal Transfer';
+                $externalReason = $this->firstNonEmpty($row, ['external_reason']);
+                $externalParty = $this->firstNonEmpty($row, ['external_party']);
 
                 $payload = [
                     'external_movement_id' => $movementId,
                     'artwork_id' => $artwork->id,
                     'from_location' => $fromName,
+                    'from_location_code' => $fromCode,
                     'to_location' => $toName,
+                    'to_location_code' => $toCode,
                     'date_out' => $dateOut,
                     'expected_return_date' => $this->parseDate($this->firstNonEmpty($row, ['expected_return_date'])) ?? $completedDate,
+                    'completed_date' => $completedDate,
+                    'movement_type' => $movementType,
+                    'external_reason' => $externalReason,
+                    'external_party' => $externalParty,
                     'responsible_handler' => $this->firstNonEmpty($row, ['moved_by', 'approved_by']) ?? 'Imported',
-                    'reason' => $this->firstNonEmpty($row, ['external_reason', 'movement_type']) ?? 'Internal Transfer',
+                    'approved_by' => $this->firstNonEmpty($row, ['approved_by']),
+                    'reason' => $externalReason ?? $movementType,
                     'status' => $this->cleanedStatus($this->firstNonEmpty($row, ['status_after_movement', 'status'])),
-                    'notes' => $this->firstNonEmpty($row, ['external_party']),
+                    'notes' => $this->firstNonEmpty($row, ['notes']),
                 ];
 
                 $movement = $movementId

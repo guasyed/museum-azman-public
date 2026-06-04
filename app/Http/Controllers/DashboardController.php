@@ -29,19 +29,7 @@ class DashboardController extends Controller
             ->orderByDesc('id')
             ->get();
 
-        $recentArtworks = Artwork::query()
-            ->with(['artist', 'images:id,artwork_id,path,position'])
-            ->orderByDesc('updated_at')
-            ->take(32)
-            ->get();
-
-        $recentArtworks = $recentArtworks
-            ->sortBy([
-                fn (Artwork $artwork) => $artwork->primary_image_url ? 0 : 1,
-                fn (Artwork $artwork) => -((int) optional($artwork->updated_at)->getTimestamp()),
-            ])
-            ->take(4)
-            ->values();
+        $recentArtworks = $this->randomArtworksWithImagePriority();
 
         return view('dashboard.index', compact('stats', 'recentArtworks', 'geoByCountry', 'recentMovements'));
     }
@@ -64,5 +52,41 @@ class DashboardController extends Controller
         arsort($counts);
 
         return $counts;
+    }
+
+    private function randomArtworksWithImagePriority(): Collection
+    {
+        $imageArtworks = Artwork::query()
+            ->with(['artist', 'images:id,artwork_id,path,position'])
+            ->where(function ($query) {
+                $query
+                    ->whereNotNull('primary_image_path')
+                    ->where('primary_image_path', '!=', '')
+                    ->orWhere(function ($query) {
+                        $query
+                            ->whereNotNull('source_image_url')
+                            ->where('source_image_url', '!=', '');
+                    })
+                    ->orWhereHas('images');
+            })
+            ->inRandomOrder()
+            ->take(4)
+            ->get();
+
+        if ($imageArtworks->count() >= 4) {
+            return $imageArtworks->values();
+        }
+
+        $fallbackArtworks = Artwork::query()
+            ->with(['artist', 'images:id,artwork_id,path,position'])
+            ->whereNotIn('id', $imageArtworks->pluck('id'))
+            ->inRandomOrder()
+            ->take(4 - $imageArtworks->count())
+            ->get();
+
+        return $imageArtworks
+            ->merge($fallbackArtworks)
+            ->take(4)
+            ->values();
     }
 }

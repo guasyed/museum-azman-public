@@ -93,8 +93,8 @@
         <article class="museum-panel p-6">
             <div class="mb-4 flex items-start justify-between">
                 <div>
-                    <h3 class="museum-section-title">Recently Acquired</h3>
-                    <p class="text-zinc-600">Latest additions to collection</p>
+                    <h3 class="museum-section-title">Featured Artworks</h3>
+                    <p class="text-zinc-600">Random selection, prioritizing artworks with images</p>
                 </div>
                 @if(auth()->check() && auth()->user()->isAdmin())
                     <a href="{{ route('artworks.index', [], false) }}" class="museum-btn-secondary">Manage Collection</a>
@@ -105,6 +105,17 @@
 
             <div class="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
                 @forelse($recentArtworks as $artwork)
+                    @php
+                        $artworkStatusClass = match($artwork->status) {
+                            'On Display' => 'bg-emerald-100 text-emerald-700',
+                            'In Stage', 'In Storage', 'In Residence', 'In Office' => 'bg-amber-100 text-amber-700',
+                            'On Loan', 'Loaned Out' => 'bg-violet-100 text-violet-700',
+                            'Under Restoration' => 'bg-sky-100 text-sky-700',
+                            'Under Evaluation' => 'bg-zinc-100 text-zinc-700',
+                            'Sold or Left' => 'bg-rose-100 text-rose-700',
+                            default => 'bg-zinc-100 text-zinc-700',
+                        };
+                    @endphp
                     <article id="artwork-{{ $artwork->id }}" class="overflow-hidden rounded-xl border border-zinc-200 bg-white">
                         <a href="{{ route('artworks.show', ['artwork' => $artwork, 'from' => 'dashboard', 'return' => request()->getRequestUri().'#artwork-'.$artwork->id], false) }}">
                             @if($artwork->primary_image_url)
@@ -116,7 +127,10 @@
                         <div class="p-3">
                             <h4 class="museum-card-title">{{ $artwork->title }}</h4>
                             <p class="text-zinc-600">{{ $artwork->artist?->name ?? 'Unknown Artist' }}{{ $artwork->year ? ', '.$artwork->year : '' }}</p>
-                            <p class="mt-2 text-lg">{{ \App\Support\Currency::symbol() }}{{ number_format((float) $artwork->current_valuation, 0) }}</p>
+                            <div class="mt-3 flex items-center justify-between gap-2">
+                                <span class="text-sm font-semibold text-zinc-500">{{ $artwork->display_inventory_code }}</span>
+                                <span class="shrink-0 rounded-lg px-2.5 py-0.5 text-xs font-semibold {{ $artworkStatusClass }}">{{ $artwork->status ?: 'Unknown' }}</span>
+                            </div>
 
                             @if(auth()->check() && auth()->user()->isAdmin())
                                 <div class="mt-3">

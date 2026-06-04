@@ -63,7 +63,7 @@
                                 <p class="font-semibold">{{ $movement->from_location }}</p>
                                 <p class="mt-2 text-zinc-500">Date Out</p>
                                 <p>{{ \App\Support\DateFormat::display($movement->date_out) }}</p>
-                                <p class="mt-2 text-zinc-500">Handler</p>
+                                <p class="mt-2 text-zinc-500">Moved By</p>
                                 <p>{{ $movement->responsible_handler }}</p>
                             </div>
                             <div>
@@ -71,8 +71,8 @@
                                 <p class="font-semibold">{{ $movement->to_location }}</p>
                                 <p class="mt-2 text-zinc-500">Expected Return</p>
                                 <p>{{ \App\Support\DateFormat::display($movement->expected_return_date) }}</p>
-                                <p class="mt-2 text-zinc-500">Reason</p>
-                                <p><span class="rounded-md border border-zinc-200 px-2 py-0.5 text-sm">{{ $movement->reason }}</span></p>
+                                <p class="mt-2 text-zinc-500">Movement Type</p>
+                                <p><span class="rounded-md border border-zinc-200 px-2 py-0.5 text-sm">{{ $movement->movement_type ?: $movement->reason }}</span></p>
                             </div>
                         </div>
 
@@ -202,7 +202,7 @@
                                 href="{{ route('movements.index', array_merge(request()->query(), ['sort' => 'responsible_handler', 'direction' => $nextHandlerDirection])) }}"
                                 class="inline-flex items-center gap-1 hover:text-zinc-900"
                             >
-                                <span>Handler</span>
+                                <span>Moved By</span>
                                 @if($isHandlerSort)
                                     <span class="text-xs">{{ ($direction ?? 'desc') === 'asc' ? '▲' : '▼' }}</span>
                                 @endif
@@ -217,7 +217,7 @@
                                 href="{{ route('movements.index', array_merge(request()->query(), ['sort' => 'reason', 'direction' => $nextReasonDirection])) }}"
                                 class="inline-flex items-center gap-1 hover:text-zinc-900"
                             >
-                                <span>Reason</span>
+                                <span>External Reason</span>
                                 @if($isReasonSort)
                                     <span class="text-xs">{{ ($direction ?? 'desc') === 'asc' ? '▲' : '▼' }}</span>
                                 @endif
@@ -232,7 +232,7 @@
                                 href="{{ route('movements.index', array_merge(request()->query(), ['sort' => 'status', 'direction' => $nextStatusDirection])) }}"
                                 class="inline-flex items-center gap-1 hover:text-zinc-900"
                             >
-                                <span>Status</span>
+                                <span>Status After Movement</span>
                                 @if($isStatusSort)
                                     <span class="text-xs">{{ ($direction ?? 'desc') === 'asc' ? '▲' : '▼' }}</span>
                                 @endif
@@ -270,12 +270,30 @@
                                 <p class="font-semibold">{{ $movement->artwork?->title }}</p>
                                 <p class="text-zinc-500">{{ $movement->artwork?->artist?->name }}</p>
                             </td>
-                            <td class="py-3">{{ $movement->from_location }}</td>
-                            <td class="py-3">{{ $movement->to_location }}</td>
+                            <td class="py-3">
+                                <p>{{ $movement->from_location }}</p>
+                                @if($movement->from_location_code)
+                                    <p class="text-xs text-zinc-400">{{ $movement->from_location_code }}</p>
+                                @endif
+                            </td>
+                            <td class="py-3">
+                                <p>{{ $movement->to_location }}</p>
+                                @if($movement->to_location_code)
+                                    <p class="text-xs text-zinc-400">{{ $movement->to_location_code }}</p>
+                                @endif
+                            </td>
                             <td class="py-3">{{ \App\Support\DateFormat::display($movement->date_out) }}</td>
                             <td class="py-3">{{ \App\Support\DateFormat::display($movement->expected_return_date) }}</td>
                             <td class="py-3">{{ $movement->responsible_handler }}</td>
-                            <td class="py-3"><span class="rounded-md border border-zinc-200 px-2 py-1">{{ $movement->reason }}</span></td>
+                            <td class="py-3">
+                                <p><span class="rounded-md border border-zinc-200 px-2 py-1">{{ $movement->external_reason ?: '-' }}</span></p>
+                                @if($movement->movement_type)
+                                    <p class="mt-1 text-xs text-zinc-500">Type: {{ $movement->movement_type }}</p>
+                                @endif
+                                @if($movement->external_party)
+                                    <p class="mt-1 text-xs text-zinc-500">Party: {{ $movement->external_party }}</p>
+                                @endif
+                            </td>
                             <td class="py-3"><span class="rounded-lg px-2.5 py-1 text-xs font-semibold {{ $statusClass }}">{{ $status }}</span></td>
                             @if($showActionsColumn)
                                 <td class="py-3 text-right">
@@ -334,7 +352,7 @@
             <a href="{{ route('movements.index', [], false) }}" class="museum-modal-close" aria-label="Close">&times;</a>
 
             <span id="movement-modal-title" class="museum-section-title block">Record Movement</span>
-            <p class="mt-2 text-zinc-600">Create a new movement record for artwork transfer, loan, or exhibition</p>
+            <p class="mt-2 text-zinc-600">Create a Movement Log entry using the Excel inventory fields</p>
 
             <form action="{{ route('movements.store', [], false) }}" method="POST" class="mt-6 grid gap-5 md:grid-cols-2">
                 @csrf
@@ -366,11 +384,13 @@
                         $selectedFromLocation = old('from_location');
                         $selectedToLocation = old('to_location');
                         $locationOptionsList = collect($locationOptions);
+                        $locationOptionRowsList = collect($locationOptionRows ?? []);
                     @endphp
-                    <select name="from_location" required>
+                    <input type="hidden" name="from_location_code" value="{{ old('from_location_code') }}" data-location-code-input="from">
+                    <select name="from_location" required data-location-select="from">
                         <option value="">Select origin</option>
-                        @foreach($locationOptions as $loc)
-                            <option value="{{ $loc }}" @selected($selectedFromLocation === $loc)>{{ $loc }}</option>
+                        @foreach($locationOptionRowsList as $loc)
+                            <option value="{{ $loc['name'] }}" data-code="{{ $loc['code'] }}" data-type="{{ $loc['type'] }}" @selected($selectedFromLocation === $loc['name'])>{{ $loc['label'] }}</option>
                         @endforeach
                         @if($selectedFromLocation && !$locationOptionsList->contains($selectedFromLocation))
                             <option value="{{ $selectedFromLocation }}" selected>{{ $selectedFromLocation }}</option>
@@ -380,10 +400,11 @@
 
                 <label class="museum-field">
                     <span>To Location <em class="text-rose-500 not-italic">*</em></span>
-                    <select name="to_location" required>
+                    <input type="hidden" name="to_location_code" value="{{ old('to_location_code') }}" data-location-code-input="to">
+                    <select name="to_location" required data-location-select="to">
                         <option value="">Select destination</option>
-                        @foreach($locationOptions as $loc)
-                            <option value="{{ $loc }}" @selected($selectedToLocation === $loc)>{{ $loc }}</option>
+                        @foreach($locationOptionRowsList as $loc)
+                            <option value="{{ $loc['name'] }}" data-code="{{ $loc['code'] }}" data-type="{{ $loc['type'] }}" @selected($selectedToLocation === $loc['name'])>{{ $loc['label'] }}</option>
                         @endforeach
                         @if($selectedToLocation && !$locationOptionsList->contains($selectedToLocation))
                             <option value="{{ $selectedToLocation }}" selected>{{ $selectedToLocation }}</option>
@@ -392,7 +413,7 @@
                 </label>
 
                 <label class="museum-field">
-                    <span>Date Out <em class="text-rose-500 not-italic">*</em></span>
+                    <span>Movement Timestamp <em class="text-rose-500 not-italic">*</em></span>
                     <input type="date" name="date_out" value="{{ old('date_out') }}" placeholder="dd-mm-yyyy" required>
                 </label>
 
@@ -402,13 +423,65 @@
                 </label>
 
                 <label class="museum-field">
-                    <span>Responsible Handler <em class="text-rose-500 not-italic">*</em></span>
+                    <span>Completed Date</span>
+                    <input type="date" name="completed_date" value="{{ old('completed_date') }}" placeholder="dd-mm-yyyy">
+                </label>
+
+                <label class="museum-field">
+                    <span>Movement Type <em class="text-rose-500 not-italic">*</em></span>
+                    @php
+                        $selectedMovementType = old('movement_type', 'Display');
+                        $movementTypeOptionsList = collect($movementTypeOptions ?? []);
+                    @endphp
+                    <select name="movement_type" required>
+                        @foreach($movementTypeOptionsList as $movementType)
+                            <option value="{{ $movementType }}" @selected($selectedMovementType === $movementType)>{{ $movementType }}</option>
+                        @endforeach
+                        @if($selectedMovementType && !$movementTypeOptionsList->contains($selectedMovementType))
+                            <option value="{{ $selectedMovementType }}" selected>{{ $selectedMovementType }}</option>
+                        @endif
+                    </select>
+                </label>
+
+                <label class="museum-field">
+                    <span>Status After Movement <em class="text-rose-500 not-italic">*</em></span>
+                    <select name="status" required data-status-after-movement>
+                        @foreach(collect($statusOptions)->sort() as $status)
+                            <option value="{{ $status }}" @selected(old('status', \App\Models\Status::DEFAULT_NAMES[0])===$status)>{{ $status }}</option>
+                        @endforeach
+                    </select>
+                </label>
+
+                <label class="museum-field">
+                    <span>External Reason</span>
+                    @php
+                        $selectedExternalReason = old('external_reason');
+                        $externalReasonOptionsList = collect($externalReasonOptions ?? $reasonOptions ?? [])->sort()->values();
+                    @endphp
+                    <select name="external_reason">
+                        <option value="">Select external reason</option>
+                        @foreach($externalReasonOptionsList as $externalReason)
+                            <option value="{{ $externalReason }}" @selected($selectedExternalReason === $externalReason)>{{ $externalReason }}</option>
+                        @endforeach
+                        @if($selectedExternalReason && !$externalReasonOptionsList->contains($selectedExternalReason))
+                            <option value="{{ $selectedExternalReason }}" selected>{{ $selectedExternalReason }}</option>
+                        @endif
+                    </select>
+                </label>
+
+                <label class="museum-field">
+                    <span>External Party</span>
+                    <input type="text" name="external_party" value="{{ old('external_party') }}" placeholder="External party, auction house, or borrower">
+                </label>
+
+                <label class="museum-field">
+                    <span>Moved By <em class="text-rose-500 not-italic">*</em></span>
                     @php
                         $selectedHandler = old('responsible_handler');
                         $handlerOptionsList = collect($handlerOptions ?? [])->values();
                     @endphp
                     <select name="responsible_handler" required>
-                        <option value="">Select handler</option>
+                        <option value="">Select moved by</option>
                         @foreach($handlerOptionsList as $handlerName)
                             <option value="{{ $handlerName }}" @selected($selectedHandler === $handlerName)>{{ $handlerName }}</option>
                         @endforeach
@@ -419,32 +492,13 @@
                 </label>
 
                 <label class="museum-field">
-                    <span>Reason <em class="text-rose-500 not-italic">*</em></span>
-                    <select name="reason" required>
-                        @foreach($reasonOptions as $reason)
-                            <option value="{{ $reason }}" @selected(old('reason', 'Display')===$reason)>{{ $reason }}</option>
-                        @endforeach
-                    </select>
-                </label>
-
-                <label class="museum-field md:col-span-1">
-                    <span>Status <em class="text-rose-500 not-italic">*</em></span>
-                    <select name="status" required>
-                        @foreach(collect($statusOptions)->sort() as $status)
-                            <option value="{{ $status }}" @selected(old('status', \App\Models\Status::DEFAULT_NAMES[0])===$status)>{{ $status }}</option>
-                        @endforeach
-                    </select>
-                </label>
-                <div class="hidden md:block"></div>
-
-                <label class="museum-field md:col-span-2">
-                    <span>Movement Notes</span>
-                    <textarea name="notes" rows="2" placeholder="Add any additional notes about this movement...">{{ old('notes') }}</textarea>
+                    <span>Approved By</span>
+                    <input type="text" name="approved_by" value="{{ old('approved_by') }}" placeholder="Approver name">
                 </label>
 
                 <label class="museum-field md:col-span-2">
-                    <span>Condition Report</span>
-                    <textarea name="condition_report" rows="2" placeholder="Document the condition of the artwork before movement...">{{ old('condition_report') }}</textarea>
+                    <span>Notes</span>
+                    <textarea name="notes" rows="3" placeholder="Movement Log notes...">{{ old('notes') }}</textarea>
                 </label>
 
                 <div class="md:col-span-2 flex justify-end gap-3 pt-1">
@@ -462,12 +516,65 @@ document.addEventListener('DOMContentLoaded', () => {
     const artworkIdInput = document.getElementById('movement-artwork-id');
     const suggestionBox = document.getElementById('movement-artwork-suggestions');
     const movementForm = modal ? modal.querySelector('form[action="{{ route('movements.store', [], false) }}"]') : null;
+    const locationSelects = modal ? Array.from(modal.querySelectorAll('[data-location-select]')) : [];
 
     if (!modal || !searchInput || !artworkIdInput || !suggestionBox || !movementForm) {
         return;
     }
 
     const artworkOptions = @json($artworkSearchOptions);
+    const syncLocationCode = (select) => {
+        const key = select.dataset.locationSelect;
+        const codeInput = modal.querySelector(`[data-location-code-input="${key}"]`);
+
+        if (!codeInput) {
+            return;
+        }
+
+        codeInput.value = select.selectedOptions[0]?.dataset.code || '';
+    };
+    const suggestStatusForLocation = (type, name) => {
+        const normalizedType = (type || '').toLowerCase();
+        const normalizedName = (name || '').toLowerCase();
+
+        if (normalizedType.includes('storage') || normalizedName.includes('store')) return 'In Storage';
+        if (normalizedType.includes('residence')) return 'In Residence';
+        if (normalizedType.includes('office')) return 'In Office';
+        if (
+            normalizedType.includes('museum')
+            || normalizedType.includes('garden')
+            || normalizedType.includes('hall')
+            || normalizedType.includes('library')
+            || normalizedType.includes('restaurant')
+        ) return 'On Display';
+        if (normalizedType.includes('disposition') || normalizedName.includes('sold') || normalizedName.includes('left')) return 'Sold or Left';
+        if (normalizedType.includes('external')) return 'External';
+
+        return null;
+    };
+    const syncStatusAfterMovement = (select) => {
+        if (select.dataset.locationSelect !== 'to') {
+            return;
+        }
+
+        const statusSelect = modal.querySelector('[data-status-after-movement]');
+        const selectedOption = select.selectedOptions[0];
+        const suggested = suggestStatusForLocation(selectedOption?.dataset.type, select.value);
+
+        if (!statusSelect || !suggested) {
+            return;
+        }
+
+        let option = Array.from(statusSelect.options).find((item) => item.value === suggested);
+        if (!option) {
+            option = document.createElement('option');
+            option.value = suggested;
+            option.text = suggested;
+            statusSelect.appendChild(option);
+        }
+
+        statusSelect.value = suggested;
+    };
 
     let filteredOptions = [];
     let activeIndex = -1;
@@ -591,6 +698,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     movementForm.addEventListener('submit', (event) => {
+        locationSelects.forEach((select) => {
+            syncLocationCode(select);
+            syncStatusAfterMovement(select);
+        });
+
         if (String(artworkIdInput.value).trim() !== '') {
             searchInput.setCustomValidity('');
             return;
@@ -599,6 +711,13 @@ document.addEventListener('DOMContentLoaded', () => {
         event.preventDefault();
         searchInput.setCustomValidity('Please select an artwork from suggestions.');
         searchInput.reportValidity();
+    });
+
+    locationSelects.forEach((select) => {
+        syncLocationCode(select);
+        syncStatusAfterMovement(select);
+        select.addEventListener('change', () => syncLocationCode(select));
+        select.addEventListener('change', () => syncStatusAfterMovement(select));
     });
 });
     </script>

@@ -334,7 +334,7 @@ class ArtworkController extends Controller
         $locationOptions = $locations->pluck('name')->values();
         $locationMeta = $locations->mapWithKeys(fn ($l) => [($l->name ?? '') => ($l->type ?? null)])->all();
 
-        $reasonOptions = [
+        $movementTypeOptions = [
             'Display',
             'Storage',
             'Loan Out',
@@ -342,22 +342,28 @@ class ArtworkController extends Controller
             'Restoration',
             'Transit',
             'Photography',
-            'Conservation',
             'Internal Transfer',
             'Sale',
-            'Deaccession',
+        ];
+        $externalReasonOptions = [
             'Loan',
             'Auction Evaluation',
             'Auction Consignment',
             'Third-Party Evaluation',
+            'Photography',
+            'Conservation',
+            'Restoration',
             'Other External Custody',
         ];
+        $reasonOptions = $externalReasonOptions;
         $statusOptions = Status::allowedNames();
 
         return view('artworks.show', array_merge(compact(
             'artwork',
             'locationOptions',
             'reasonOptions',
+            'movementTypeOptions',
+            'externalReasonOptions',
             'statusOptions'
         ), ['locationMeta' => $locationMeta]));
     }

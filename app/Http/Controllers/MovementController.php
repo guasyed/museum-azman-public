@@ -74,6 +74,15 @@ class MovementController extends Controller
         $handlerOptions = $this->handlerUsersQuery()
             ->orderBy('name')
             ->pluck('name')
+            ->merge(
+                Movement::query()
+                    ->select('responsible_handler')
+                    ->whereNotNull('responsible_handler')
+                    ->where('responsible_handler', '!=', '')
+                    ->distinct()
+                    ->orderBy('responsible_handler')
+                    ->pluck('responsible_handler')
+            )
             ->filter(fn ($name) => is_string($name) && trim($name) !== '')
             ->unique()
             ->values();
@@ -83,6 +92,7 @@ class MovementController extends Controller
             ->tap(fn (Builder $query) => $this->orderLocationsByCleanedInventory($query))
             ->pluck('name')
             ->values();
+        $locationOptionRows = $this->locationOptionRows();
 
         // Stats come from a lightweight count query (not affected by pagination)
         $statsQuery = Movement::query();
@@ -105,9 +115,11 @@ class MovementController extends Controller
 
         $canRecordMovement = ! $isAssignedOnlyView;
 
-        $reasonOptions = $this->reasonOptions();
+        $movementTypeOptions = $this->movementTypeOptions();
+        $externalReasonOptions = $this->externalReasonOptions();
+        $reasonOptions = $externalReasonOptions;
 
-        return view('movements.index', compact('movements', 'artworks', 'stats', 'activeMovements', 'locationOptions', 'statusOptions', 'handlerOptions', 'reasonOptions', 'sortColumn', 'direction', 'canRecordMovement', 'isAssignedOnlyView'));
+        return view('movements.index', compact('movements', 'artworks', 'stats', 'activeMovements', 'locationOptions', 'locationOptionRows', 'statusOptions', 'handlerOptions', 'reasonOptions', 'movementTypeOptions', 'externalReasonOptions', 'sortColumn', 'direction', 'canRecordMovement', 'isAssignedOnlyView'));
     }
 
     public function store(StoreMovementRequest $request): RedirectResponse
@@ -146,17 +158,29 @@ class MovementController extends Controller
             ->tap(fn (Builder $query) => $this->orderLocationsByCleanedInventory($query))
             ->pluck('name')
             ->values();
+        $locationOptionRows = $this->locationOptionRows();
 
-        $reasonOptions = $this->reasonOptions();
+        $movementTypeOptions = $this->movementTypeOptions();
+        $externalReasonOptions = $this->externalReasonOptions();
+        $reasonOptions = $externalReasonOptions;
         $statusOptions = Status::allowedNames();
         $handlerOptions = $this->handlerUsersQuery()
             ->orderBy('name')
             ->pluck('name')
+            ->merge(
+                Movement::query()
+                    ->select('responsible_handler')
+                    ->whereNotNull('responsible_handler')
+                    ->where('responsible_handler', '!=', '')
+                    ->distinct()
+                    ->orderBy('responsible_handler')
+                    ->pluck('responsible_handler')
+            )
             ->filter(fn ($name) => is_string($name) && trim($name) !== '')
             ->unique()
             ->values();
 
-        return view('movements.edit', compact('movement', 'artworks', 'locationOptions', 'reasonOptions', 'statusOptions', 'handlerOptions'));
+        return view('movements.edit', compact('movement', 'artworks', 'locationOptions', 'locationOptionRows', 'reasonOptions', 'movementTypeOptions', 'externalReasonOptions', 'statusOptions', 'handlerOptions'));
     }
 
     public function update(StoreMovementRequest $request, Movement $movement): RedirectResponse
@@ -362,9 +386,25 @@ class MovementController extends Controller
         $query->orderBy('name');
     }
 
-    private function reasonOptions(): array
+    private function locationOptionRows()
     {
-        return [
+        return Location::query()
+            ->whereNotNull('name')
+            ->where('name', '!=', '')
+            ->tap(fn (Builder $query) => $this->orderLocationsByCleanedInventory($query))
+            ->get(['code', 'name', 'type'])
+            ->map(fn (Location $location) => [
+                'code' => (string) ($location->code ?? ''),
+                'name' => (string) $location->name,
+                'type' => (string) ($location->type ?? ''),
+                'label' => trim(($location->code ? $location->code.' - ' : '').$location->name),
+            ])
+            ->values();
+    }
+
+    private function movementTypeOptions(): array
+    {
+        $defaults = [
             'Display',
             'Storage',
             'Loan Out',
@@ -372,15 +412,62 @@ class MovementController extends Controller
             'Restoration',
             'Transit',
             'Photography',
-            'Conservation',
             'Internal Transfer',
             'Sale',
-            'Deaccession',
+        ];
+
+        $imported = Schema::hasColumn('movements', 'movement_type')
+            ? Movement::query()
+                ->whereNotNull('movement_type')
+                ->where('movement_type', '!=', '')
+                ->distinct()
+                ->orderBy('movement_type')
+                ->pluck('movement_type')
+                ->all()
+            : [];
+
+        return collect($defaults)
+            ->merge($imported)
+            ->filter(fn ($value) => is_string($value) && trim($value) !== '')
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    private function externalReasonOptions(): array
+    {
+        $defaults = [
             'Loan',
             'Auction Evaluation',
             'Auction Consignment',
             'Third-Party Evaluation',
+            'Photography',
+            'Conservation',
+            'Restoration',
             'Other External Custody',
         ];
+
+        $imported = Schema::hasColumn('movements', 'external_reason')
+            ? Movement::query()
+                ->whereNotNull('external_reason')
+                ->where('external_reason', '!=', '')
+                ->distinct()
+                ->orderBy('external_reason')
+                ->pluck('external_reason')
+                ->all()
+            : Movement::query()
+                ->whereNotNull('reason')
+                ->where('reason', '!=', '')
+                ->distinct()
+                ->orderBy('reason')
+                ->pluck('reason')
+                ->all();
+
+        return collect($defaults)
+            ->merge($imported)
+            ->filter(fn ($value) => is_string($value) && trim($value) !== '')
+            ->unique()
+            ->values()
+            ->all();
     }
 }

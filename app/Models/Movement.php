@@ -14,10 +14,17 @@ class Movement extends Model
         'external_movement_id',
         'artwork_id',
         'from_location',
+        'from_location_code',
         'to_location',
+        'to_location_code',
         'date_out',
         'expected_return_date',
+        'completed_date',
+        'movement_type',
+        'external_reason',
+        'external_party',
         'responsible_handler',
+        'approved_by',
         'reason',
         'status',
         'notes',
@@ -29,6 +36,7 @@ class Movement extends Model
         return [
             'date_out' => 'date',
             'expected_return_date' => 'date',
+            'completed_date' => 'date',
         ];
     }
 

@@ -468,6 +468,220 @@
 		        display: none !important;
 		    }
 		}
+
+        body.museum-shell {
+            --museum-accent: #c8a85d !important;
+            --museum-premium-bg: #050505;
+            --museum-premium-panel: #0b0b0a;
+            --museum-premium-panel-soft: #11110f;
+            --museum-premium-border: rgba(255, 255, 255, 0.12);
+            --museum-premium-text: #f4f0e8;
+            --museum-premium-muted: rgba(244, 240, 232, 0.62);
+            --museum-premium-gold: #c8a85d;
+            background: var(--museum-premium-bg) !important;
+            color: var(--museum-premium-text);
+        }
+
+        body.museum-shell header,
+        body.museum-shell aside,
+        body.museum-shell main,
+        body.museum-shell .mobile-nav-panel {
+            background: var(--museum-premium-bg) !important;
+            color: var(--museum-premium-text);
+            border-color: var(--museum-premium-border) !important;
+        }
+
+        body.museum-shell main > div {
+            max-width: 1440px;
+        }
+
+        body.museum-shell .museum-panel,
+        body.museum-shell .museum-card,
+        body.museum-shell .museum-stat-card,
+        body.museum-shell .museum-modal,
+        body.museum-shell details > div,
+        body.museum-shell article[class*="bg-white"],
+        body.museum-shell div[class*="bg-white"] {
+            background: var(--museum-premium-panel) !important;
+            border-color: var(--museum-premium-border) !important;
+            color: var(--museum-premium-text) !important;
+            box-shadow: none !important;
+        }
+
+        body.museum-shell .museum-page-title,
+        body.museum-shell .museum-section-title,
+        body.museum-shell .museum-brand-title {
+            color: var(--museum-premium-text) !important;
+            font-family: "Cormorant Garamond", Georgia, serif !important;
+            font-weight: 500;
+        }
+
+        body.museum-shell .museum-page-subtitle,
+        body.museum-shell .text-zinc-400,
+        body.museum-shell .text-zinc-500,
+        body.museum-shell .text-zinc-600,
+        body.museum-shell .text-zinc-700 {
+            color: var(--museum-premium-muted) !important;
+        }
+
+        body.museum-shell .text-zinc-800,
+        body.museum-shell .text-zinc-900,
+        body.museum-shell .museum-card-title,
+        body.museum-shell .font-semibold,
+        body.museum-shell strong,
+        body.museum-shell th {
+            color: var(--museum-premium-text) !important;
+        }
+
+        body.museum-shell .museum-nav-item {
+            border-radius: 4px;
+            color: var(--museum-premium-muted);
+        }
+
+        body.museum-shell .museum-nav-item:hover,
+        body.museum-shell .museum-nav-item.active,
+        body.museum-shell .mobile-nav-link:hover,
+        body.museum-shell .mobile-nav-link.active {
+            background: rgba(200, 168, 93, 0.13) !important;
+            border-color: rgba(200, 168, 93, 0.34) !important;
+            color: var(--museum-premium-gold) !important;
+        }
+
+        body.museum-shell .museum-btn {
+            background: var(--museum-premium-gold) !important;
+            border-color: var(--museum-premium-gold) !important;
+            color: #070707 !important;
+            border-radius: 4px !important;
+        }
+
+        body.museum-shell .museum-btn-secondary,
+        body.museum-shell .museum-install-trigger,
+        body.museum-shell .mobile-nav-logout {
+            background: rgba(255, 255, 255, 0.04) !important;
+            border-color: var(--museum-premium-border) !important;
+            color: var(--museum-premium-text) !important;
+            border-radius: 4px !important;
+        }
+
+        body.museum-shell .museum-btn-secondary:hover,
+        body.museum-shell .museum-install-trigger:hover {
+            background: rgba(200, 168, 93, 0.14) !important;
+            color: var(--museum-premium-gold) !important;
+        }
+
+        body.museum-shell .museum-field > span,
+        body.museum-shell label,
+        body.museum-shell summary {
+            color: var(--museum-premium-text) !important;
+        }
+
+        body.museum-shell .museum-field input,
+        body.museum-shell .museum-field select,
+        body.museum-shell .museum-field textarea,
+        body.museum-shell input,
+        body.museum-shell select,
+        body.museum-shell textarea {
+            background: var(--museum-premium-panel-soft) !important;
+            border-color: var(--museum-premium-border) !important;
+            color: var(--museum-premium-text) !important;
+            border-radius: 4px !important;
+        }
+
+        body.museum-shell .museum-field input::placeholder,
+        body.museum-shell .museum-field textarea::placeholder,
+        body.museum-shell input::placeholder,
+        body.museum-shell textarea::placeholder {
+            color: rgba(244, 240, 232, 0.42) !important;
+        }
+
+        body.museum-shell table {
+            color: var(--museum-premium-text);
+        }
+
+        body.museum-shell thead tr,
+        body.museum-shell tr,
+        body.museum-shell .border-zinc-100,
+        body.museum-shell .border-zinc-200,
+        body.museum-shell .border-zinc-300 {
+            border-color: var(--museum-premium-border) !important;
+        }
+
+        body.museum-shell tr:hover,
+        body.museum-shell .hover\:bg-zinc-50:hover,
+        body.museum-shell .bg-zinc-50,
+        body.museum-shell .bg-zinc-100 {
+            background: rgba(255, 255, 255, 0.045) !important;
+        }
+
+        body.museum-shell img {
+            border-color: var(--museum-premium-border) !important;
+        }
+
+        body.museum-shell main img:not([data-no-lightbox]) {
+            cursor: zoom-in;
+        }
+
+        .museum-global-lightbox {
+            position: fixed;
+            inset: 0;
+            z-index: 1400;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: clamp(16px, 3vw, 42px);
+            background: rgba(0, 0, 0, 0.88);
+            backdrop-filter: blur(10px);
+        }
+
+        .museum-global-lightbox.is-open {
+            display: flex;
+        }
+
+        .museum-global-lightbox img {
+            max-width: min(100%, 1180px);
+            max-height: calc(100vh - 110px);
+            object-fit: contain;
+            border-radius: 4px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+        }
+
+        .museum-global-lightbox-caption {
+            position: absolute;
+            left: clamp(16px, 3vw, 42px);
+            bottom: clamp(18px, 3vw, 34px);
+            max-width: min(760px, calc(100vw - 120px));
+            color: rgba(244, 240, 232, 0.82);
+            font-size: 0.9rem;
+        }
+
+        .museum-global-lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 22px;
+            width: 44px;
+            height: 44px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            font-size: 30px;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        body.museum-shell .pagination .page-link,
+        body.museum-shell nav[role="navigation"] a,
+        body.museum-shell nav[role="navigation"] span {
+            background: var(--museum-premium-panel-soft) !important;
+            border-color: var(--museum-premium-border) !important;
+            color: var(--museum-premium-text) !important;
+        }
+
+        body.museum-shell .pagination .page-item.active .page-link {
+            background: var(--museum-premium-gold) !important;
+            border-color: var(--museum-premium-gold) !important;
+            color: #070707 !important;
+        }
     </style>
 </head>
 <body class="museum-shell museum-theme-{{ $uiTheme }} museum-density-{{ $uiDensity }} bg-[#f6f5f4]">
@@ -770,6 +984,12 @@
     </div>
 </div>
 
+<div id="museumGlobalLightbox" class="museum-global-lightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Image preview">
+    <button type="button" class="museum-global-lightbox-close" data-lightbox-close aria-label="Close image preview">&times;</button>
+    <img src="" alt="" data-lightbox-image>
+    <p class="museum-global-lightbox-caption" data-lightbox-caption></p>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@19.5.7/build/js/intlTelInput.min.js"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -995,6 +1215,71 @@
         };
 
         initGlobalScrollButtons();
+
+        const globalLightbox = document.getElementById('museumGlobalLightbox');
+        const globalLightboxImage = globalLightbox?.querySelector('[data-lightbox-image]');
+        const globalLightboxCaption = globalLightbox?.querySelector('[data-lightbox-caption]');
+        const closeGlobalLightbox = () => {
+            if (!globalLightbox || !globalLightboxImage) {
+                return;
+            }
+
+            globalLightbox.classList.remove('is-open');
+            globalLightbox.setAttribute('aria-hidden', 'true');
+            globalLightboxImage.removeAttribute('src');
+            globalLightboxImage.alt = '';
+            document.body.classList.remove('overflow-hidden');
+        };
+        const shouldOpenImageLightbox = (image) => {
+            if (!(image instanceof HTMLImageElement)) {
+                return false;
+            }
+
+            if (!image.currentSrc && !image.src) {
+                return false;
+            }
+
+            if (image.closest('[data-no-lightbox], .museum-global-lightbox, .mobile-nav, header, aside')) {
+                return false;
+            }
+
+            const rect = image.getBoundingClientRect();
+            return rect.width >= 72 && rect.height >= 72;
+        };
+
+        document.addEventListener('click', (event) => {
+            const image = event.target instanceof Element ? event.target.closest('img') : null;
+
+            if (!globalLightbox || !globalLightboxImage || !shouldOpenImageLightbox(image)) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            const source = image.currentSrc || image.src;
+            const caption = image.getAttribute('alt') || image.closest('article')?.querySelector('h3, h4, .museum-card-title')?.textContent?.trim() || 'Image preview';
+            globalLightboxImage.src = source;
+            globalLightboxImage.alt = caption;
+            if (globalLightboxCaption) {
+                globalLightboxCaption.textContent = caption;
+            }
+            globalLightbox.classList.add('is-open');
+            globalLightbox.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('overflow-hidden');
+        }, true);
+
+        globalLightbox?.addEventListener('click', (event) => {
+            if (event.target === globalLightbox || event.target instanceof Element && event.target.matches('[data-lightbox-close]')) {
+                closeGlobalLightbox();
+            }
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && globalLightbox?.classList.contains('is-open')) {
+                closeGlobalLightbox();
+            }
+        });
 
         const notificationDetails = document.getElementById('notification-details');
         const notificationCountBadge = document.getElementById('notification-count-badge');

@@ -20,7 +20,7 @@ class ArtworkPrimaryImageUrlTest extends TestCase
 
         $artwork->setRelation('images', collect());
 
-        $this->assertSame(asset('storage/artworks/primary.jpg'), $artwork->primary_image_url);
+        $this->assertSame(Storage::url('artworks/primary.jpg'), $artwork->primary_image_url);
     }
 
     public function test_it_falls_back_to_the_source_image_url_when_no_local_file_exists(): void

@@ -13,62 +13,6 @@
             transform: scale(1.15);
         }
 
-        /* Lightbox Modal Styles */
-        .artwork-lightbox {
-            position: fixed;
-            inset: 0;
-            background-color: rgba(0, 0, 0, 0.9);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
-            z-index: 50;
-        }
-
-        .artwork-lightbox.active {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        .artwork-lightbox-content {
-            position: relative;
-            max-width: 90vw;
-            max-height: 90vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .artwork-lightbox-image {
-            max-width: 100%;
-            max-height: 85vh;
-            object-fit: contain;
-        }
-
-        .artwork-lightbox-close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 24px;
-            transition: background-color 0.2s ease-in-out;
-            z-index: 51;
-        }
-
-        .artwork-lightbox-close:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
     </style>
 
     @php
@@ -171,7 +115,7 @@
         <div class="grid gap-4 xl:grid-cols-[1.55fr_0.78fr]">
             <div class="space-y-4">
                 <article class="museum-panel overflow-hidden p-0">
-                    <div class="artwork-image-container h-130" onclick="document.getElementById('artworkLightbox').classList.add('active')">
+                    <div class="artwork-image-container h-130">
                         @if($artwork->primary_image_url)
                             <img
                                 src="{{ $artwork->primary_image_url }}"
@@ -465,25 +409,4 @@
         })();
     </script>
 
-    <!-- Artwork Lightbox Modal -->
-    <div class="artwork-lightbox" id="artworkLightbox" onclick="if(event.target === this) this.classList.remove('active')">
-        <button class="artwork-lightbox-close" onclick="document.getElementById('artworkLightbox').classList.remove('active')" aria-label="Close lightbox">&times;</button>
-        <div class="artwork-lightbox-content">
-            @if($artwork->primary_image_url)
-                <img src="{{ $artwork->primary_image_url }}" alt="{{ $artwork->title }}" class="artwork-lightbox-image">
-            @endif
-        </div>
-    </div>
-
-    <script>
-        // Close lightbox with Escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                const lightbox = document.getElementById('artworkLightbox');
-                if (lightbox.classList.contains('active')) {
-                    lightbox.classList.remove('active');
-                }
-            }
-        });
-    </script>
 </x-layout>

@@ -77,6 +77,46 @@ Route::get('/storage/{path}', function (string $path) {
 	]);
 })->where('path', '.*');
 
+$publicMuseumPage = function (string $publicPage = 'home') {
+	$homeArtworks = \App\Models\Artwork::query()
+		->with('artist')
+		->whereNotNull('source_image_url')
+		->where('source_image_url', '!=', '')
+		->inRandomOrder()
+		->take(18)
+		->get();
+
+	return view('welcome', compact('homeArtworks', 'publicPage'));
+};
+
+Route::get('/', function () use ($publicMuseumPage) {
+	return $publicMuseumPage('home');
+})->name('home');
+
+Route::get('/museum/about', function () use ($publicMuseumPage) {
+	return $publicMuseumPage('about');
+})->name('public.about');
+
+Route::get('/museum/events', function () use ($publicMuseumPage) {
+	return $publicMuseumPage('events');
+})->name('public.events');
+
+Route::get('/museum/artists', function () use ($publicMuseumPage) {
+	return $publicMuseumPage('artists');
+})->name('public.artists');
+
+Route::get('/museum/collection', function () use ($publicMuseumPage) {
+	return $publicMuseumPage('collection');
+})->name('public.collection');
+
+Route::get('/museum/visit', function () use ($publicMuseumPage) {
+	return $publicMuseumPage('visit');
+})->name('public.visit');
+
+Route::get('/museum/contact', function () use ($publicMuseumPage) {
+	return $publicMuseumPage('contact');
+})->name('public.contact');
+
 
 Route::middleware('auth')->group(function () {
 	Route::post('logout', [AuthController::class, 'logout'])->name('logout');
@@ -92,7 +132,7 @@ Route::middleware('auth')->group(function () {
 		return response()->json(['status' => 'ok']);
 	})->name('notifications.mark-read');
 
-	Route::get('/', DashboardController::class)->name('dashboard');
+	Route::get('dashboard', DashboardController::class)->name('dashboard');
 	Route::get('artworks/suggestions', [ArtworkController::class, 'suggestions'])->name('artworks.suggestions');
 	Route::get('artworks/export/pdf', [ArtworkController::class, 'exportPdf'])->name('artworks.export.pdf');
 	Route::resource('artworks', ArtworkController::class);

@@ -813,13 +813,10 @@
 
     <main>
         @if($publicPage === 'home')
-            <section class="hero" aria-label="Contemporary art">
+            <section class="hero" aria-label="Museum Azman">
                 <video autoplay muted loop playsinline poster="{{ $fallbackImage }}">
                     <source src="{{ asset('media/museum-azman-home-video.mp4') }}" type="video/mp4">
                 </video>
-                <div class="hero-content">
-                    <h1>Contemporary art</h1>
-                </div>
             </section>
 
             <section class="section">

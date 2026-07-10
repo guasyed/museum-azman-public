@@ -19,6 +19,6 @@ class ExampleTest extends TestCase
         $response = $this->get('/');
 
         $response->assertOk();
-        $response->assertSee('Contemporary art');
+        $response->assertDontSee('<h1>Contemporary art</h1>', false);
     }
 }

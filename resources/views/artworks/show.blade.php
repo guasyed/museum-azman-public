@@ -109,7 +109,7 @@
                 <span>{{ $backLabel }}</span>
             </a>
 
-            <a href="#record-movement" class="museum-btn text-xs">+ Record Movement</a>
+            <a href="#record-movement" class="hidden museum-btn text-xs" style="display: none !important;">+ Record Movement</a>
         </div>
 
         <div class="grid gap-4 xl:grid-cols-[1.55fr_0.78fr]">
@@ -163,6 +163,13 @@
                             <p class="text-zinc-500">Provenance</p>
                             <p class="text-zinc-700">{{ $artwork->provenance ?: '-' }}</p>
                         </div>
+
+                        @if($artwork->remarks)
+                            <div class="space-y-2 border-t border-zinc-200 pt-4 text-sm">
+                                <p class="text-zinc-500">Remarks</p>
+                                <p class="whitespace-pre-wrap text-zinc-700">{{ $artwork->remarks }}</p>
+                            </div>
+                        @endif
                     </div>
                 </article>
 

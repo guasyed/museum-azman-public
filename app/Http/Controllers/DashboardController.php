@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Artwork;
-use App\Models\Movement;
+use App\Models\ActivityLog;
 use Illuminate\Support\Collection;
 
 class DashboardController extends Controller
@@ -23,15 +23,26 @@ class DashboardController extends Controller
 
         $geoByCountry = $this->geographyCounts($artworks);
 
-        $recentMovements = Movement::query()
-            ->with('artwork.artist')
+        $recentArtworkActivities = ActivityLog::query()
+            ->whereIn('action', ['artwork.created', 'artwork.updated'])
             ->orderByDesc('created_at')
             ->orderByDesc('id')
+            ->take(30)
             ->get();
+
+        $activityArtworks = Artwork::query()
+            ->with(['artist', 'location'])
+            ->whereIn('id', $recentArtworkActivities->pluck('subject_id')->filter()->unique())
+            ->get()
+            ->keyBy('id');
+
+        $recentArtworkActivities->each(function (ActivityLog $activity) use ($activityArtworks): void {
+            $activity->setRelation('dashboardArtwork', $activityArtworks->get($activity->subject_id));
+        });
 
         $recentArtworks = $this->randomArtworksWithImagePriority();
 
-        return view('dashboard.index', compact('stats', 'recentArtworks', 'geoByCountry', 'recentMovements'));
+        return view('dashboard.index', compact('stats', 'recentArtworks', 'geoByCountry', 'recentArtworkActivities'));
     }
 
     private function geographyCounts(Collection $artworks): array

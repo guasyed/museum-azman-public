@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Status;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -32,8 +31,15 @@ class StoreArtworkRequest extends FormRequest
             'acquisition_date' => ['nullable', 'date'],
             'acquisition_price' => ['nullable', 'numeric', 'min:0'],
             'current_valuation' => ['nullable', 'numeric', 'min:0'],
-            'status' => ['required', 'string', 'max:50', Rule::in(Status::allowedNames())],
+            'status' => [
+                Rule::requiredIf(fn () => strcasecmp(trim((string) $this->input('location_name')), 'External') === 0),
+                'nullable',
+                'string',
+                'max:50',
+                Rule::in(['On Display', 'In Storage', 'Sold or Left', 'Under Restoration', 'Loaned Out', 'Under Evaluation']),
+            ],
             'provenance' => ['nullable', 'string'],
+            'remarks' => ['nullable', 'string', 'max:5000'],
 
             'primary_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp,gif,bmp', 'max:10240'],
             'gallery_images' => ['nullable', 'array'],

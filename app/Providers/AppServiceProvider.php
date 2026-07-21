@@ -21,7 +21,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Paginator::useBootstrapFive();
+        Paginator::useTailwind();
 
         // If production APP_URL uses https, generate secure absolute URLs.
         if (str_starts_with((string) config('app.url'), 'https://')) {

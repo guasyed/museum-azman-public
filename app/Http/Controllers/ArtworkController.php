@@ -302,7 +302,9 @@ class ArtworkController extends Controller
             return $artwork;
         });
 
-        ActivityLogger::log('artwork.created', "Artwork created: {$artwork->title}", $artwork);
+        $artwork->loadMissing('location');
+        $createdLocation = $artwork->location?->name ?: 'Unknown Location';
+        ActivityLogger::log('artwork.created', "Added artwork at {$createdLocation}.", $artwork);
 
         $redirectUrl = route('artworks.show', $artwork);
 
@@ -326,7 +328,8 @@ class ArtworkController extends Controller
             ->select('name', 'type')
             ->whereNotNull('name')
             ->where('name', '!=', '')
-            ->tap(fn (Builder $query) => $this->orderLocationsByCleanedInventory($query))
+            ->orderByRaw('LOWER(name)')
+            ->orderBy('name')
             ->get()
             ->unique('name')
             ->values();
@@ -384,7 +387,8 @@ class ArtworkController extends Controller
             ->select('name', 'type', 'address')
             ->whereNotNull('name')
             ->where('name', '!=', '')
-            ->tap(fn (Builder $query) => $this->orderLocationsByCleanedInventory($query))
+            ->orderByRaw('LOWER(name)')
+            ->orderBy('name')
             ->get()
             ->unique('name')
             ->values();
@@ -409,6 +413,8 @@ class ArtworkController extends Controller
 
     public function update(UpdateArtworkRequest $request, Artwork $artwork): RedirectResponse|JsonResponse
     {
+        $artwork->loadMissing('location');
+        $previousLocation = $artwork->location?->name ?: 'Unknown Location';
         $origin = $request->string('from')->toString() === 'dashboard' ? 'dashboard' : 'collection';
         $returnUrl = $request->input('return', $request->query('return'));
         $selectedPrimaryGalleryImageId = $request->integer('primary_gallery_image_id');
@@ -482,7 +488,12 @@ class ArtworkController extends Controller
             }
         });
 
-        ActivityLogger::log('artwork.updated', "Artwork updated: {$artwork->title}", $artwork);
+        $artwork->load('location');
+        $currentLocation = $artwork->location?->name ?: 'Unknown Location';
+        $activityDescription = $previousLocation !== $currentLocation
+            ? "Location changed: {$previousLocation} → {$currentLocation}."
+            : "Artwork details updated. Location: {$currentLocation}.";
+        ActivityLogger::log('artwork.updated', $activityDescription, $artwork);
 
         $redirectUrl = $isSafeReturnUrl
             ? (string) $returnUrl
@@ -628,9 +639,37 @@ class ArtworkController extends Controller
             'acquisition_date' => $request->input('acquisition_date'),
             'acquisition_price' => $request->input('acquisition_price'),
             'current_valuation' => $request->input('current_valuation'),
-            'status' => $request->input('status', Status::DEFAULT_NAMES[0]),
+            'status' => $this->statusForLocation(
+                $request->string('location_name')->trim()->toString(),
+                $request->input('status')
+            ),
             'provenance' => $request->input('provenance'),
+            'remarks' => $request->input('remarks'),
         ];
+    }
+
+    private function statusForLocation(string $locationName, mixed $externalStatus = null): string
+    {
+        $normalizedLocation = Str::lower(trim($locationName));
+
+        if ($normalizedLocation === 'store') {
+            return 'In Storage';
+        }
+
+        if ($normalizedLocation === 'sold or left') {
+            return 'Sold or Left';
+        }
+
+        if ($normalizedLocation === 'external') {
+            $allowedExternalStatuses = ['Under Restoration', 'Loaned Out', 'Under Evaluation'];
+            $externalStatus = trim((string) $externalStatus);
+
+            return in_array($externalStatus, $allowedExternalStatuses, true)
+                ? $externalStatus
+                : 'Under Restoration';
+        }
+
+        return 'On Display';
     }
 
     private function orderLocationsByCleanedInventory(Builder $query): void

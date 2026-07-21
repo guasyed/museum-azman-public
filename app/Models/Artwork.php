@@ -27,6 +27,7 @@ class Artwork extends Model
         'acquisition_price',
         'current_valuation',
         'provenance',
+        'remarks',
         'status',
         'primary_image_path',
         'source_image_url',

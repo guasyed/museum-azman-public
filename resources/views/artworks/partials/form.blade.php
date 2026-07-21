@@ -5,6 +5,15 @@ $locationTypeOptions = collect($locationTypeOptions ?? []);
 $selectedLocationName = (string) old('location_name', $artwork?->location?->name);
 $selectedLocationType = (string) old('location_type', $artwork?->location?->type);
 $selectedLocationAddress = (string) old('location_address', $artwork?->location?->address);
+$externalStatusOptions = collect(['Under Restoration', 'Loaned Out', 'Under Evaluation']);
+$selectedStatus = (string) old('status', $artwork?->status);
+$normalizedLocationName = strtolower(trim($selectedLocationName));
+$automaticStatus = match ($normalizedLocationName) {
+    'store' => 'In Storage',
+    'sold or left' => 'Sold or Left',
+    'external' => $externalStatusOptions->contains($selectedStatus) ? $selectedStatus : 'Under Restoration',
+    default => 'On Display',
+};
 
 $descriptionText = trim((string) old('description', $artwork?->description));
 $derivedYear = null;
@@ -96,10 +105,12 @@ $sizeToDefault = $artwork?->size_to_cm ?: $derivedSizeTo;
     </label>
 
     <label class="museum-field">
-        <span>Status *</span>
-        <select name="status">
-            @foreach($statuses as $status)
-                <option value="{{ $status }}" @selected(old('status', $artwork?->status ?? \App\Models\Status::DEFAULT_NAMES[0]) === $status)>{{ $status }}</option>
+        <span>Status (Automated)</span>
+        <input id="artwork-status-display" value="{{ $automaticStatus }}" readonly aria-readonly="true">
+        <input id="artwork-status-value" type="hidden" name="status" value="{{ $automaticStatus }}">
+        <select id="artwork-external-status" class="hidden" aria-label="External artwork status">
+            @foreach($externalStatusOptions as $status)
+                <option value="{{ $status }}" @selected($automaticStatus === $status)>{{ $status }}</option>
             @endforeach
         </select>
     </label>
@@ -125,19 +136,11 @@ $sizeToDefault = $artwork?->size_to_cm ?: $derivedSizeTo;
     </label>
 
     <label class="museum-field">
-        <span>Location Type</span>
-        <select id="location-type-select" name="location_type">
-            <option value="">Select type</option>
-            @foreach($locationTypeOptions as $locationTypeOption)
-                <option value="{{ $locationTypeOption }}" @selected($selectedLocationType === (string) $locationTypeOption)>
-                    {{ $locationTypeOption }}
-                </option>
-            @endforeach
-            @if($selectedLocationType !== '' && !$locationTypeOptions->contains($selectedLocationType))
-                <option value="{{ $selectedLocationType }}" selected>{{ $selectedLocationType }}</option>
-            @endif
-        </select>
+        <span>Remarks <span class="font-normal text-zinc-400">(Optional)</span></span>
+        <textarea name="remarks" rows="2" maxlength="5000" placeholder="Add any internal notes or reference details">{{ old('remarks', $artwork?->remarks) }}</textarea>
     </label>
+
+    <input id="location-type-select" type="hidden" name="location_type" value="{{ $selectedLocationType }}">
 </div>
 
 <label class="museum-field">
@@ -216,6 +219,31 @@ document.addEventListener('DOMContentLoaded', () => {
     const locationSelect = document.getElementById('location-name-select');
     const locationTypeSelect = document.getElementById('location-type-select');
     const locationAddressInput = document.getElementById('location-address-input');
+    const statusDisplay = document.getElementById('artwork-status-display');
+    const statusValue = document.getElementById('artwork-status-value');
+    const externalStatusSelect = document.getElementById('artwork-external-status');
+
+    const statusForLocation = (locationName) => {
+        const normalizedName = String(locationName || '').trim().toLowerCase();
+
+        if (normalizedName === 'store') return 'In Storage';
+        if (normalizedName === 'sold or left') return 'Sold or Left';
+        if (normalizedName === 'external') return externalStatusSelect?.value || 'Under Restoration';
+
+        return 'On Display';
+    };
+
+    const syncAutomatedStatus = () => {
+        const locationName = locationSelect?.value || '';
+        const isExternal = locationName.trim().toLowerCase() === 'external';
+        const status = statusForLocation(locationName);
+
+        statusDisplay?.classList.toggle('hidden', isExternal);
+        externalStatusSelect?.classList.toggle('hidden', !isExternal);
+
+        if (statusDisplay) statusDisplay.value = status;
+        if (statusValue) statusValue.value = status;
+    };
 
     const syncLocationDetails = (force = false) => {
         if (!locationSelect) {
@@ -237,9 +265,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (locationAddressInput && (force || locationAddressInput.value.trim() === '')) {
             locationAddressInput.value = address;
         }
+
+        syncAutomatedStatus();
     };
 
     locationSelect?.addEventListener('change', () => syncLocationDetails(true));
+    externalStatusSelect?.addEventListener('change', syncAutomatedStatus);
     syncLocationDetails(false);
 
     const maxSide = 2200;

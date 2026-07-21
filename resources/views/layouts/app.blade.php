@@ -580,7 +580,7 @@
                 <span>Collection</span>
             </a>
 
-            <a href="{{ route('movements.index', [], false) }}" class="museum-nav-item flex items-center gap-3 {{ request()->routeIs('movements.*') ? 'active' : '' }}">
+            <a href="{{ route('movements.index', [], false) }}" class="hidden museum-nav-item items-center gap-3 {{ request()->routeIs('movements.*') ? 'active' : '' }}" style="display: none !important;">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path><path d="M15 18H9"></path><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"></path><circle cx="17" cy="18" r="2"></circle><circle cx="7" cy="18" r="2"></circle></svg>
                 <span>Movement Tracker</span>
             </a>
@@ -606,6 +606,10 @@
             </a>
 
             @if(auth()->check() && auth()->user()->isAdmin())
+                <a href="{{ route('admin.events.index', [], false) }}" class="museum-nav-item flex items-center gap-3 {{ request()->routeIs('admin.events.*') ? 'active' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path></svg>
+                    <span>Events CMS</span>
+                </a>
                 <a href="{{ route('admin.visit-requests.index', [], false) }}" class="museum-nav-item flex items-center gap-3 {{ request()->routeIs('admin.visit-requests.*') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="m9 16 2 2 4-4"></path></svg>
                     <span>Visit Requests</span>
@@ -785,12 +789,13 @@
         <nav class="mobile-nav-list" aria-label="Mobile navigation">
         <a href="{{ route('dashboard', [], false) }}" class="mobile-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a>
         <a href="{{ route('artworks.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('artworks.*') ? 'active' : '' }}">Collection</a>
-        <a href="{{ route('movements.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('movements.*') ? 'active' : '' }}">Movement Tracker</a>
+        <a href="{{ route('movements.index', [], false) }}" class="hidden mobile-nav-link {{ request()->routeIs('movements.*') ? 'active' : '' }}" style="display: none !important;">Movement Tracker</a>
         <a href="{{ route('locations.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('locations.*') ? 'active' : '' }}">Locations</a>
         <a href="{{ route('artists.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('artists.*') ? 'active' : '' }}">Artists</a>
         <a href="{{ route('reports.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">Reports & Analytics</a>
         <a href="{{ route('settings.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}">Settings</a>
         @if(auth()->check() && auth()->user()->isAdmin())
+            <a href="{{ route('admin.events.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.events.*') ? 'active' : '' }}">Events CMS</a>
             <a href="{{ route('admin.visit-requests.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.visit-requests.*') ? 'active' : '' }}">Visit Requests</a>
             <a href="{{ route('admin.contact-messages.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.contact-messages.*') ? 'active' : '' }}">Messages</a>
             <a href="{{ route('admin.imports.csv.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.imports.csv.*') ? 'active' : '' }}">Import CSV</a>

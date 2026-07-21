@@ -5,6 +5,7 @@ use App\Http\Controllers\AdminActivityLogController;
 use App\Http\Controllers\AdminImportController;
 use App\Http\Controllers\AdminContactMessageController;
 use App\Http\Controllers\AdminVisitRequestController;
+use App\Http\Controllers\AdminMuseumEventController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ArtworkController;
 use App\Http\Controllers\ArtistController;
@@ -90,7 +91,17 @@ $publicMuseumPage = function (string $publicPage = 'home') {
 		->take(18)
 		->get();
 
-	return view('welcome', compact('homeArtworks', 'publicPage'));
+	$publicEvents = collect();
+	if ($publicPage === 'events' && \Illuminate\Support\Facades\Schema::hasTable('museum_events')) {
+		$publicEvents = \App\Models\MuseumEvent::query()
+			->where('is_published', true)
+			->orderBy('sort_order')
+			->orderBy('id')
+			->get()
+			->groupBy('section');
+	}
+
+	return view('welcome', compact('homeArtworks', 'publicPage', 'publicEvents'));
 };
 
 Route::get('/', function () use ($publicMuseumPage) {
@@ -175,6 +186,10 @@ Route::middleware('auth')->group(function () {
 	Route::post('settings/backup/delete', [SettingController::class, 'deleteBackup'])->name('settings.backup.delete')->middleware('admin');
 
 	Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
+		Route::get('events', [AdminMuseumEventController::class, 'index'])->name('events.index');
+		Route::post('events', [AdminMuseumEventController::class, 'store'])->name('events.store');
+		Route::put('events/{event}', [AdminMuseumEventController::class, 'update'])->name('events.update');
+		Route::delete('events/{event}', [AdminMuseumEventController::class, 'destroy'])->name('events.destroy');
 		Route::get('visit-requests', [AdminVisitRequestController::class, 'index'])->name('visit-requests.index');
 		Route::patch('visit-requests/{visitRequest}/reviewed', [AdminVisitRequestController::class, 'markReviewed'])->name('visit-requests.reviewed');
 		Route::get('messages', [AdminContactMessageController::class, 'index'])->name('contact-messages.index');

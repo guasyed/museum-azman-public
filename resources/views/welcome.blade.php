@@ -322,6 +322,18 @@
             aspect-ratio: 1 / 1;
         }
 
+        .event-placeholder {
+            display: grid;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            place-items: center;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: #151515;
+            color: rgba(255, 255, 255, 0.46);
+            font-family: var(--public-font-serif);
+            font-size: clamp(1.35rem, 2.2vw, 2rem);
+        }
+
         .wide-card img {
             aspect-ratio: 16 / 11;
         }
@@ -1008,47 +1020,34 @@
                 </div>
             </section>
 
-            <section class="section alt">
-                <div class="section-head"><h2>Currently Active</h2></div>
-                <div class="grid three">
-                    @foreach([1, 10, 2] as $loopIndex => $index)
-                        <article class="card square-card">
-                            <img src="{{ $imageFor($index) }}" alt="{{ ['Silent Forms', 'Curatorial Walkthrough', 'Urban Narratives'][$loopIndex] }}" loading="lazy">
-                            <h3>{{ ['Silent Forms', 'Curatorial Walkthrough', 'Urban Narratives'][$loopIndex] }}</h3>
-                            <p>{{ ['Exhibition', 'Guided Tour', 'Collection Focus'][$loopIndex] }}</p>
-                            <small>{{ ['On view through June 2026', 'Every Saturday, 2pm', 'On view through August 2026'][$loopIndex] }}</small>
-                        </article>
-                    @endforeach
-                </div>
-            </section>
-
-            <section class="section">
-                <div class="section-head"><h2>Upcoming</h2></div>
-                <div class="grid three">
-                    @foreach([0, 1, 11] as $loopIndex => $index)
-                        <article class="card">
-                            <img src="{{ $imageFor($index) }}" alt="{{ ['Chromatic Dialogues', 'Artist Talk: Kseniya Lapteva', 'Collectors Evening'][$loopIndex] }}" loading="lazy">
-                            <h3>{{ ['Chromatic Dialogues', 'Artist Talk: Kseniya Lapteva', 'Collectors Evening'][$loopIndex] }}</h3>
-                            <p>{{ ['Exhibition Opening', 'In Conversation', 'Private Event'][$loopIndex] }}</p>
-                            <small>{{ ['March 15, 2026', 'April 8, 2026', 'April 22, 2026'][$loopIndex] }}</small>
-                        </article>
-                    @endforeach
-                </div>
-            </section>
-
-            <section class="section alt">
-                <div class="section-head"><h2>Archive</h2></div>
-                <div class="grid three">
-                    @foreach([6, 8, 9, 12] as $loopIndex => $index)
-                        <article class="card">
-                            <img src="{{ $imageFor($index) }}" alt="{{ ['Horizons Exhibition', 'Artist Interview Series', 'Abstract Territories', 'Symposium: Contemporary Art Across Continents'][$loopIndex] }}" loading="lazy">
-                            <h3>{{ ['Horizons Exhibition', 'Artist Interview Series', 'Abstract Territories', 'Symposium: Contemporary Art Across Continents'][$loopIndex] }}</h3>
-                            <p>{{ ['Margarita Shtyfura', 'Fons Heijnsbroek', 'Group Exhibition', 'Panel Discussion'][$loopIndex] }}</p>
-                            <small>{{ ['January - March 2026', 'February 12, 2026', 'October - December 2025', 'September 18, 2025'][$loopIndex] }}</small>
-                        </article>
-                    @endforeach
-                </div>
-            </section>
+            @foreach([
+                'currently_active' => ['label' => 'Currently Active', 'alternate' => true],
+                'upcoming' => ['label' => 'Upcoming', 'alternate' => false],
+                'archive' => ['label' => 'Archive', 'alternate' => true],
+            ] as $eventSection => $sectionConfig)
+                @php $sectionEvents = collect($publicEvents->get($eventSection, []))->take(3)->values(); @endphp
+                <section class="section {{ $sectionConfig['alternate'] ? 'alt' : '' }}">
+                    <div class="section-head"><h2>{{ $sectionConfig['label'] }}</h2></div>
+                    <div class="grid three">
+                        @foreach(range(0, 2) as $slot)
+                            @php $event = $sectionEvents->get($slot); @endphp
+                            <article class="card square-card">
+                                @if($event?->image_url)
+                                    <img src="{{ $event->image_url }}" alt="{{ $event->title }}" loading="lazy">
+                                @else
+                                    <div class="event-placeholder">Coming Soon</div>
+                                @endif
+                                <h3>{{ $event?->title ?: 'Coming Soon' }}</h3>
+                                <p>{{ $event?->event_type ?: 'Event announcement' }}</p>
+                                <small>{{ $event?->schedule ?: 'Details to be announced' }}</small>
+                                @if($event?->description)
+                                    <p>{{ $event->description }}</p>
+                                @endif
+                            </article>
+                        @endforeach
+                    </div>
+                </section>
+            @endforeach
 
             <section class="section">
                 <div class="center-copy">

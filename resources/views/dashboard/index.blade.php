@@ -37,46 +37,47 @@
             <article class="museum-panel p-6">
                 <div class="mb-4 flex items-start justify-between">
                     <div>
-                        <h3 class="museum-section-title">Recent Movements</h3>
-                        <p class="text-zinc-600">Latest movement logs</p>
+                        <h3 class="museum-section-title">Recent Artwork Activities</h3>
+                        <p class="text-zinc-600">Latest artwork additions and edits</p>
                     </div>
-                    <a href="{{ route('movements.index', [], false) }}" class="text-3xl leading-none" aria-label="View all movements">→</a>
+                    <a href="{{ route('artworks.index', [], false) }}" class="text-3xl leading-none" aria-label="View all artworks">→</a>
                 </div>
 
                 <div class="space-y-2" data-recent-movements-list>
-                    @forelse($recentMovements as $move)
+                    @forelse($recentArtworkActivities as $activity)
                         @php
-                            $movementStatusClass = match($move->status) {
-                                'On Display' => 'bg-emerald-100 text-emerald-700',
-                                'In Stage', 'In Storage', 'In Residence', 'In Office' => 'bg-amber-100 text-amber-700',
-                                'On Loan', 'Loaned Out' => 'bg-violet-100 text-violet-700',
-                                'Under Restoration' => 'bg-sky-100 text-sky-700',
-                                'Sold or Left' => 'bg-rose-100 text-rose-700',
-                                default => 'bg-zinc-100 text-zinc-700',
-                            };
+                            $activityArtwork = $activity->dashboardArtwork;
+                            $isCreatedActivity = $activity->action === 'artwork.created';
+                            $activityClass = $isCreatedActivity
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : 'bg-blue-100 text-blue-700';
                         @endphp
                         <div class="border-b border-zinc-200 py-2.5 last:border-b-0 {{ $loop->iteration > 3 ? 'hidden' : '' }}" data-recent-movement-item>
                             <div class="flex items-center justify-between gap-2">
-                                <div>
-                                    <strong class="text-base leading-tight">{{ $move->artwork?->title ?? 'Unknown Artwork' }}</strong>
-                                    <p class="text-xs text-zinc-500">{{ $move->artwork?->artist?->name ?? 'Unknown Artist' }}</p>
+                                <div class="min-w-0">
+                                    @if($activityArtwork)
+                                        <a href="{{ route('artworks.show', $activityArtwork, false) }}" class="text-base font-semibold leading-tight hover:underline">{{ $activity->subject_label ?: $activityArtwork->title }}</a>
+                                    @else
+                                        <strong class="text-base leading-tight">{{ $activity->subject_label ?: 'Unknown Artwork' }}</strong>
+                                    @endif
+                                    <p class="text-xs text-zinc-500">{{ $activityArtwork?->artist?->name ?? 'Unknown Artist' }}</p>
                                 </div>
-                                <span class="shrink-0 rounded-lg px-2.5 py-0.5 text-xs font-semibold {{ $movementStatusClass }}">{{ $move->status }}</span>
+                                <span class="shrink-0 rounded-lg px-2.5 py-0.5 text-xs font-semibold {{ $activityClass }}">{{ $isCreatedActivity ? 'Added' : 'Edited' }}</span>
                             </div>
-                            <p class="mt-1.5 text-sm text-zinc-600">{{ $move->from_location ?: 'Unknown Location' }} → {{ $move->to_location ?: 'Unknown Location' }}</p>
+                            <p class="mt-1.5 text-sm text-zinc-600">{{ $activity->description }}</p>
                             <div class="mt-1.5 grid gap-1 text-xs text-zinc-500 sm:grid-cols-2">
-                                <p>{{ \App\Support\DateFormat::display($move->date_out) }}</p>
-                                <p>{{ $move->responsible_handler ?: 'No handler assigned' }}</p>
-                                <p>{{ $move->reason ?: 'No reason recorded' }}</p>
-                                <p>Expected: {{ \App\Support\DateFormat::display($move->expected_return_date) }}</p>
+                                <p>{{ $activity->created_at?->format('d/m/Y') ?: '-' }}</p>
+                                <p>{{ $activity->user_name ?: 'System' }}</p>
+                                <p>{{ $isCreatedActivity ? 'Artwork added' : 'Artwork edited' }}</p>
+                                <p>{{ $activityArtwork?->location?->name ? 'Current: '.$activityArtwork->location->name : 'Location unavailable' }}</p>
                             </div>
                         </div>
                     @empty
-                        <p class="text-zinc-500">No movement records yet.</p>
+                        <p class="text-zinc-500">No artwork activities yet.</p>
                     @endforelse
                 </div>
 
-                @if($recentMovements->count() > 3)
+                @if($recentArtworkActivities->count() > 3)
                     <div class="mt-4 flex items-center justify-between gap-3 border-t border-zinc-200 pt-4">
                         <button type="button" class="museum-btn-secondary px-3 py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-50" data-recent-movements-back>
                             Back

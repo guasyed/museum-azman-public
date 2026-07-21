@@ -15,7 +15,7 @@
                 <strong>{{ number_format($messages->total()) }}</strong>
             </article>
         </div>
-
+   
         <form method="GET" action="{{ route('admin.contact-messages.index', [], false) }}" class="museum-panel flex flex-wrap items-end gap-3 p-4">
             <label class="museum-field min-w-56 flex-1">
                 <span>Search</span>

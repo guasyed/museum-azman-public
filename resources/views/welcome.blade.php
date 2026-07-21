@@ -42,6 +42,12 @@
             --text: #f4f0e8;
             --gold: #c8a85d;
             --gold-soft: #e7d295;
+            --public-font-sans: Arial, Helvetica, sans-serif;
+            --public-font-serif: Georgia, "Times New Roman", serif;
+            --public-size-nav: 14px;
+            --public-size-body: 18px;
+            --public-size-section-title: clamp(2rem, 2.6vw, 2.5rem);
+            --public-size-label: 14px;
         }
 
         * {
@@ -57,7 +63,7 @@
             margin: 0;
             background: var(--page);
             color: var(--text);
-            font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            font-family: var(--public-font-sans);
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
             text-rendering: optimizeLegibility;
@@ -78,7 +84,7 @@
         h2,
         h3 {
             margin: 0;
-            font-family: Georgia, "Times New Roman", serif;
+            font-family: var(--public-font-serif);
             font-weight: 400;
         }
 
@@ -97,36 +103,21 @@
             justify-content: space-between;
             min-height: 80px;
             padding: 18px clamp(34px, 3vw, 44px);
-            background: rgba(5, 5, 5, 0.78);
+            background: #000;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(14px);
         }
 
         .brand {
             display: inline-flex;
             align-items: center;
-            gap: 12px;
             min-width: 190px;
         }
 
-        .brand-mark {
-            display: grid;
-            place-items: center;
-            width: 32px;
-            height: 32px;
-            border: 1px solid rgba(255, 255, 255, 0.72);
-            color: #fff;
-            font-family: Georgia, "Times New Roman", serif;
-            font-size: 18px;
-            line-height: 1;
-        }
-
-        .brand-text {
-            display: grid;
-            font-size: 11px;
-            line-height: 1.02;
-            letter-spacing: 0;
-            text-transform: uppercase;
+        .brand-logo {
+            display: block;
+            width: 190px;
+            height: auto;
+            object-fit: contain;
         }
 
         .nav {
@@ -134,8 +125,9 @@
             align-items: center;
             gap: clamp(18px, 2.2vw, 30px);
             color: rgba(255, 255, 255, 0.58);
-            font-size: 10px;
-            font-weight: 800;
+            font-size: var(--public-size-nav);
+            font-weight: 500;
+            letter-spacing: 0.02em;
             text-transform: uppercase;
         }
 
@@ -233,7 +225,7 @@
         }
 
         .section {
-            padding: clamp(54px, 7vw, 96px) clamp(28px, 4vw, 76px);
+            padding: 58px clamp(34px, 3vw, 54px) 62px;
             border-bottom: 1px solid var(--line);
             background: #070707;
         }
@@ -248,7 +240,8 @@
         }
 
         .section-head {
-            width: min(1160px, 100%);
+            width: 100%;
+            max-width: none;
             margin: 0 auto 42px;
         }
 
@@ -258,7 +251,7 @@
 
         .section-head h2,
         .text-panel h2 {
-            font-size: clamp(2rem, 3.2vw, 3.15rem);
+            font-size: var(--public-size-section-title);
             line-height: 1;
         }
 
@@ -275,7 +268,8 @@
         }
 
         .grid {
-            width: min(1160px, 100%);
+            width: 100%;
+            max-width: none;
             margin: 0 auto;
             display: grid;
             gap: clamp(28px, 3vw, 38px);
@@ -295,6 +289,8 @@
 
         .card {
             min-width: 0;
+            overflow: clip;
+            transition: transform 420ms cubic-bezier(0.22, 1, 0.36, 1);
         }
 
         .card img {
@@ -304,6 +300,21 @@
             border-radius: 2px;
             background: #151515;
             cursor: zoom-in;
+            transition: transform 700ms cubic-bezier(0.22, 1, 0.36, 1), filter 500ms ease, opacity 500ms ease;
+            will-change: transform;
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+        }
+
+        .card:hover img {
+            transform: scale(1.045);
+            filter: brightness(1.08) contrast(1.03);
+        }
+
+        .artist-card:hover img {
+            filter: grayscale(0.25) brightness(1.08) contrast(1.03);
         }
 
         .square-card img,
@@ -322,7 +333,7 @@
         .card h3 {
             margin-top: 16px;
             color: #f5f1e8;
-            font-family: Georgia, "Times New Roman", serif;
+            font-family: var(--public-font-serif);
             font-size: 18px;
             font-weight: 400;
             line-height: 1.15;
@@ -425,7 +436,7 @@
         .experience h2,
         .vision h2,
         .center-copy h2 {
-            font-size: clamp(2.05rem, 3.6vw, 3.45rem);
+            font-size: var(--public-size-section-title);
             line-height: 1.05;
         }
 
@@ -435,7 +446,9 @@
         .text-panel p {
             margin-top: 16px;
             color: rgba(255, 255, 255, 0.68);
-            font-size: 15px;
+            font-family: var(--public-font-sans);
+            font-size: var(--public-size-body);
+            line-height: 1.55;
         }
 
         .button {
@@ -492,7 +505,7 @@
         .value-grid h3,
         .visit-stats h3,
         .form-section-title {
-            font-family: Georgia, "Times New Roman", serif;
+            font-family: var(--public-font-serif);
             font-size: 18px;
             font-weight: 400;
         }
@@ -502,7 +515,8 @@
         .visit-stats p {
             margin-top: 8px;
             color: var(--muted);
-            font-size: 13px;
+            font-family: var(--public-font-sans);
+            font-size: var(--public-size-label);
         }
 
         .text-panel {
@@ -546,7 +560,8 @@
             display: block;
             margin-bottom: 9px;
             color: rgba(255, 255, 255, 0.8);
-            font-size: 12px;
+            font-family: var(--public-font-sans);
+            font-size: var(--public-size-label);
             font-weight: 800;
             letter-spacing: 0;
             text-transform: uppercase;
@@ -649,7 +664,7 @@
             grid-template-columns: minmax(220px, 1fr) repeat(3, minmax(130px, 0.55fr));
             gap: 36px;
             padding: 64px clamp(28px, 4vw, 76px) 36px;
-            background: #050505;
+            background: #000;
         }
 
         .footer p,
@@ -741,6 +756,103 @@
             font-size: 0.9rem;
         }
 
+        .site-header {
+            animation: public-header-enter 850ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        .hero-content,
+        .image-hero-content,
+        .page-intro-inner {
+            animation: public-intro-enter 900ms 100ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        .hero video,
+        .image-hero img {
+            animation: public-hero-image-enter 1400ms cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+
+        .reveal-item {
+            opacity: 0;
+            transform: translateY(28px);
+            transition: opacity 750ms ease, transform 850ms cubic-bezier(0.22, 1, 0.36, 1);
+            transition-delay: var(--reveal-delay, 0ms);
+        }
+
+        .reveal-item.is-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card.reveal-item.is-visible:hover {
+            transform: translateY(-8px);
+        }
+
+        .nav a {
+            position: relative;
+        }
+
+        .nav a::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            bottom: -7px;
+            left: 0;
+            height: 1px;
+            background: var(--gold-soft);
+            transform: scaleX(0);
+            transform-origin: right;
+            transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .nav a:hover::after,
+        .nav a.active::after {
+            transform: scaleX(1);
+            transform-origin: left;
+        }
+
+        .button,
+        .public-form button {
+            transition: transform 250ms ease, filter 250ms ease, box-shadow 250ms ease;
+        }
+
+        .button:hover,
+        .public-form button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.08);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
+        }
+
+        @keyframes public-header-enter {
+            from { opacity: 0; transform: translateY(-18px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes public-intro-enter {
+            from { opacity: 0; transform: translateY(24px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes public-hero-image-enter {
+            from { opacity: 0; transform: scale(1.06); }
+            to { opacity: 0.68; transform: scale(1); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                scroll-behavior: auto !important;
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+
+            .reveal-item {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
         @media (max-width: 980px) {
             .site-header {
                 position: absolute;
@@ -801,8 +913,7 @@
 <body class="public-page public-page-{{ $publicPage }}">
     <header class="site-header">
         <a class="brand" href="{{ $routes['home'] }}" aria-label="Museum Azman home">
-            <span class="brand-mark">A</span>
-            <span class="brand-text"><span>Museum</span><span>Azman</span></span>
+            <img class="brand-logo" src="{{ asset('media/museum-azman-logo.jpeg') }}" alt="Museum Azman">
         </a>
         <nav class="nav" aria-label="Main navigation">
             @foreach(['about' => 'About', 'events' => 'Events', 'artists' => 'Artists', 'collection' => 'Collection', 'visit' => 'Visit', 'contact' => 'Contact'] as $key => $label)
@@ -899,13 +1010,13 @@
 
             <section class="section alt">
                 <div class="section-head"><h2>Currently Active</h2></div>
-                <div class="grid two">
-                    @foreach([1, 10] as $loopIndex => $index)
+                <div class="grid three">
+                    @foreach([1, 10, 2] as $loopIndex => $index)
                         <article class="card square-card">
-                            <img src="{{ $imageFor($index) }}" alt="{{ ['Silent Forms', 'Curatorial Walkthrough'][$loopIndex] }}" loading="lazy">
-                            <h3>{{ ['Silent Forms', 'Curatorial Walkthrough'][$loopIndex] }}</h3>
-                            <p>{{ ['Exhibition', 'Guided Tour'][$loopIndex] }}</p>
-                            <small>{{ ['On view through June 2026', 'Every Saturday, 2pm'][$loopIndex] }}</small>
+                            <img src="{{ $imageFor($index) }}" alt="{{ ['Silent Forms', 'Curatorial Walkthrough', 'Urban Narratives'][$loopIndex] }}" loading="lazy">
+                            <h3>{{ ['Silent Forms', 'Curatorial Walkthrough', 'Urban Narratives'][$loopIndex] }}</h3>
+                            <p>{{ ['Exhibition', 'Guided Tour', 'Collection Focus'][$loopIndex] }}</p>
+                            <small>{{ ['On view through June 2026', 'Every Saturday, 2pm', 'On view through August 2026'][$loopIndex] }}</small>
                         </article>
                     @endforeach
                 </div>
@@ -1029,36 +1140,42 @@
             <section class="section narrow">
                 <div class="text-panel">
                     <h2>Visitor Registration</h2>
-                    <form class="public-form" data-public-form>
+                    <form class="public-form" method="POST" action="{{ route('public.visit.store', [], false) }}">
+                        @csrf
+                        @if(session('visit_success'))
+                            <p class="form-response" role="status">{{ session('visit_success') }}</p>
+                        @endif
+                        @if($errors->any())
+                            <p class="form-response" role="alert">{{ $errors->first() }}</p>
+                        @endif
                         <p class="form-section-title">Personal Information</p>
                         <div class="form-grid">
-                            <div class="field"><label for="visit-name">Full Name *</label><input id="visit-name" name="name" required></div>
-                            <div class="field"><label for="visit-phone">Phone Number *</label><input id="visit-phone" name="phone" required></div>
-                            <div class="field full"><label for="visit-email">Email Address *</label><input id="visit-email" name="email" type="email" required></div>
-                            <div class="field"><label for="visit-occupation">Occupation *</label><input id="visit-occupation" name="occupation" required></div>
-                            <div class="field"><label for="visit-company">Company / Organisation *</label><input id="visit-company" name="company" required></div>
-                            <div class="field full"><label for="visit-city">City / Country *</label><input id="visit-city" name="city" required></div>
-                            <div class="field full"><label for="visit-social">Social Media Profile (Optional)</label><input id="visit-social" name="social" placeholder="Instagram, LinkedIn, etc."></div>
+                            <div class="field"><label for="visit-name">Full Name *</label><input id="visit-name" name="name" value="{{ old('name') }}" maxlength="255" required></div>
+                            <div class="field"><label for="visit-phone">Phone Number *</label><input id="visit-phone" name="phone" value="{{ old('phone') }}" maxlength="50" required></div>
+                            <div class="field full"><label for="visit-email">Email Address *</label><input id="visit-email" name="email" type="email" value="{{ old('email') }}" maxlength="255" required></div>
+                            <div class="field"><label for="visit-occupation">Occupation *</label><input id="visit-occupation" name="occupation" value="{{ old('occupation') }}" maxlength="255" required></div>
+                            <div class="field"><label for="visit-company">Company / Organisation *</label><input id="visit-company" name="company" value="{{ old('company') }}" maxlength="255" required></div>
+                            <div class="field full"><label for="visit-city">City / Country *</label><input id="visit-city" name="city" value="{{ old('city') }}" maxlength="255" required></div>
+                            <div class="field full"><label for="visit-social">Social Media Profile (Optional)</label><input id="visit-social" name="social" value="{{ old('social') }}" maxlength="255" placeholder="Instagram, LinkedIn, etc."></div>
                         </div>
                         <p class="form-section-title">Visit Details</p>
                         <div class="form-grid">
-                            <div class="field full"><label for="visit-purpose">Purpose of Visit *</label><select id="visit-purpose" name="purpose" required><option value="">Select purpose</option><option>Collector viewing</option><option>Curatorial research</option><option>Artist visit</option><option>Private tour</option></select></div>
-                            <div class="field full"><label for="visit-category">Interest Category *</label><select id="visit-category" name="category" required><option value="">Select category</option><option>Contemporary painting</option><option>Southeast Asian art</option><option>Acquisition inquiry</option><option>General viewing</option></select></div>
-                            <div class="field"><label for="visit-date">Preferred Visit Date *</label><input id="visit-date" name="date" type="date" required></div>
-                            <div class="field"><label for="visit-guests">Number of Guests *</label><input id="visit-guests" name="guests" type="number" min="1" max="6" value="1" required></div>
-                            <div class="field full"><label for="visit-source">How Did You Hear About Us? *</label><select id="visit-source" name="source" required><option value="">Select source</option><option>Collector referral</option><option>Artist referral</option><option>Social media</option><option>Press or publication</option></select></div>
-                            <div class="field full"><label for="visit-message">Message / Special Requests</label><textarea id="visit-message" name="message" placeholder="Share any specific interests, questions, or accessibility requirements"></textarea></div>
+                            <div class="field full"><label for="visit-purpose">Purpose of Visit *</label><select id="visit-purpose" name="purpose" required><option value="">Select purpose</option>@foreach(['Collector viewing', 'Curatorial research', 'Artist visit', 'Private tour'] as $option)<option @selected(old('purpose') === $option)>{{ $option }}</option>@endforeach</select></div>
+                            <div class="field full"><label for="visit-category">Interest Category *</label><select id="visit-category" name="category" required><option value="">Select category</option>@foreach(['Contemporary painting', 'Southeast Asian art', 'Acquisition inquiry', 'General viewing'] as $option)<option @selected(old('category') === $option)>{{ $option }}</option>@endforeach</select></div>
+                            <div class="field"><label for="visit-date">Preferred Visit Date *</label><input id="visit-date" name="date" type="date" min="{{ now()->toDateString() }}" value="{{ old('date') }}" required></div>
+                            <div class="field"><label for="visit-guests">Number of Guests *</label><input id="visit-guests" name="guests" type="number" min="1" max="6" value="{{ old('guests', 1) }}" required></div>
+                            <div class="field full"><label for="visit-source">How Did You Hear About Us? *</label><select id="visit-source" name="source" required><option value="">Select source</option>@foreach(['Collector referral', 'Artist referral', 'Social media', 'Press or publication'] as $option)<option @selected(old('source') === $option)>{{ $option }}</option>@endforeach</select></div>
+                            <div class="field full"><label for="visit-message">Message / Special Requests</label><textarea id="visit-message" name="message" maxlength="5000" placeholder="Share any specific interests, questions, or accessibility requirements">{{ old('message') }}</textarea></div>
                         </div>
                         <p class="form-section-title">Preferences</p>
                         <div class="checkbox-list">
-                            <label><input type="checkbox" name="preference[]" value="outside-hours"> Request exclusive private viewing outside regular hours</label>
-                            <label><input type="checkbox" name="preference[]" value="curator"> Request guided tour with curator</label>
-                            <label><input type="checkbox" name="preference[]" value="events"> Receive invitations to exclusive events, talks, and special programming</label>
-                            <label><input type="checkbox" name="preference[]" value="updates"> Receive updates about future public opening plans</label>
-                            <label><input type="checkbox" required> I agree to the privacy policy and consent to Museum Azman storing and processing my information for coordinating my visit. *</label>
+                            <label><input type="checkbox" name="preference[]" value="outside-hours" @checked(in_array('outside-hours', old('preference', []), true))> Request exclusive private viewing outside regular hours</label>
+                            <label><input type="checkbox" name="preference[]" value="curator" @checked(in_array('curator', old('preference', []), true))> Request guided tour with curator</label>
+                            <label><input type="checkbox" name="preference[]" value="events" @checked(in_array('events', old('preference', []), true))> Receive invitations to exclusive events, talks, and special programming</label>
+                            <label><input type="checkbox" name="preference[]" value="updates" @checked(in_array('updates', old('preference', []), true))> Receive updates about future public opening plans</label>
+                            <label><input type="checkbox" name="consent" value="1" required> I agree to the privacy policy and consent to Museum Azman storing and processing my information for coordinating my visit. *</label>
                         </div>
                         <button type="submit">Submit Request</button>
-                        <p class="form-response" data-form-response></p>
                     </form>
                 </div>
             </section>
@@ -1085,13 +1202,19 @@
                             <p>By appointment only<br>Tuesday - Saturday<br>10:00 AM - 6:00 PM</p>
                         </div>
                     </div>
-                    <form class="public-form" data-public-form>
-                        <div class="field"><label for="contact-name">Name *</label><input id="contact-name" name="name" required></div>
-                        <div class="field"><label for="contact-email">Email *</label><input id="contact-email" name="email" type="email" required></div>
-                        <div class="field"><label for="contact-subject">Subject</label><input id="contact-subject" name="subject"></div>
-                        <div class="field"><label for="contact-message">Message *</label><textarea id="contact-message" name="message" required></textarea></div>
+                    <form class="public-form" method="POST" action="{{ route('public.contact.store', [], false) }}">
+                        @csrf
+                        @if(session('contact_success'))
+                            <p class="form-response" role="status">{{ session('contact_success') }}</p>
+                        @endif
+                        @if($errors->any())
+                            <p class="form-response" role="alert">{{ $errors->first() }}</p>
+                        @endif
+                        <div class="field"><label for="contact-name">Name *</label><input id="contact-name" name="name" value="{{ old('name') }}" maxlength="255" required></div>
+                        <div class="field"><label for="contact-email">Email *</label><input id="contact-email" name="email" type="email" value="{{ old('email') }}" maxlength="255" required></div>
+                        <div class="field"><label for="contact-subject">Subject</label><input id="contact-subject" name="subject" value="{{ old('subject') }}" maxlength="255"></div>
+                        <div class="field"><label for="contact-message">Message *</label><textarea id="contact-message" name="message" maxlength="5000" required>{{ old('message') }}</textarea></div>
                         <button type="submit">Send Message</button>
-                        <p class="form-response" data-form-response></p>
                     </form>
                 </div>
             </section>
@@ -1149,8 +1272,7 @@
     <footer class="footer">
         <div>
             <a class="brand" href="{{ $routes['home'] }}" aria-label="Museum Azman home">
-                <span class="brand-mark">A</span>
-                <span class="brand-text"><span>Museum</span><span>Azman</span></span>
+                <img class="brand-logo" src="{{ asset('media/museum-azman-logo.jpeg') }}" alt="Museum Azman">
             </a>
             <p>A private contemporary art museum featuring artists from the Americas to Southeast Asia.</p>
         </div>
@@ -1197,6 +1319,38 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const revealItems = document.querySelectorAll(
+                '.section-head, .center-copy, .text-panel, .contact-grid, .space-grid, .visit-stats, .program-grid, .value-grid, .grid .card'
+            );
+
+            revealItems.forEach((item, index) => {
+                item.classList.add('reveal-item');
+                if (item.matches('.card')) {
+                    item.style.setProperty('--reveal-delay', `${(index % 4) * 90}ms`);
+                }
+            });
+
+            if (reduceMotion || !('IntersectionObserver' in window)) {
+                revealItems.forEach((item) => item.classList.add('is-visible'));
+            } else {
+                const revealObserver = new IntersectionObserver((entries, observer) => {
+                    entries.forEach((entry) => {
+                        if (!entry.isIntersecting) {
+                            return;
+                        }
+
+                        entry.target.classList.add('is-visible');
+                        observer.unobserve(entry.target);
+                    });
+                }, {
+                    threshold: 0.12,
+                    rootMargin: '0px 0px -6% 0px',
+                });
+
+                revealItems.forEach((item) => revealObserver.observe(item));
+            }
+
             const lightbox = document.getElementById('landingLightbox');
             const image = lightbox?.querySelector('[data-landing-lightbox-image]');
             const caption = lightbox?.querySelector('[data-landing-lightbox-caption]');

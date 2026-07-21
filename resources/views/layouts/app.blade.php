@@ -469,154 +469,6 @@
 		    }
 		}
 
-        body.museum-shell {
-            --museum-accent: #c8a85d !important;
-            --museum-premium-bg: #050505;
-            --museum-premium-panel: #0b0b0a;
-            --museum-premium-panel-soft: #11110f;
-            --museum-premium-border: rgba(255, 255, 255, 0.12);
-            --museum-premium-text: #f4f0e8;
-            --museum-premium-muted: rgba(244, 240, 232, 0.62);
-            --museum-premium-gold: #c8a85d;
-            background: var(--museum-premium-bg) !important;
-            color: var(--museum-premium-text);
-        }
-
-        body.museum-shell header,
-        body.museum-shell aside,
-        body.museum-shell main,
-        body.museum-shell .mobile-nav-panel {
-            background: var(--museum-premium-bg) !important;
-            color: var(--museum-premium-text);
-            border-color: var(--museum-premium-border) !important;
-        }
-
-        body.museum-shell main > div {
-            max-width: 1440px;
-        }
-
-        body.museum-shell .museum-panel,
-        body.museum-shell .museum-card,
-        body.museum-shell .museum-stat-card,
-        body.museum-shell .museum-modal,
-        body.museum-shell details > div,
-        body.museum-shell article[class*="bg-white"],
-        body.museum-shell div[class*="bg-white"] {
-            background: var(--museum-premium-panel) !important;
-            border-color: var(--museum-premium-border) !important;
-            color: var(--museum-premium-text) !important;
-            box-shadow: none !important;
-        }
-
-        body.museum-shell .museum-page-title,
-        body.museum-shell .museum-section-title,
-        body.museum-shell .museum-brand-title {
-            color: var(--museum-premium-text) !important;
-            font-family: "Cormorant Garamond", Georgia, serif !important;
-            font-weight: 500;
-        }
-
-        body.museum-shell .museum-page-subtitle,
-        body.museum-shell .text-zinc-400,
-        body.museum-shell .text-zinc-500,
-        body.museum-shell .text-zinc-600,
-        body.museum-shell .text-zinc-700 {
-            color: var(--museum-premium-muted) !important;
-        }
-
-        body.museum-shell .text-zinc-800,
-        body.museum-shell .text-zinc-900,
-        body.museum-shell .museum-card-title,
-        body.museum-shell .font-semibold,
-        body.museum-shell strong,
-        body.museum-shell th {
-            color: var(--museum-premium-text) !important;
-        }
-
-        body.museum-shell .museum-nav-item {
-            border-radius: 4px;
-            color: var(--museum-premium-muted);
-        }
-
-        body.museum-shell .museum-nav-item:hover,
-        body.museum-shell .museum-nav-item.active,
-        body.museum-shell .mobile-nav-link:hover,
-        body.museum-shell .mobile-nav-link.active {
-            background: rgba(200, 168, 93, 0.13) !important;
-            border-color: rgba(200, 168, 93, 0.34) !important;
-            color: var(--museum-premium-gold) !important;
-        }
-
-        body.museum-shell .museum-btn {
-            background: var(--museum-premium-gold) !important;
-            border-color: var(--museum-premium-gold) !important;
-            color: #070707 !important;
-            border-radius: 4px !important;
-        }
-
-        body.museum-shell .museum-btn-secondary,
-        body.museum-shell .museum-install-trigger,
-        body.museum-shell .mobile-nav-logout {
-            background: rgba(255, 255, 255, 0.04) !important;
-            border-color: var(--museum-premium-border) !important;
-            color: var(--museum-premium-text) !important;
-            border-radius: 4px !important;
-        }
-
-        body.museum-shell .museum-btn-secondary:hover,
-        body.museum-shell .museum-install-trigger:hover {
-            background: rgba(200, 168, 93, 0.14) !important;
-            color: var(--museum-premium-gold) !important;
-        }
-
-        body.museum-shell .museum-field > span,
-        body.museum-shell label,
-        body.museum-shell summary {
-            color: var(--museum-premium-text) !important;
-        }
-
-        body.museum-shell .museum-field input,
-        body.museum-shell .museum-field select,
-        body.museum-shell .museum-field textarea,
-        body.museum-shell input,
-        body.museum-shell select,
-        body.museum-shell textarea {
-            background: var(--museum-premium-panel-soft) !important;
-            border-color: var(--museum-premium-border) !important;
-            color: var(--museum-premium-text) !important;
-            border-radius: 4px !important;
-        }
-
-        body.museum-shell .museum-field input::placeholder,
-        body.museum-shell .museum-field textarea::placeholder,
-        body.museum-shell input::placeholder,
-        body.museum-shell textarea::placeholder {
-            color: rgba(244, 240, 232, 0.42) !important;
-        }
-
-        body.museum-shell table {
-            color: var(--museum-premium-text);
-        }
-
-        body.museum-shell thead tr,
-        body.museum-shell tr,
-        body.museum-shell .border-zinc-100,
-        body.museum-shell .border-zinc-200,
-        body.museum-shell .border-zinc-300 {
-            border-color: var(--museum-premium-border) !important;
-        }
-
-        body.museum-shell tr:hover,
-        body.museum-shell .hover\:bg-zinc-50:hover,
-        body.museum-shell .bg-zinc-50,
-        body.museum-shell .bg-zinc-100 {
-            background: rgba(255, 255, 255, 0.045) !important;
-        }
-
-        body.museum-shell img {
-            border-color: var(--museum-premium-border) !important;
-        }
-
         body.museum-shell main img:not([data-no-lightbox]) {
             cursor: zoom-in;
         }
@@ -669,19 +521,6 @@
             cursor: pointer;
         }
 
-        body.museum-shell .pagination .page-link,
-        body.museum-shell nav[role="navigation"] a,
-        body.museum-shell nav[role="navigation"] span {
-            background: var(--museum-premium-panel-soft) !important;
-            border-color: var(--museum-premium-border) !important;
-            color: var(--museum-premium-text) !important;
-        }
-
-        body.museum-shell .pagination .page-item.active .page-link {
-            background: var(--museum-premium-gold) !important;
-            border-color: var(--museum-premium-gold) !important;
-            color: #070707 !important;
-        }
     </style>
 </head>
 <body class="museum-shell museum-theme-{{ $uiTheme }} museum-density-{{ $uiDensity }} bg-[#f6f5f4]">
@@ -767,6 +606,14 @@
             </a>
 
             @if(auth()->check() && auth()->user()->isAdmin())
+                <a href="{{ route('admin.visit-requests.index', [], false) }}" class="museum-nav-item flex items-center gap-3 {{ request()->routeIs('admin.visit-requests.*') ? 'active' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="m9 16 2 2 4-4"></path></svg>
+                    <span>Visit Requests</span>
+                </a>
+                <a href="{{ route('admin.contact-messages.index', [], false) }}" class="museum-nav-item flex items-center gap-3 {{ request()->routeIs('admin.contact-messages.*') ? 'active' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-10 6L2 7"></path></svg>
+                    <span>Messages</span>
+                </a>
                 <a href="{{ route('admin.imports.csv.index', [], false) }}" class="museum-nav-item flex items-center gap-3 {{ request()->routeIs('admin.imports.csv.*') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                     <span>Import CSV</span>
@@ -944,6 +791,8 @@
         <a href="{{ route('reports.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">Reports & Analytics</a>
         <a href="{{ route('settings.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}">Settings</a>
         @if(auth()->check() && auth()->user()->isAdmin())
+            <a href="{{ route('admin.visit-requests.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.visit-requests.*') ? 'active' : '' }}">Visit Requests</a>
+            <a href="{{ route('admin.contact-messages.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.contact-messages.*') ? 'active' : '' }}">Messages</a>
             <a href="{{ route('admin.imports.csv.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.imports.csv.*') ? 'active' : '' }}">Import CSV</a>
             <a href="{{ route('settings.index', ['tab' => 'users-roles'], false) }}" class="mobile-nav-link {{ request()->routeIs('settings.*') && request()->string('tab')->toString() === 'users-roles' ? 'active' : '' }}">Users &amp; Roles</a>
             <a href="{{ route('admin.users.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">Manage Users</a>

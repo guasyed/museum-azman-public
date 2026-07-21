@@ -3,6 +3,8 @@
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AdminActivityLogController;
 use App\Http\Controllers\AdminImportController;
+use App\Http\Controllers\AdminContactMessageController;
+use App\Http\Controllers\AdminVisitRequestController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ArtworkController;
 use App\Http\Controllers\ArtistController;
@@ -12,6 +14,8 @@ use App\Http\Controllers\MovementController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\ContactMessageController;
+use App\Http\Controllers\VisitRequestController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
@@ -112,10 +116,16 @@ Route::get('/museum/collection', function () use ($publicMuseumPage) {
 Route::get('/museum/visit', function () use ($publicMuseumPage) {
 	return $publicMuseumPage('visit');
 })->name('public.visit');
+Route::post('/museum/visit', [VisitRequestController::class, 'store'])
+	->middleware('throttle:5,1')
+	->name('public.visit.store');
 
 Route::get('/museum/contact', function () use ($publicMuseumPage) {
 	return $publicMuseumPage('contact');
 })->name('public.contact');
+Route::post('/museum/contact', [ContactMessageController::class, 'store'])
+	->middleware('throttle:10,1')
+	->name('public.contact.store');
 
 
 Route::middleware('auth')->group(function () {
@@ -165,6 +175,10 @@ Route::middleware('auth')->group(function () {
 	Route::post('settings/backup/delete', [SettingController::class, 'deleteBackup'])->name('settings.backup.delete')->middleware('admin');
 
 	Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
+		Route::get('visit-requests', [AdminVisitRequestController::class, 'index'])->name('visit-requests.index');
+		Route::patch('visit-requests/{visitRequest}/reviewed', [AdminVisitRequestController::class, 'markReviewed'])->name('visit-requests.reviewed');
+		Route::get('messages', [AdminContactMessageController::class, 'index'])->name('contact-messages.index');
+		Route::patch('messages/{contactMessage}/read', [AdminContactMessageController::class, 'markRead'])->name('contact-messages.read');
 		Route::get('imports/csv', [AdminImportController::class, 'index'])->name('imports.csv.index');
 		Route::post('imports/csv', [AdminImportController::class, 'store'])->name('imports.csv.store');
 

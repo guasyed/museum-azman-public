@@ -6,6 +6,25 @@
         </div>
 
         <details class="museum-panel" open>
+            <summary class="museum-section-title cursor-pointer">Page Content</summary>
+            <p class="mt-2 text-sm text-zinc-500">Edit the introduction and Event Programming section highlighted on the public Events page.</p>
+            <form method="POST" action="{{ route('admin.events.content.update', [], false) }}" class="mt-5 grid gap-4 md:grid-cols-2">
+                @csrf
+                @method('PUT')
+                <label class="museum-field"><span>Page Title *</span><input name="public_events_page_title" value="{{ old('public_events_page_title', $content['public_events_page_title']) }}" required></label>
+                <label class="museum-field md:col-span-2"><span>Page Introduction *</span><textarea name="public_events_page_description" rows="3" required>{{ old('public_events_page_description', $content['public_events_page_description']) }}</textarea></label>
+                <label class="museum-field"><span>Programming Section Title *</span><input name="public_events_programming_title" value="{{ old('public_events_programming_title', $content['public_events_programming_title']) }}" required></label>
+                @foreach(range(1, 4) as $number)
+                    <div class="grid gap-4 rounded-xl border border-zinc-200 p-4 md:col-span-2 md:grid-cols-2">
+                        <label class="museum-field"><span>Program {{ $number }} Title *</span><input name="public_events_program_{{ $number }}_title" value="{{ old('public_events_program_'.$number.'_title', $content['public_events_program_'.$number.'_title']) }}" required></label>
+                        <label class="museum-field"><span>Program {{ $number }} Description *</span><textarea name="public_events_program_{{ $number }}_description" rows="2" required>{{ old('public_events_program_'.$number.'_description', $content['public_events_program_'.$number.'_description']) }}</textarea></label>
+                    </div>
+                @endforeach
+                <div class="md:col-span-2"><button class="museum-btn" type="submit">Save Page Content</button></div>
+            </form>
+        </details>
+
+        <details class="museum-panel" open>
             <summary class="museum-section-title cursor-pointer">Add Event</summary>
             <form method="POST" action="{{ route('admin.events.store', [], false) }}" enctype="multipart/form-data" class="mt-5 grid gap-4 md:grid-cols-2">
                 @csrf

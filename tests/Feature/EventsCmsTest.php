@@ -51,4 +51,30 @@ class EventsCmsTest extends TestCase
             ->assertSee('Events CMS')
             ->assertSee('Museum Preview Night');
     }
+
+    public function test_admin_can_update_the_events_page_content(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $content = MuseumEvent::CONTENT_DEFAULTS;
+        $content['public_events_page_title'] = 'Museum Programmes';
+        $content['public_events_page_description'] = 'A CMS-managed introduction for the events page.';
+        $content['public_events_programming_title'] = 'Our Programmes';
+        $content['public_events_program_1_title'] = 'New Exhibitions';
+
+        $this->actingAs($admin)
+            ->put(route('admin.events.content.update'), $content)
+            ->assertRedirect();
+
+        $this->assertDatabaseHas('settings', [
+            'key' => 'public_events_page_title',
+            'value' => 'Museum Programmes',
+        ]);
+
+        $this->get(route('public.events'))
+            ->assertOk()
+            ->assertSee('Museum Programmes')
+            ->assertSee('A CMS-managed introduction for the events page.')
+            ->assertSee('Our Programmes')
+            ->assertSee('New Exhibitions');
+    }
 }

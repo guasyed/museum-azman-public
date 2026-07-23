@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\MuseumEvent;
+use App\Models\Setting;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -23,7 +24,27 @@ class AdminMuseumEventController extends Controller
         return view('admin.events.index', [
             'events' => $events,
             'sections' => MuseumEvent::SECTIONS,
+            'content' => array_replace(
+                MuseumEvent::CONTENT_DEFAULTS,
+                Setting::query()->whereIn('key', array_keys(MuseumEvent::CONTENT_DEFAULTS))->pluck('value', 'key')->all(),
+            ),
         ]);
+    }
+
+    public function updateContent(Request $request): RedirectResponse
+    {
+        $rules = [];
+        foreach (MuseumEvent::CONTENT_DEFAULTS as $key => $default) {
+            $rules[$key] = ['required', 'string', str_ends_with($key, '_description') ? 'max:1000' : 'max:255'];
+        }
+
+        $validated = $request->validate($rules);
+
+        foreach ($validated as $key => $value) {
+            Setting::updateOrCreate(['key' => $key], ['value' => trim($value)]);
+        }
+
+        return back()->with('success', 'Events page content updated successfully.');
     }
 
     public function store(Request $request): RedirectResponse

@@ -99,8 +99,8 @@
     <style>
         body.museum-shell {
             --museum-accent: {{ $uiAccent }};
-            --museum-font-heading: {!! $uiHeadingFontFamily !!};
-            --museum-font-body: {!! $uiBodyFontFamily !!};
+            --museum-font-heading: 'Inter', sans-serif;
+            --museum-font-body: 'Inter', sans-serif;
         }
 
         body.museum-shell .museum-btn {
@@ -275,6 +275,29 @@
             background-color: color-mix(in srgb, var(--museum-accent) 20%, white) !important;
             border-color: color-mix(in srgb, var(--museum-accent) 38%, white) !important;
             color: var(--museum-accent) !important;
+        }
+
+        .museum-nav-group-label {
+            margin: 1.25rem 0.75rem 0.35rem;
+            color: #a1a1aa;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            line-height: 1;
+            text-transform: uppercase;
+        }
+
+        .museum-nav-group-label:first-child {
+            margin-top: 0.35rem;
+        }
+
+        .mobile-nav-group-label {
+            margin: 1.25rem 1rem 0.35rem;
+            color: #a1a1aa;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
         }
 
         .logout-menu-item {
@@ -570,11 +593,13 @@
         </div>
 
         <nav class="flex-1 space-y-1 p-4 text-sm">
+            <p class="museum-nav-group-label">Overview</p>
             <a href="{{ route('dashboard', [], false) }}" class="museum-nav-item flex items-center gap-3 {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"></rect><rect width="7" height="5" x="14" y="3" rx="1"></rect><rect width="7" height="9" x="14" y="12" rx="1"></rect><rect width="7" height="5" x="3" y="16" rx="1"></rect></svg>
                 <span>Dashboard</span>
             </a>
 
+            <p class="museum-nav-group-label">Collection Management</p>
             <a href="{{ route('artworks.index', [], false) }}" class="museum-nav-item flex items-center gap-3 {{ request()->routeIs('artworks.*') ? 'active' : '' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"></circle><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"></circle><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"></circle><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"></circle><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125 a1.64 1.64 0 0 1 1.668-1.668h1.996 c3.051 0 5.555-2.503 5.555-5.554 C21.965 6.012 17.461 2 12 2z"></path></svg>
                 <span>Collection</span>
@@ -595,6 +620,7 @@
                 <span>Artists</span>
             </a>
 
+            <p class="museum-nav-group-label">Reports &amp; Configuration</p>
             <a href="{{ route('reports.index', [], false) }}" class="museum-nav-item flex items-center gap-3 {{ request()->routeIs('reports.*') ? 'active' : '' }}">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
                 <span>Reports & Analytics</span>
@@ -606,10 +632,24 @@
             </a>
 
             @if(auth()->check() && auth()->user()->isAdmin())
+                <p class="museum-nav-group-label">Public Website</p>
+                <a href="{{ route('admin.about.index', [], false) }}" class="museum-nav-item flex items-center gap-3 {{ request()->routeIs('admin.about.*') ? 'active' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                    <span>About CMS</span>
+                </a>
                 <a href="{{ route('admin.events.index', [], false) }}" class="museum-nav-item flex items-center gap-3 {{ request()->routeIs('admin.events.*') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path></svg>
                     <span>Events CMS</span>
                 </a>
+                <a href="{{ route('admin.public-artists.index', [], false) }}" class="museum-nav-item flex items-center gap-3 {{ request()->routeIs('admin.public-artists.*') ? 'active' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6"></path><path d="M22 11h-6"></path></svg>
+                    <span>Artists CMS</span>
+                </a>
+                <a href="{{ route('admin.public-collection.index', [], false) }}" class="museum-nav-item flex items-center gap-3 {{ request()->routeIs('admin.public-collection.*') ? 'active' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"></rect><circle cx="9" cy="9" r="2"></circle><path d="m21 15-5-5L5 21"></path></svg>
+                    <span>Collection CMS</span>
+                </a>
+                <p class="museum-nav-group-label">Public Enquiries</p>
                 <a href="{{ route('admin.visit-requests.index', [], false) }}" class="museum-nav-item flex items-center gap-3 {{ request()->routeIs('admin.visit-requests.*') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="m9 16 2 2 4-4"></path></svg>
                     <span>Visit Requests</span>
@@ -618,6 +658,7 @@
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-10 6L2 7"></path></svg>
                     <span>Messages</span>
                 </a>
+                <p class="museum-nav-group-label">Administration</p>
                 <a href="{{ route('admin.imports.csv.index', [], false) }}" class="museum-nav-item flex items-center gap-3 {{ request()->routeIs('admin.imports.csv.*') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
                     <span>Import CSV</span>
@@ -643,20 +684,7 @@
     </aside>
 
     <main class="flex-1 overflow-y-auto">
-        <div class="mx-auto w-full max-w-350 p-6 lg:p-10">
-            <div class="mb-4 hidden lg:flex justify-end">
-                <button
-                    type="button"
-                    class="museum-install-trigger"
-                    data-install-trigger
-                    data-install-variant="pill"
-                    title="Install app"
-                    aria-label="Install app"
-                >
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 3v11"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="m7.5 10.5 4.5 4.5 4.5-4.5"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 17.5a1.5 1.5 0 0 0 1.5 1.5h13A1.5 1.5 0 0 0 20 17.5"></path></svg>
-                    <span data-install-label>Install App</span>
-                </button>
-            </div>
+        <div class="w-full max-w-none p-6 lg:p-10">
 
             @auth
                 @php
@@ -787,17 +815,26 @@
         </div>
 
         <nav class="mobile-nav-list" aria-label="Mobile navigation">
+        <p class="mobile-nav-group-label">Overview</p>
         <a href="{{ route('dashboard', [], false) }}" class="mobile-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a>
+        <p class="mobile-nav-group-label">Collection Management</p>
         <a href="{{ route('artworks.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('artworks.*') ? 'active' : '' }}">Collection</a>
         <a href="{{ route('movements.index', [], false) }}" class="hidden mobile-nav-link {{ request()->routeIs('movements.*') ? 'active' : '' }}" style="display: none !important;">Movement Tracker</a>
         <a href="{{ route('locations.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('locations.*') ? 'active' : '' }}">Locations</a>
         <a href="{{ route('artists.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('artists.*') ? 'active' : '' }}">Artists</a>
+        <p class="mobile-nav-group-label">Reports &amp; Configuration</p>
         <a href="{{ route('reports.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('reports.*') ? 'active' : '' }}">Reports & Analytics</a>
         <a href="{{ route('settings.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}">Settings</a>
         @if(auth()->check() && auth()->user()->isAdmin())
+            <p class="mobile-nav-group-label">Public Website</p>
+            <a href="{{ route('admin.about.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.about.*') ? 'active' : '' }}">About CMS</a>
             <a href="{{ route('admin.events.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.events.*') ? 'active' : '' }}">Events CMS</a>
+            <a href="{{ route('admin.public-artists.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.public-artists.*') ? 'active' : '' }}">Artists CMS</a>
+            <a href="{{ route('admin.public-collection.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.public-collection.*') ? 'active' : '' }}">Collection CMS</a>
+            <p class="mobile-nav-group-label">Public Enquiries</p>
             <a href="{{ route('admin.visit-requests.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.visit-requests.*') ? 'active' : '' }}">Visit Requests</a>
             <a href="{{ route('admin.contact-messages.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.contact-messages.*') ? 'active' : '' }}">Messages</a>
+            <p class="mobile-nav-group-label">Administration</p>
             <a href="{{ route('admin.imports.csv.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.imports.csv.*') ? 'active' : '' }}">Import CSV</a>
             <a href="{{ route('settings.index', ['tab' => 'users-roles'], false) }}" class="mobile-nav-link {{ request()->routeIs('settings.*') && request()->string('tab')->toString() === 'users-roles' ? 'active' : '' }}">Users &amp; Roles</a>
             <a href="{{ route('admin.users.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">Manage Users</a>
@@ -813,28 +850,6 @@
             </form>
         @endauth
         </nav>
-    </div>
-</div>
-
-<div id="installModal" class="museum-install-modal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="installModalTitle">
-    <div class="museum-install-dialog">
-        <div class="flex items-start justify-between gap-4">
-            <div>
-                <p class="text-xs font-semibold uppercase tracking-[0.24em] text-zinc-500">Install app</p>
-                <h2 id="installModalTitle" class="museum-install-title mt-2 text-2xl font-semibold">Install Museum Azman</h2>
-                <p id="installModalDescription" class="museum-install-description mt-3 text-sm leading-6"></p>
-            </div>
-            <button type="button" id="installModalClose" class="rounded-full border border-zinc-200 p-2 text-zinc-500 transition hover:bg-zinc-100 hover:text-zinc-700" aria-label="Close install instructions">
-                <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"></path></svg>
-            </button>
-        </div>
-
-        <ol id="installModalSteps" class="museum-install-steps text-sm leading-6"></ol>
-        <p id="installModalNote" class="museum-install-note"></p>
-
-        <div class="mt-6 flex justify-end">
-            <button type="button" id="installModalDone" class="museum-btn rounded-full px-5 py-2.5 text-sm font-semibold text-white">Close</button>
-        </div>
     </div>
 </div>
 

@@ -9,14 +9,14 @@
     --museum-ink: #1c1917;
     --museum-soft: #f7f6f4;
     --museum-card: #ffffff;
-    --museum-size-brand: 1.35rem;
-    --museum-size-page-title: clamp(1.55rem, 2.6vw, 2.05rem);
-    --museum-size-page-subtitle: 0.86rem;
-    --museum-size-section-title: 1.08rem;
-    --museum-size-card-title: 1rem;
-    --museum-size-stat-label: 0.8rem;
-    --museum-size-stat-value: 1.2rem;
-    --museum-size-body: 0.78rem;
+    --museum-size-brand: 1.1rem;
+    --museum-size-page-title: clamp(2rem, 2.8vw, 2.35rem);
+    --museum-size-page-subtitle: 0.9rem;
+    --museum-size-section-title: 1rem;
+    --museum-size-card-title: 0.95rem;
+    --museum-size-stat-label: 0.875rem;
+    --museum-size-stat-value: 1.75rem;
+    --museum-size-body: 0.875rem;
 }
 
 body.museum-shell {
@@ -203,7 +203,7 @@ body.museum-shell {
 }
 
 .museum-dashboard-compact .museum-page-title {
-    font-size: clamp(1.7rem, 2.6vw, 2.2rem);
+    font-size: clamp(2rem, 2.8vw, 2.35rem);
     line-height: 1.05;
 }
 
@@ -216,11 +216,11 @@ body.museum-shell {
 }
 
 .museum-dashboard-compact .museum-stat-card p {
-    font-size: 0.82rem;
+    font-size: 0.875rem;
 }
 
 .museum-dashboard-compact .museum-stat-card strong {
-    font-size: clamp(1.2rem, 1.7vw, 1.55rem);
+    font-size: clamp(1.55rem, 2vw, 1.75rem);
     margin-top: 0.4rem;
 }
 
@@ -242,14 +242,14 @@ body.museum-shell {
 
 @media (max-width: 1024px) {
     :root {
-        --museum-size-brand: 1.25rem;
-        --museum-size-page-title: clamp(1.4rem, 5vw, 1.8rem);
-        --museum-size-page-subtitle: 0.8rem;
+        --museum-size-brand: 1.05rem;
+        --museum-size-page-title: clamp(1.8rem, 6vw, 2.15rem);
+        --museum-size-page-subtitle: 0.875rem;
         --museum-size-section-title: 1rem;
         --museum-size-card-title: 0.95rem;
-        --museum-size-stat-label: 0.75rem;
-        --museum-size-stat-value: 1.45rem;
-        --museum-size-body: 0.78rem;
+        --museum-size-stat-label: 0.825rem;
+        --museum-size-stat-value: 1.55rem;
+        --museum-size-body: 0.875rem;
     }
 }
 

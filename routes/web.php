@@ -6,6 +6,9 @@ use App\Http\Controllers\AdminImportController;
 use App\Http\Controllers\AdminContactMessageController;
 use App\Http\Controllers\AdminVisitRequestController;
 use App\Http\Controllers\AdminMuseumEventController;
+use App\Http\Controllers\AdminPublicArtistController;
+use App\Http\Controllers\AdminPublicCollectionController;
+use App\Http\Controllers\AdminAboutPageController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ArtworkController;
 use App\Http\Controllers\ArtistController;
@@ -92,6 +95,16 @@ $publicMuseumPage = function (string $publicPage = 'home') {
 		->get();
 
 	$publicEvents = collect();
+	$eventContent = \App\Models\MuseumEvent::CONTENT_DEFAULTS;
+	$publicArtistProfiles = collect();
+	$artistsCmsConfigured = false;
+	$artistContent = \App\Models\PublicArtistProfile::CONTENT_DEFAULTS;
+	$publicCollectionItems = collect();
+	$collectionCmsConfigured = false;
+	$collectionContent = \App\Models\PublicCollectionItem::CONTENT_DEFAULTS;
+	$aboutContent = \App\Support\AboutPageContent::DEFAULTS;
+	$aboutHeroImageUrl = null;
+	$aboutSpaceImageUrl = null;
 	if ($publicPage === 'events' && \Illuminate\Support\Facades\Schema::hasTable('museum_events')) {
 		$publicEvents = \App\Models\MuseumEvent::query()
 			->where('is_published', true)
@@ -99,9 +112,61 @@ $publicMuseumPage = function (string $publicPage = 'home') {
 			->orderBy('id')
 			->get()
 			->groupBy('section');
+
+		if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {
+			$eventContent = array_replace(
+				$eventContent,
+				\App\Models\Setting::query()->whereIn('key', array_keys($eventContent))->pluck('value', 'key')->all(),
+			);
+		}
 	}
 
-	return view('welcome', compact('homeArtworks', 'publicPage', 'publicEvents'));
+	if ($publicPage === 'artists' && \Illuminate\Support\Facades\Schema::hasTable('public_artist_profiles')) {
+		$artistsCmsConfigured = \App\Models\PublicArtistProfile::query()->exists();
+		$publicArtistProfiles = \App\Models\PublicArtistProfile::query()
+			->where('is_published', true)
+			->with(['artist.artworks.images'])
+			->orderBy('sort_order')
+			->orderBy('id')
+			->get();
+
+		if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {
+			$artistContent = array_replace(
+				$artistContent,
+				\App\Models\Setting::query()->whereIn('key', array_keys($artistContent))->pluck('value', 'key')->all(),
+			);
+		}
+	}
+
+	if ($publicPage === 'collection' && \Illuminate\Support\Facades\Schema::hasTable('public_collection_items')) {
+		$collectionCmsConfigured = \App\Models\PublicCollectionItem::query()->exists();
+		$publicCollectionItems = \App\Models\PublicCollectionItem::query()
+			->where('is_published', true)
+			->with(['artwork.artist', 'artwork.images'])
+			->orderBy('sort_order')
+			->orderBy('id')
+			->get();
+
+		if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {
+			$collectionContent = array_replace(
+				$collectionContent,
+				\App\Models\Setting::query()->whereIn('key', array_keys($collectionContent))->pluck('value', 'key')->all(),
+			);
+		}
+	}
+
+	if ($publicPage === 'about' && \Illuminate\Support\Facades\Schema::hasTable('settings')) {
+		$aboutContent = array_replace(
+			$aboutContent,
+			\App\Models\Setting::query()->whereIn('key', array_keys($aboutContent))->pluck('value', 'key')->all(),
+		);
+		$heroPath = $aboutContent['public_about_hero_image_path'];
+		$spacePath = $aboutContent['public_about_space_image_path'];
+		$aboutHeroImageUrl = $heroPath && Storage::disk('public')->exists($heroPath) ? Storage::url($heroPath) : null;
+		$aboutSpaceImageUrl = $spacePath && Storage::disk('public')->exists($spacePath) ? Storage::url($spacePath) : null;
+	}
+
+	return view('welcome', compact('homeArtworks', 'publicPage', 'publicEvents', 'eventContent', 'publicArtistProfiles', 'artistsCmsConfigured', 'artistContent', 'publicCollectionItems', 'collectionCmsConfigured', 'collectionContent', 'aboutContent', 'aboutHeroImageUrl', 'aboutSpaceImageUrl'));
 };
 
 Route::get('/', function () use ($publicMuseumPage) {
@@ -190,6 +255,19 @@ Route::middleware('auth')->group(function () {
 		Route::post('events', [AdminMuseumEventController::class, 'store'])->name('events.store');
 		Route::put('events/{event}', [AdminMuseumEventController::class, 'update'])->name('events.update');
 		Route::delete('events/{event}', [AdminMuseumEventController::class, 'destroy'])->name('events.destroy');
+		Route::put('events-content', [AdminMuseumEventController::class, 'updateContent'])->name('events.content.update');
+		Route::get('public-artists', [AdminPublicArtistController::class, 'index'])->name('public-artists.index');
+		Route::post('public-artists', [AdminPublicArtistController::class, 'store'])->name('public-artists.store');
+		Route::put('public-artists/{profile}', [AdminPublicArtistController::class, 'update'])->name('public-artists.update');
+		Route::delete('public-artists/{profile}', [AdminPublicArtistController::class, 'destroy'])->name('public-artists.destroy');
+		Route::put('public-artists-content', [AdminPublicArtistController::class, 'updateContent'])->name('public-artists.content.update');
+		Route::get('public-collection', [AdminPublicCollectionController::class, 'index'])->name('public-collection.index');
+		Route::post('public-collection', [AdminPublicCollectionController::class, 'store'])->name('public-collection.store');
+		Route::put('public-collection/{item}', [AdminPublicCollectionController::class, 'update'])->name('public-collection.update');
+		Route::delete('public-collection/{item}', [AdminPublicCollectionController::class, 'destroy'])->name('public-collection.destroy');
+		Route::put('public-collection-content', [AdminPublicCollectionController::class, 'updateContent'])->name('public-collection.content.update');
+		Route::get('about-page', [AdminAboutPageController::class, 'index'])->name('about.index');
+		Route::put('about-page', [AdminAboutPageController::class, 'update'])->name('about.update');
 		Route::get('visit-requests', [AdminVisitRequestController::class, 'index'])->name('visit-requests.index');
 		Route::patch('visit-requests/{visitRequest}/reviewed', [AdminVisitRequestController::class, 'markReviewed'])->name('visit-requests.reviewed');
 		Route::get('messages', [AdminContactMessageController::class, 'index'])->name('contact-messages.index');

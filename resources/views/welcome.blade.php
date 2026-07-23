@@ -1015,8 +1015,8 @@
         @elseif($publicPage === 'events')
             <section class="page-intro">
                 <div class="page-intro-inner">
-                    <h1 class="page-title">Events</h1>
-                    <p class="page-copy">Special exhibitions, artist talks, interviews, and exclusive events exploring contemporary art and cultural dialogue.</p>
+                    <h1 class="page-title">{{ $eventContent['public_events_page_title'] }}</h1>
+                    <p class="page-copy">{{ $eventContent['public_events_page_description'] }}</p>
                 </div>
             </section>
 
@@ -1051,68 +1051,109 @@
 
             <section class="section">
                 <div class="center-copy">
-                    <h2>Event Programming</h2>
+                    <h2>{{ $eventContent['public_events_programming_title'] }}</h2>
                     <div class="program-grid">
-                        <div><h3>Exhibitions</h3><p>Curated presentations of contemporary art featuring solo and group shows.</p></div>
-                        <div><h3>Artist Talks</h3><p>Intimate conversations with artists about their practice and vision.</p></div>
-                        <div><h3>Interviews</h3><p>In-depth dialogues exploring artistic processes and cultural contexts.</p></div>
-                        <div><h3>Special Events</h3><p>Exclusive gatherings, collector evenings, and symposiums.</p></div>
+                        @foreach(range(1, 4) as $number)
+                            <div>
+                                <h3>{{ $eventContent['public_events_program_'.$number.'_title'] }}</h3>
+                                <p>{{ $eventContent['public_events_program_'.$number.'_description'] }}</p>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             </section>
         @elseif($publicPage === 'artists')
             <section class="page-intro">
                 <div class="page-intro-inner">
-                    <h1 class="page-title">Artists</h1>
-                    <p class="page-copy">Representing voices from the Americas to Southeast Asia, our artists explore contemporary themes through diverse mediums and perspectives.</p>
+                    <h1 class="page-title">{{ $artistContent['public_artists_page_title'] }}</h1>
+                    <p class="page-copy">{{ $artistContent['public_artists_page_description'] }}</p>
                 </div>
             </section>
 
             <section class="section">
                 <div class="grid four">
-                    @foreach([3, 4, 5, 6, 7, 8, 9, 10] as $loopIndex => $index)
-                        <article class="card artist-card">
-                            <img src="{{ $imageFor($index) }}" alt="{{ $artistFor($index, 'Artist') }}" loading="lazy">
-                            <h3>{{ $artistFor($index, ['Aurelius Wendleken', 'Fons Heijnsbroek', 'Kseniya Lapteva', 'Margarita Shtyfura', 'Chen Wei', 'Anh Vy', 'Sofia Ramirez', 'Elena Torres'][$loopIndex]) }}</h3>
-                            <small>{{ $countryFor($index, ['Germany', 'Netherlands', 'Russia', 'Ukraine', 'China', 'Vietnam', 'Mexico', 'Brazil'][$loopIndex]) }}</small>
-                        </article>
-                    @endforeach
+                    @if($artistsCmsConfigured)
+                        @forelse($publicArtistProfiles as $profile)
+                            @php
+                                $artist = $profile->artist;
+                                $profileImage = $profile->image_url ?: $artist?->artworks?->first(fn ($artwork) => filled($artwork->primary_image_url))?->primary_image_url;
+                            @endphp
+                            <article class="card artist-card">
+                                @if($profileImage)
+                                    <img src="{{ $profileImage }}" alt="{{ $artist?->name ?? 'Artist' }}" loading="lazy">
+                                @else
+                                    <div class="event-placeholder" role="img" aria-label="Portrait coming soon"><span>Portrait<br>Coming Soon</span></div>
+                                @endif
+                                <h3>{{ $artist?->name ?? 'Artist' }}</h3>
+                                <small>{{ $artist?->country ?: 'International' }}</small>
+                                @if($profile->biography)<p>{{ $profile->biography }}</p>@endif
+                            </article>
+                        @empty
+                            <p class="page-copy">Artist profiles coming soon.</p>
+                        @endforelse
+                    @else
+                        @foreach([3, 4, 5, 6, 7, 8, 9, 10] as $loopIndex => $index)
+                            <article class="card artist-card">
+                                <img src="{{ $imageFor($index) }}" alt="{{ $artistFor($index, 'Artist') }}" loading="lazy">
+                                <h3>{{ $artistFor($index, ['Aurelius Wendleken', 'Fons Heijnsbroek', 'Kseniya Lapteva', 'Margarita Shtyfura', 'Chen Wei', 'Anh Vy', 'Sofia Ramirez', 'Elena Torres'][$loopIndex]) }}</h3>
+                                <small>{{ $countryFor($index, ['Germany', 'Netherlands', 'Russia', 'Ukraine', 'China', 'Vietnam', 'Mexico', 'Brazil'][$loopIndex]) }}</small>
+                            </article>
+                        @endforeach
+                    @endif
                 </div>
             </section>
 
             <section class="section alt">
                 <div class="center-copy">
-                    <h2>Artist Collaborations</h2>
-                    <p>Museum Azman works directly with artists to create meaningful exhibitions that honor their vision while facilitating dialogue with audiences. We are committed to supporting artistic practice through acquisitions, commissions, and cultural exchange.</p>
+                    <h2>{{ $artistContent['public_artists_collaboration_title'] }}</h2>
+                    <p>{{ $artistContent['public_artists_collaboration_description'] }}</p>
                 </div>
             </section>
         @elseif($publicPage === 'collection')
             <section class="page-intro">
                 <div class="page-intro-inner">
-                    <h1 class="page-title">Collection</h1>
-                    <p class="page-copy">Our permanent collection represents significant voices in contemporary art, spanning diverse mediums, geographies, and artistic approaches.</p>
+                    <h1 class="page-title">{{ $collectionContent['public_collection_page_title'] }}</h1>
+                    <p class="page-copy">{{ $collectionContent['public_collection_page_description'] }}</p>
                 </div>
             </section>
 
             <section class="section">
                 <div class="grid three">
-                    @foreach(range(0, 8) as $index)
-                        <article class="card collection-card">
-                            <img src="{{ $imageFor($index) }}" alt="{{ $titleFor($index, 'Collection artwork') }}" loading="lazy">
-                            <h3>{{ $titleFor($index, ['Chromatic Resonance', 'Abstract Composition III', 'Geometric Harmony', 'Pink Dreams', 'Expressive Forms', 'Distant Shores', 'Vivid Emotions', 'Fluid Transitions', 'Color Study'][$index]) }}</h3>
-                            <p>{{ $artistFor($index) }}, {{ $yearFor($index, '2024') }}</p>
-                            <small>{{ $mediumFor($index, 'Oil on canvas') }}</small>
-                        </article>
-                    @endforeach
+                    @if($collectionCmsConfigured)
+                        @forelse($publicCollectionItems as $item)
+                            @php $artwork = $item->artwork; @endphp
+                            <article class="card collection-card">
+                                @if($artwork?->primary_image_url)
+                                    <img src="{{ $artwork->primary_image_url }}" alt="{{ $artwork->title ?: 'Collection artwork' }}" loading="lazy">
+                                @else
+                                    <div class="event-placeholder" role="img" aria-label="Artwork image coming soon">Image Coming Soon</div>
+                                @endif
+                                <h3>{{ $artwork?->title ?: 'Untitled' }}</h3>
+                                <p>{{ $artwork?->artist?->name ?: 'Museum Azman' }}{{ $artwork?->year ? ', '.$artwork->year : '' }}</p>
+                                <small>{{ $artwork?->medium ?: 'Medium not specified' }}</small>
+                            </article>
+                        @empty
+                            <p class="page-copy">Collection highlights coming soon.</p>
+                        @endforelse
+                    @else
+                        @foreach(range(0, 8) as $index)
+                            <article class="card collection-card">
+                                <img src="{{ $imageFor($index) }}" alt="{{ $titleFor($index, 'Collection artwork') }}" loading="lazy">
+                                <h3>{{ $titleFor($index, ['Chromatic Resonance', 'Abstract Composition III', 'Geometric Harmony', 'Pink Dreams', 'Expressive Forms', 'Distant Shores', 'Vivid Emotions', 'Fluid Transitions', 'Color Study'][$index]) }}</h3>
+                                <p>{{ $artistFor($index) }}, {{ $yearFor($index, '2024') }}</p>
+                                <small>{{ $mediumFor($index, 'Oil on canvas') }}</small>
+                            </article>
+                        @endforeach
+                    @endif
                 </div>
             </section>
 
             <section class="section alt">
                 <div class="text-panel">
-                    <h2>Collecting Philosophy</h2>
-                    <p>Museum Azman's collection is built on a commitment to artistic excellence and cultural dialogue. We acquire works that challenge conventions, expand perspectives, and demonstrate enduring relevance.</p>
-                    <p>Our focus on artists from the Americas to Southeast Asia reflects our belief that these regions offer vital perspectives often underrepresented in global art discourse. The collection grows through careful consideration, prioritizing depth over breadth.</p>
-                    <p>Each work is selected not only for its individual merit but for its contribution to the larger narrative we are building, one that honors diverse artistic traditions while embracing contemporary innovation.</p>
+                    <h2>{{ $collectionContent['public_collection_philosophy_title'] }}</h2>
+                    <p>{{ $collectionContent['public_collection_philosophy_paragraph_1'] }}</p>
+                    <p>{{ $collectionContent['public_collection_philosophy_paragraph_2'] }}</p>
+                    <p>{{ $collectionContent['public_collection_philosophy_paragraph_3'] }}</p>
                 </div>
             </section>
         @elseif($publicPage === 'visit')
@@ -1193,7 +1234,7 @@
                         <p class="page-copy">For private viewing requests, please use our visitor registration form. For all other inquiries, reach out through the contact details below.</p>
                         <div class="contact-list">
                             <div class="contact-item"><span class="contact-icon">@</span><div><h3>Email</h3><p>info@museumazman.com</p></div></div>
-                            <div class="contact-item"><span class="contact-icon">T</span><div><h3>Phone</h3><p>+1 (234) 567-8900</p></div></div>
+                            <!--<div class="contact-item"><span class="contact-icon">T</span><div><h3>Phone</h3><p>+1 (234) 567-8900</p></div></div>-->
                             <div class="contact-item"><span class="contact-icon">L</span><div><h3>Location</h3><p>Museum Azman<br>By Invitation Only<br>Location disclosed upon registration</p></div></div>
                         </div>
                         <div class="text-panel" style="margin: 48px 0 0; border-top: 1px solid var(--line); padding-top: 34px;">
@@ -1219,38 +1260,34 @@
             </section>
         @elseif($publicPage === 'about')
             <section class="image-hero">
-                <img src="{{ $imageFor(11) }}" alt="About Museum Azman" loading="eager">
+                <img src="{{ $aboutHeroImageUrl ?: $imageFor(11) }}" alt="{{ $aboutContent['public_about_hero_title'] }}" loading="eager">
                 <div class="image-hero-content">
-                    <h1>About Museum Azman</h1>
-                    <p>A sanctuary for contemporary art across continents</p>
+                    <h1>{{ $aboutContent['public_about_hero_title'] }}</h1>
+                    <p>{{ $aboutContent['public_about_hero_subtitle'] }}</p>
                 </div>
             </section>
 
             <section class="section">
                 <div class="text-panel">
-                    <h2>Our Mission</h2>
-                    <p>Museum Azman was founded to create a dialogue between contemporary artists across the Americas and Southeast Asia, regions rich with cultural heritage and innovative artistic practices.</p>
-                    <p>We believe art transcends borders and speaks to universal human experiences while honoring distinct cultural perspectives. Our collection represents diverse voices exploring themes of identity, place, memory, and transformation.</p>
-                    <p>Operating as a private museum allows us to maintain an intimate, contemplative environment where visitors can engage deeply with artworks without distraction. Each viewing is curated to facilitate meaningful encounters between art and observer.</p>
+                    <h2>{{ $aboutContent['public_about_mission_title'] }}</h2>
+                    @foreach(range(1, 3) as $number)<p>{{ $aboutContent['public_about_mission_paragraph_'.$number] }}</p>@endforeach
                 </div>
             </section>
 
             <section class="section alt">
                 <div class="text-panel">
-                    <h2>Looking Forward</h2>
-                    <p>While currently invitation-only, we are planning to open Museum Azman to the public in the coming years. This transition will expand access while preserving the qualities that make our space unique: thoughtful curation, intimate scale, and commitment to deep engagement.</p>
-                    <p>Our future plans include educational programming, artist residencies, and cultural exchange initiatives that further our mission of connecting artistic communities across continents.</p>
-                    <p style="color: var(--gold-soft); font-weight: 700;">We invite collectors, curators, artists, and serious art enthusiasts to visit and join us on this journey.</p>
+                    <h2>{{ $aboutContent['public_about_forward_title'] }}</h2>
+                    <p>{{ $aboutContent['public_about_forward_paragraph_1'] }}</p>
+                    <p>{{ $aboutContent['public_about_forward_paragraph_2'] }}</p>
+                    <p style="color: var(--gold-soft); font-weight: 700;">{{ $aboutContent['public_about_forward_paragraph_3'] }}</p>
                 </div>
             </section>
 
             <section class="section">
                 <div class="center-copy">
-                    <h2>Our Values</h2>
+                    <h2>{{ $aboutContent['public_about_values_title'] }}</h2>
                     <div class="value-grid">
-                        <div><h3>Cultural Exchange</h3><p>Fostering dialogue between artistic traditions and contemporary practices across continents.</p></div>
-                        <div><h3>Intimate Experience</h3><p>Creating space for contemplation and deep engagement with art in a serene environment.</p></div>
-                        <div><h3>Artistic Excellence</h3><p>Presenting works of exceptional quality that challenge, inspire, and endure.</p></div>
+                        @foreach(range(1, 3) as $number)<div><h3>{{ $aboutContent['public_about_value_'.$number.'_title'] }}</h3><p>{{ $aboutContent['public_about_value_'.$number.'_description'] }}</p></div>@endforeach
                     </div>
                 </div>
             </section>
@@ -1258,11 +1295,11 @@
             <section class="section alt">
                 <div class="space-grid">
                     <div>
-                        <h2>The Space</h2>
-                        <p class="page-copy">Museum Azman occupies a minimalist structure designed to let art breathe. Natural light, clean lines, and deliberate proportions create galleries that enhance rather than compete with the works on display.</p>
-                        <p class="page-copy">Our architecture reflects the museum's philosophy: restraint, clarity, and respect for the power of art to speak for itself.</p>
+                        <h2>{{ $aboutContent['public_about_space_title'] }}</h2>
+                        <p class="page-copy">{{ $aboutContent['public_about_space_paragraph_1'] }}</p>
+                        <p class="page-copy">{{ $aboutContent['public_about_space_paragraph_2'] }}</p>
                     </div>
-                    <img src="{{ $imageFor(12) }}" alt="Museum Azman space" loading="lazy">
+                    <img src="{{ $aboutSpaceImageUrl ?: $imageFor(12) }}" alt="{{ $aboutContent['public_about_space_title'] }}" loading="lazy">
                 </div>
             </section>
         @endif

@@ -69,6 +69,15 @@
             'page' => $artworks->currentPage(),
         ];
         $canManageArtworks = auth()->check() && auth()->user()->isAdmin();
+        $sortableColumns = [
+            ['key' => 'id', 'label' => 'ID', 'align' => 'text-left'],
+            ['key' => 'title', 'label' => 'Artwork', 'align' => 'text-left'],
+            ['key' => 'artist', 'label' => 'Artist', 'align' => 'text-left'],
+            ['key' => 'region', 'label' => 'Region', 'align' => 'text-left'],
+            ['key' => 'medium', 'label' => 'Medium', 'align' => 'text-left'],
+            ['key' => 'current_valuation', 'label' => 'Value', 'align' => 'text-right'],
+            ['key' => 'status', 'label' => 'Status', 'align' => 'text-right'],
+        ];
         $currentRequestUri = request()->getRequestUri();
         $collectionReturnUrl = static function ($artworkId) use ($currentRequestUri): string {
             $separator = str_contains($currentRequestUri, '?') ? '&' : '?';
@@ -224,41 +233,21 @@
                     <table class="w-full min-w-245 text-sm">
                         <thead>
                             <tr class="border-b border-zinc-200 text-left font-semibold text-zinc-800">
-                                <th class="px-4 py-3">ID</th>
-                                <th class="px-4 py-3">
+                                @foreach($sortableColumns as $column)
                                     @php
-                                        $isTitleSort = ($sortColumn ?? 'created_at') === 'title';
-                                        $nextTitleDirection = $isTitleSort && ($direction ?? 'desc') === 'asc' ? 'desc' : 'asc';
+                                        $isActiveSort = ($sortColumn ?? 'created_at') === $column['key'];
+                                        $nextSortDirection = $isActiveSort && ($direction ?? 'desc') === 'asc' ? 'desc' : 'asc';
                                     @endphp
-                                    <a
-                                        href="{{ route('artworks.index', array_merge(request()->query(), ['sort' => 'title', 'direction' => $nextTitleDirection]), false) }}"
-                                        class="inline-flex items-center gap-1 hover:text-zinc-900"
-                                    >
-                                        <span>Artwork</span>
-                                        @if($isTitleSort)
-                                            <span class="text-xs">{{ ($direction ?? 'desc') === 'asc' ? '▲' : '▼' }}</span>
-                                        @endif
-                                    </a>
-                                </th>
-                                <th class="px-4 py-3">Artist</th>
-                                <th class="px-4 py-3">Region</th>
-                                <th class="px-4 py-3">Medium</th>
-                                <th class="px-4 py-3 text-right">
-                                    @php
-                                        $isValueSort = ($sortColumn ?? 'created_at') === 'current_valuation';
-                                        $nextValueDirection = $isValueSort && ($direction ?? 'desc') === 'asc' ? 'desc' : 'asc';
-                                    @endphp
-                                    <a
-                                        href="{{ route('artworks.index', array_merge(request()->query(), ['sort' => 'current_valuation', 'direction' => $nextValueDirection]), false) }}"
-                                        class="inline-flex items-center gap-1 hover:text-zinc-900"
-                                    >
-                                        <span>Value</span>
-                                        @if($isValueSort)
-                                            <span class="text-xs">{{ ($direction ?? 'desc') === 'asc' ? '▲' : '▼' }}</span>
-                                        @endif
-                                    </a>
-                                </th>
-                                <th class="px-4 py-3 text-right">Status</th>
+                                    <th class="px-4 py-3 {{ $column['align'] }}">
+                                        <a
+                                            href="{{ route('artworks.index', array_merge(request()->query(), ['sort' => $column['key'], 'direction' => $nextSortDirection]), false) }}"
+                                            class="inline-flex items-center gap-1 hover:text-zinc-900 {{ $column['align'] === 'text-right' ? 'justify-end' : '' }}"
+                                        >
+                                            <span>{{ $column['label'] }}</span>
+                                            @if($isActiveSort)<span class="text-xs">{{ ($direction ?? 'desc') === 'asc' ? '▲' : '▼' }}</span>@endif
+                                        </a>
+                                    </th>
+                                @endforeach
                                 @if($canManageArtworks)
                                     <th class="px-4 py-3 text-right">Action</th>
                                 @endif

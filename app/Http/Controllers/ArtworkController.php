@@ -571,7 +571,7 @@ class ArtworkController extends Controller
             'view' => in_array((string) $request->string('view'), ['grid', 'table'], true)
                 ? (string) $request->string('view')
                 : 'grid',
-            'sortColumn' => in_array((string) $request->string('sort', 'created_at'), ['created_at', 'title', 'current_valuation'], true)
+            'sortColumn' => in_array((string) $request->string('sort', 'created_at'), ['created_at', 'id', 'title', 'artist', 'region', 'medium', 'current_valuation', 'status'], true)
                 ? (string) $request->string('sort', 'created_at')
                 : 'created_at',
             'direction' => strtolower((string) $request->string('direction', 'desc')) === 'asc'
@@ -607,7 +607,18 @@ class ArtworkController extends Controller
                 fn ($query) => $query->where('status', $selectedStatus)
             )
             ->when($sortColumn === 'title', fn ($query) => $query->orderBy('title', $direction))
+            ->when($sortColumn === 'id', fn ($query) => $query->orderBy('inventory_code', $direction)->orderBy('id', $direction))
+            ->when($sortColumn === 'artist', fn ($query) => $query->orderBy(
+                Artist::query()->select('name')->whereColumn('artists.id', 'artworks.artist_id')->limit(1),
+                $direction
+            ))
+            ->when($sortColumn === 'region', fn ($query) => $query->orderBy(
+                Artist::query()->select('country')->whereColumn('artists.id', 'artworks.artist_id')->limit(1),
+                $direction
+            ))
+            ->when($sortColumn === 'medium', fn ($query) => $query->orderBy('medium', $direction))
             ->when($sortColumn === 'current_valuation', fn ($query) => $query->orderBy('current_valuation', $direction))
+            ->when($sortColumn === 'status', fn ($query) => $query->orderBy('status', $direction))
             ->when($sortColumn === 'created_at', function ($query) use ($direction) {
                 if ($direction === 'asc') {
                     $query

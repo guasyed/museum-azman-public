@@ -158,17 +158,10 @@ $sizeToDefault = $artwork?->size_to_cm ?: $derivedSizeTo;
     <textarea name="provenance" rows="3">{{ old('provenance', $artwork?->provenance) }}</textarea>
 </label>
 
-<div class="grid gap-4 md:grid-cols-2">
-    <label class="museum-field">
-        <span>Primary Image</span>
-        <input name="primary_image" type="file" accept="image/*">
-    </label>
-
-    <label class="museum-field">
-        <span>Gallery Images</span>
-        <input name="gallery_images[]" type="file" accept="image/*" multiple>
-    </label>
-</div>
+<label class="museum-field">
+    <span>Gallery Images</span>
+    <input name="gallery_images[]" type="file" accept="image/*" multiple>
+</label>
 
 <p class="text-xs text-zinc-500">Selected images are automatically compressed before upload.</p>
 

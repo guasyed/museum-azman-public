@@ -32,8 +32,8 @@
                         <span>Search and Select Artwork *</span>
                         <input type="hidden" name="artwork_id" value="{{ old('artwork_id') }}" data-artwork-value required>
                         <div class="relative">
-                            <svg class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
-                            <input class="w-full pl-10" type="search" placeholder="Search title, artist or inventory code..." autocomplete="off" data-artwork-search aria-label="Search artwork" aria-expanded="false">
+                            <svg class="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-zinc-400" style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                            <input class="w-full" style="padding-left: 2.75rem; padding-right: 2.5rem;" type="search" placeholder="Search title, artist or inventory code..." autocomplete="off" data-artwork-search aria-label="Search artwork" aria-expanded="false">
                         </div>
                         <div class="absolute left-0 right-0 z-30 hidden max-h-72 overflow-y-auto rounded-xl border border-zinc-200 bg-white p-1 shadow-xl" style="top: calc(100% + 0.25rem);" data-artwork-options>
                             @foreach($availableArtworks as $artwork)

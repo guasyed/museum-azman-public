@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\ContactMessage;
 use App\Models\User;
+use App\Mail\ContactMessageSubmitted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class ContactMessageTest extends TestCase
@@ -13,6 +15,8 @@ class ContactMessageTest extends TestCase
 
     public function test_public_contact_form_saves_a_message(): void
     {
+        Mail::fake();
+
         $response = $this->post(route('public.contact.store'), [
             'name' => 'Museum Visitor',
             'email' => 'visitor@example.com',
@@ -26,6 +30,7 @@ class ContactMessageTest extends TestCase
             'email' => 'visitor@example.com',
             'subject' => 'Private viewing',
         ]);
+        Mail::assertSent(ContactMessageSubmitted::class, fn ($mail) => $mail->hasTo('faiz@museumazman.com'));
     }
 
     public function test_admin_can_view_and_mark_contact_messages_as_read(): void

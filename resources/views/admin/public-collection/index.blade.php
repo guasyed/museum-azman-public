@@ -64,16 +64,33 @@
                         @endif
                     </div>
                     <div class="grid gap-4 md:grid-cols-2">
-                        <input type="hidden" name="artwork_id" value="{{ $item->artwork_id }}">
+                        <input type="hidden" name="artwork_id" value="{{ $item->artwork_id }}" data-artwork-value>
                         <div><span class="text-xs font-bold uppercase text-zinc-500">Artwork</span><p class="mt-1 font-semibold">{{ $item->artwork?->title ?: 'Untitled' }}</p><p class="text-sm text-zinc-500">{{ $item->artwork?->artist?->name ?: 'Unknown artist' }} · {{ $item->artwork?->display_inventory_code }}</p></div>
                         <label class="museum-field"><span>Display Order</span><input name="sort_order" type="number" min="0" max="999" value="{{ $item->sort_order }}"></label>
                         <label class="flex items-center gap-2 text-sm font-semibold text-zinc-700"><input name="is_published" type="checkbox" value="1" @checked($item->is_published)> Display on public website</label>
                         <div class="flex flex-wrap gap-2 md:col-span-2">
                             <button class="museum-btn" type="submit">Save Display Settings</button>
-                            @if($item->artwork)
-                                <a class="museum-btn-secondary" href="{{ route('artworks.edit', ['artwork' => $item->artwork, 'return' => route('admin.public-collection.index', [], false)], false) }}">Edit Artwork Details</a>
+                            @if($availableArtworks->isNotEmpty())
+                                <button class="museum-btn-secondary" type="button" data-artwork-replace-toggle>Choose Another Artwork</button>
                             @endif
                         </div>
+                        @if($availableArtworks->isNotEmpty())
+                            <div class="museum-field relative hidden md:col-span-2" data-artwork-picker data-replacement-picker>
+                                <span>Search and Select Replacement Artwork *</span>
+                                <div class="relative">
+                                    <svg class="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-zinc-400" style="width: 1rem; height: 1rem;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                                    <input class="w-full" style="padding-left: 2.75rem; padding-right: 2.5rem;" type="search" placeholder="Search title, artist or inventory code..." autocomplete="off" data-artwork-search aria-label="Search replacement artwork" aria-expanded="false">
+                                </div>
+                                <div class="absolute left-0 right-0 z-30 hidden max-h-72 overflow-y-auto rounded-xl border border-zinc-200 bg-white p-1 shadow-xl" style="top: calc(100% + 0.25rem);" data-artwork-options>
+                                    @foreach($availableArtworks as $artwork)
+                                        @php $optionLabel = ($artwork->title ?: 'Untitled').' — '.($artwork->artist?->name ?: 'Unknown artist').' ('.$artwork->display_inventory_code.')'; @endphp
+                                        <button type="button" class="block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-zinc-100" data-artwork-option data-value="{{ $artwork->id }}" data-search="{{ strtolower($optionLabel) }}">{{ $optionLabel }}</button>
+                                    @endforeach
+                                    <p class="hidden px-3 py-3 text-sm text-zinc-500" data-artwork-empty>No matching artwork found.</p>
+                                </div>
+                                <p class="text-xs text-zinc-500">Select an artwork, then click Save Display Settings to replace the current artwork.</p>
+                            </div>
+                        @endif
                     </div>
                 </form>
                 <form method="POST" action="{{ route('admin.public-collection.destroy', $item, false) }}" class="mt-3 flex justify-end" onsubmit="return confirm('Remove this artwork from the public Collection page?')">@csrf @method('DELETE')<button type="submit" class="museum-btn-danger">Remove Artwork</button></form>
@@ -85,36 +102,49 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const picker = document.querySelector('[data-artwork-picker]');
-            if (!picker) return;
+            document.querySelectorAll('[data-artwork-picker]').forEach(picker => {
+                const form = picker.closest('form');
+                const search = picker.querySelector('[data-artwork-search]');
+                const value = form.querySelector('[data-artwork-value]');
+                const panel = picker.querySelector('[data-artwork-options]');
+                const options = [...picker.querySelectorAll('[data-artwork-option]')];
+                const empty = picker.querySelector('[data-artwork-empty]');
 
-            const search = picker.querySelector('[data-artwork-search]');
-            const value = picker.querySelector('[data-artwork-value]');
-            const panel = picker.querySelector('[data-artwork-options]');
-            const options = [...picker.querySelectorAll('[data-artwork-option]')];
-            const empty = picker.querySelector('[data-artwork-empty]');
+                const open = () => { panel.classList.remove('hidden'); search.setAttribute('aria-expanded', 'true'); };
+                const close = () => { panel.classList.add('hidden'); search.setAttribute('aria-expanded', 'false'); };
+                const filter = () => {
+                    const query = search.value.trim().toLowerCase();
+                    let visible = 0;
+                    options.forEach(option => {
+                        const matches = option.dataset.search.includes(query);
+                        option.classList.toggle('hidden', !matches);
+                        if (matches) visible++;
+                    });
+                    empty.classList.toggle('hidden', visible !== 0);
+                };
 
-            const open = () => { panel.classList.remove('hidden'); search.setAttribute('aria-expanded', 'true'); };
-            const close = () => { panel.classList.add('hidden'); search.setAttribute('aria-expanded', 'false'); };
-            const filter = () => {
-                const query = search.value.trim().toLowerCase();
-                let visible = 0;
-                options.forEach(option => {
-                    const matches = option.dataset.search.includes(query);
-                    option.classList.toggle('hidden', !matches);
-                    if (matches) visible++;
+                search.addEventListener('focus', open);
+                search.addEventListener('input', () => {
+                    if (!picker.hasAttribute('data-replacement-picker')) value.value = '';
+                    filter();
+                    open();
                 });
-                empty.classList.toggle('hidden', visible !== 0);
-            };
+                options.forEach(option => option.addEventListener('click', () => {
+                    value.value = option.dataset.value;
+                    search.value = option.textContent.trim();
+                    close();
+                }));
+                document.addEventListener('click', event => { if (!picker.contains(event.target)) close(); });
+            });
 
-            search.addEventListener('focus', open);
-            search.addEventListener('input', () => { value.value = ''; filter(); open(); });
-            options.forEach(option => option.addEventListener('click', () => {
-                value.value = option.dataset.value;
-                search.value = option.textContent.trim();
-                close();
-            }));
-            document.addEventListener('click', event => { if (!picker.contains(event.target)) close(); });
+            document.querySelectorAll('[data-artwork-replace-toggle]').forEach(toggle => {
+                toggle.addEventListener('click', () => {
+                    const picker = toggle.closest('form').querySelector('[data-replacement-picker]');
+                    picker.classList.toggle('hidden');
+                    toggle.textContent = picker.classList.contains('hidden') ? 'Choose Another Artwork' : 'Cancel Artwork Change';
+                    if (!picker.classList.contains('hidden')) picker.querySelector('[data-artwork-search]').focus();
+                });
+            });
         });
     </script>
 </x-layout>

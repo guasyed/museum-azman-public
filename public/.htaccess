@@ -15,3 +15,7 @@
     RewriteCond %{REQUEST_FILENAME} !-f
     RewriteRule ^ index.php [L]
 </IfModule>
+
+# Branded fallback when Apache can still serve static files but PHP/Laravel
+# is temporarily unavailable.
+ErrorDocument 503 /503.html

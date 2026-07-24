@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ContactMessageSubmitted;
 use App\Models\ContactMessage;
+use App\Services\DatabaseSmtpConfigurator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class ContactMessageController extends Controller
 {
@@ -17,10 +21,22 @@ class ContactMessageController extends Controller
             'message' => ['required', 'string', 'max:5000'],
         ]);
 
-        ContactMessage::create([
+        $contactMessage = ContactMessage::create([
             ...$validated,
             'ip_address' => $request->ip(),
         ]);
+
+        try {
+            $smtp = app(DatabaseSmtpConfigurator::class)->configure();
+            if ($smtp['enabled']) {
+                Mail::to($smtp['recipient'])->send(new ContactMessageSubmitted($contactMessage));
+            }
+        } catch (\Throwable $exception) {
+            Log::error('Contact form email could not be sent.', [
+                'contact_message_id' => $contactMessage->id,
+                'error' => $exception->getMessage(),
+            ]);
+        }
 
         return redirect()
             ->route('public.contact')

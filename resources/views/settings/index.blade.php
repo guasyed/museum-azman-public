@@ -27,6 +27,7 @@
             $tabs = ($canAccessAdminTabs ?? false)
                 ? [
                     ['key' => 'general',       'label' => 'General',        'icon' => '⚙️'],
+                    ['key' => 'smtp',          'label' => 'SMTP & Email',   'icon' => '✉️'],
                     ['key' => 'users-roles',   'label' => 'Users & Roles',  'icon' => '👥'],
                     ['key' => 'statuses',      'label' => 'Statuses',       'icon' => '🔖'],
                     ['key' => 'notifications', 'label' => 'Notifications',  'icon' => '🔔'],
@@ -65,7 +66,25 @@
     </nav>
 </div>
 
-        @if($activeTab === 'general')
+        @if($activeTab === 'smtp')
+            <article class="museum-panel">
+                <h3 class="museum-section-title">SMTP & Visitor Email</h3>
+                <p class="mt-1 text-sm text-zinc-600">Configure email delivery for Visitor Registration and Contact Form submissions.</p>
+                <form method="POST" action="{{ route('settings.update', ['section' => 'smtp'], false) }}" class="mt-5 grid gap-4 md:grid-cols-2">
+                    @csrf
+                    <label class="flex items-center gap-2 text-sm font-semibold"><input type="hidden" name="smtp_enabled" value="0"><input type="checkbox" name="smtp_enabled" value="1" @checked(old('smtp_enabled', $smtpSettings['enabled']))> Enable public form emails</label>
+                    <label class="museum-field"><span>Recipient Email *</span><input type="email" name="visit_request_recipient" value="{{ old('visit_request_recipient', $smtpSettings['recipient']) }}" required></label>
+                    <label class="museum-field"><span>SMTP Host *</span><input name="smtp_host" value="{{ old('smtp_host', $smtpSettings['host']) }}" placeholder="smtp.example.com" required></label>
+                    <label class="museum-field"><span>SMTP Port *</span><input type="number" name="smtp_port" min="1" max="65535" value="{{ old('smtp_port', $smtpSettings['port']) }}" required></label>
+                    <label class="museum-field"><span>Encryption *</span><select name="smtp_encryption"><option value="tls" @selected(old('smtp_encryption', $smtpSettings['encryption']) === 'tls')>TLS</option><option value="ssl" @selected(old('smtp_encryption', $smtpSettings['encryption']) === 'ssl')>SSL</option><option value="none" @selected(old('smtp_encryption', $smtpSettings['encryption']) === 'none')>None</option></select></label>
+                    <label class="museum-field"><span>SMTP Username</span><input name="smtp_username" value="{{ old('smtp_username', $smtpSettings['username']) }}"></label>
+                    <label class="museum-field"><span>SMTP Password</span><input type="password" name="smtp_password" autocomplete="new-password" placeholder="{{ $smtpSettings['has_password'] ? 'Saved — leave blank to keep current password' : 'Enter SMTP password' }}"></label>
+                    <label class="museum-field"><span>Sender Email *</span><input type="email" name="smtp_from_address" value="{{ old('smtp_from_address', $smtpSettings['from_address']) }}" required></label>
+                    <label class="museum-field"><span>Sender Name *</span><input name="smtp_from_name" value="{{ old('smtp_from_name', $smtpSettings['from_name']) }}" required></label>
+                    <div class="md:col-span-2"><button type="submit" class="museum-btn">Save SMTP Settings</button></div>
+                </form>
+            </article>
+        @elseif($activeTab === 'general')
             <article class="museum-panel p-4 sm:p-5">
                 <h3 class="museum-section-title text-base!">Organization Information</h3>
                 <p class="mt-1 text-sm text-zinc-600">Basic information about your collection</p>

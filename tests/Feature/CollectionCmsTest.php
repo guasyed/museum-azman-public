@@ -46,8 +46,37 @@ class CollectionCmsTest extends TestCase
         $this->actingAs($admin)->get(route('admin.public-collection.index'))
             ->assertOk()
             ->assertSee('Collection CMS')
-            ->assertSee('Edit Artwork Details')
+            ->assertSee('Choose Another Artwork')
+            ->assertDontSee('Edit Artwork Details')
             ->assertSee('Selected CMS Artwork');
+    }
+
+    public function test_admin_can_replace_a_selected_artwork_without_creating_another_slot(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $original = Artwork::create(['title' => 'Original Public Artwork', 'slug' => 'original-public-artwork']);
+        $replacement = Artwork::create(['title' => 'Replacement Public Artwork', 'slug' => 'replacement-public-artwork']);
+        $item = PublicCollectionItem::create([
+            'artwork_id' => $original->id,
+            'sort_order' => 4,
+            'is_published' => true,
+        ]);
+
+        $this->actingAs($admin)
+            ->put(route('admin.public-collection.update', $item), [
+                'artwork_id' => $replacement->id,
+                'sort_order' => 4,
+                'is_published' => '1',
+            ])
+            ->assertRedirect();
+
+        $this->assertDatabaseCount('public_collection_items', 1);
+        $this->assertDatabaseHas('public_collection_items', [
+            'id' => $item->id,
+            'artwork_id' => $replacement->id,
+            'sort_order' => 4,
+            'is_published' => true,
+        ]);
     }
 
     public function test_unpublished_selected_artwork_is_hidden(): void

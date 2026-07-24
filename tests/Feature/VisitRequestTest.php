@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\User;
 use App\Models\VisitRequest;
+use App\Mail\VisitRequestSubmitted;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
 use Tests\TestCase;
 
 class VisitRequestTest extends TestCase
@@ -13,6 +15,8 @@ class VisitRequestTest extends TestCase
 
     public function test_public_visit_form_saves_a_request(): void
     {
+        Mail::fake();
+
         $response = $this->post(route('public.visit.store'), [
             'name' => 'Museum Visitor',
             'phone' => '+60123456789',
@@ -35,6 +39,28 @@ class VisitRequestTest extends TestCase
             'email' => 'visitor@example.com',
             'guests' => 2,
         ]);
+        Mail::assertSent(VisitRequestSubmitted::class, fn ($mail) => $mail->hasTo('faiz@museumazman.com'));
+    }
+
+    public function test_admin_can_save_encrypted_smtp_settings(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+
+        $this->actingAs($admin)->post(route('settings.update', ['section' => 'smtp']), [
+            'smtp_enabled' => '1',
+            'smtp_host' => 'smtp.museumazman.com',
+            'smtp_port' => 587,
+            'smtp_encryption' => 'tls',
+            'smtp_username' => 'mailer@museumazman.com',
+            'smtp_password' => 'secret-password',
+            'smtp_from_address' => 'mailer@museumazman.com',
+            'smtp_from_name' => 'Museum Azman',
+            'visit_request_recipient' => 'faiz@museumazman.com',
+        ])->assertRedirect(route('settings.index', ['tab' => 'smtp']));
+
+        $storedPassword = \App\Models\Setting::where('key', 'smtp_password')->value('value');
+        $this->assertNotSame('secret-password', $storedPassword);
+        $this->assertSame('secret-password', \Illuminate\Support\Facades\Crypt::decryptString($storedPassword));
     }
 
     public function test_admin_can_view_and_review_visit_requests(): void

@@ -11,14 +11,16 @@ class EventsCmsTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_public_events_page_displays_three_coming_soon_slots_per_section(): void
+    public function test_public_events_page_displays_the_programmes_editorial_layout(): void
     {
         $this->get(route('public.events'))
             ->assertOk()
-            ->assertSee('Currently Active')
-            ->assertSee('Upcoming')
-            ->assertSee('Archive')
-            ->assertSeeInOrder(['Currently Active', 'Coming Soon', 'Upcoming', 'Coming Soon', 'Archive', 'Coming Soon']);
+            ->assertSee('Programmes')
+            ->assertSee('Ways of being here.')
+            ->assertSee('Museum Tours')
+            ->assertSee('Private &amp; Special Visits', false)
+            ->assertSee('Education Programmes')
+            ->assertSee('The conversation continues.');
     }
 
     public function test_admin_can_create_and_publish_an_event(): void

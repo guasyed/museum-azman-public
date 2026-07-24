@@ -3,8 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\VisitRequest as MuseumVisitRequest;
+use App\Mail\VisitRequestSubmitted;
+use App\Services\DatabaseSmtpConfigurator;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class VisitRequestController extends Controller
 {
@@ -29,12 +33,24 @@ class VisitRequestController extends Controller
             'consent' => ['accepted'],
         ]);
 
-        MuseumVisitRequest::create([
+        $visitRequest = MuseumVisitRequest::create([
             ...collect($validated)->except(['date', 'preference', 'consent'])->all(),
             'preferred_date' => $validated['date'],
             'preferences' => $validated['preference'] ?? [],
             'ip_address' => $request->ip(),
         ]);
+
+        try {
+            $smtp = app(DatabaseSmtpConfigurator::class)->configure();
+            if ($smtp['enabled']) {
+                Mail::to($smtp['recipient'])->send(new VisitRequestSubmitted($visitRequest));
+            }
+        } catch (\Throwable $exception) {
+            Log::error('Visit request email could not be sent.', [
+                'visit_request_id' => $visitRequest->id,
+                'error' => $exception->getMessage(),
+            ]);
+        }
 
         return redirect()
             ->route('public.visit')

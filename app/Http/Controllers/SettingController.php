@@ -8,6 +8,7 @@ use App\Models\Setting;
 use App\Models\Status;
 use App\Services\ImageOptimizer;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -138,7 +139,7 @@ class SettingController extends Controller
         $canAccessAdminTabs = $canManageSettings;
 
         $allowedTabs = $canAccessAdminTabs
-            ? ['general', 'users-roles', 'statuses', 'notifications', 'appearance']
+            ? ['general', 'smtp', 'users-roles', 'statuses', 'notifications', 'appearance']
             : ['notifications', 'appearance'];
         $activeTab = (string) $request->string('tab', 'general');
 
@@ -194,6 +195,18 @@ class SettingController extends Controller
             'accent_color' => $settings['accent_color'] ?? '#1c1917',
             'heading_font' => $settings['heading_font'] ?? 'cormorant',
             'body_font' => $settings['body_font'] ?? 'inter',
+        ];
+
+        $smtpSettings = [
+            'enabled' => ($settings['smtp_enabled'] ?? '1') === '1',
+            'host' => $settings['smtp_host'] ?? env('MAIL_HOST', ''),
+            'port' => $settings['smtp_port'] ?? env('MAIL_PORT', 587),
+            'encryption' => $settings['smtp_encryption'] ?? 'tls',
+            'username' => $settings['smtp_username'] ?? env('MAIL_USERNAME', ''),
+            'has_password' => filled($settings['smtp_password'] ?? null) || filled(env('MAIL_PASSWORD')),
+            'from_address' => $settings['smtp_from_address'] ?? env('MAIL_FROM_ADDRESS', 'noreply@museumazman.com'),
+            'from_name' => $settings['smtp_from_name'] ?? env('MAIL_FROM_NAME', 'Museum Azman'),
+            'recipient' => $settings['visit_request_recipient'] ?? 'faiz@museumazman.com',
         ];
 
         $backupList = $this->listBackups($configuredTimezone);
@@ -256,6 +269,7 @@ class SettingController extends Controller
             'regionalSettings',
             'notificationSettings',
             'appearanceSettings',
+            'smtpSettings',
             'backupSettings',
             'backupMeta',
             'backupList',
@@ -272,7 +286,7 @@ class SettingController extends Controller
         $currentUser = $request->user();
         $isAdmin = (bool) ($currentUser?->isAdmin());
 
-        $adminOnlySections = ['general', 'regional', 'backup'];
+        $adminOnlySections = ['general', 'regional', 'backup', 'smtp'];
         if (! $isAdmin && in_array($section, $adminOnlySections, true)) {
             return redirect()
                 ->route('settings.index', ['tab' => 'appearance'])
@@ -337,6 +351,35 @@ class SettingController extends Controller
                 return redirect()
                     ->route('settings.index', ['tab' => 'general'])
                     ->with('success', 'Regional settings updated successfully.');
+
+            case 'smtp':
+                $validated = $request->validate([
+                    'smtp_host' => ['required', 'string', 'max:255'],
+                    'smtp_port' => ['required', 'integer', 'min:1', 'max:65535'],
+                    'smtp_encryption' => ['required', 'in:none,tls,ssl'],
+                    'smtp_username' => ['nullable', 'string', 'max:255'],
+                    'smtp_password' => ['nullable', 'string', 'max:1000'],
+                    'smtp_from_address' => ['required', 'email', 'max:255'],
+                    'smtp_from_name' => ['required', 'string', 'max:255'],
+                    'visit_request_recipient' => ['required', 'email', 'max:255'],
+                ]);
+
+                $payload = [
+                    'smtp_enabled' => $request->boolean('smtp_enabled') ? '1' : '0',
+                    'smtp_host' => $validated['smtp_host'],
+                    'smtp_port' => (string) $validated['smtp_port'],
+                    'smtp_encryption' => $validated['smtp_encryption'],
+                    'smtp_username' => $validated['smtp_username'] ?? '',
+                    'smtp_from_address' => $validated['smtp_from_address'],
+                    'smtp_from_name' => $validated['smtp_from_name'],
+                    'visit_request_recipient' => $validated['visit_request_recipient'],
+                ];
+                if (filled($validated['smtp_password'] ?? null)) {
+                    $payload['smtp_password'] = Crypt::encryptString($validated['smtp_password']);
+                }
+                $this->saveSettings($payload);
+
+                return redirect()->route('settings.index', ['tab' => 'smtp'])->with('success', 'SMTP settings updated successfully.');
 
             case 'notifications':
                 $validated = $request->validate([

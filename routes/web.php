@@ -9,6 +9,7 @@ use App\Http\Controllers\AdminMuseumEventController;
 use App\Http\Controllers\AdminPublicArtistController;
 use App\Http\Controllers\AdminPublicCollectionController;
 use App\Http\Controllers\AdminAboutPageController;
+use App\Http\Controllers\AdminHomePageController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ArtworkController;
 use App\Http\Controllers\ArtistController;
@@ -105,6 +106,39 @@ $publicMuseumPage = function (string $publicPage = 'home') {
 	$aboutContent = \App\Support\AboutPageContent::DEFAULTS;
 	$aboutHeroImageUrl = null;
 	$aboutSpaceImageUrl = null;
+	$homeContent = \App\Support\HomePageContent::DEFAULTS;
+	$homeHeroVideoUrl = null;
+	$homeHeroPosterUrl = null;
+	$homeFeaturedEvents = collect();
+	$homeFeaturedArtists = collect();
+	$homeSelectedWorks = collect();
+	if ($publicPage === 'home') {
+		if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {
+			$homeContent = array_replace($homeContent, \App\Models\Setting::query()->whereIn('key', array_keys($homeContent))->pluck('value', 'key')->all());
+			$videoPath = $homeContent['public_home_hero_video_path'];
+			$posterPath = $homeContent['public_home_hero_poster_path'];
+			$homeHeroVideoUrl = $videoPath && Storage::disk('public')->exists($videoPath) ? Storage::url($videoPath) : null;
+			$homeHeroPosterUrl = $posterPath && Storage::disk('public')->exists($posterPath) ? Storage::url($posterPath) : null;
+		}
+		$homeSelectionSettings = \Illuminate\Support\Facades\Schema::hasTable('settings') ? \App\Models\Setting::query()->whereIn('key', ['public_home_featured_event_ids', 'public_home_featured_artist_ids', 'public_home_selected_work_ids'])->pluck('value', 'key') : collect();
+		$orderedSelection = static function ($records, ?string $json, int $limit) {
+			$ids = json_decode((string) $json, true);
+			if (! is_array($ids) || $ids === []) return $records->take($limit)->values();
+			return collect($ids)->map(fn ($id) => $records->firstWhere('id', (int) $id))->take($limit)->values();
+		};
+		if (\Illuminate\Support\Facades\Schema::hasTable('museum_events')) {
+			$records = \App\Models\MuseumEvent::where('is_published', true)->orderBy('sort_order')->get();
+			$homeFeaturedEvents = $orderedSelection($records, $homeSelectionSettings['public_home_featured_event_ids'] ?? null, 3);
+		}
+		if (\Illuminate\Support\Facades\Schema::hasTable('public_artist_profiles')) {
+			$records = \App\Models\PublicArtistProfile::where('is_published', true)->with(['artist.artworks.images'])->orderBy('sort_order')->get();
+			$homeFeaturedArtists = $orderedSelection($records, $homeSelectionSettings['public_home_featured_artist_ids'] ?? null, 4);
+		}
+		if (\Illuminate\Support\Facades\Schema::hasTable('public_collection_items')) {
+			$records = \App\Models\PublicCollectionItem::where('is_published', true)->with(['artwork.artist', 'artwork.images'])->orderBy('sort_order')->get();
+			$homeSelectedWorks = $orderedSelection($records, $homeSelectionSettings['public_home_selected_work_ids'] ?? null, 3);
+		}
+	}
 	if ($publicPage === 'events' && \Illuminate\Support\Facades\Schema::hasTable('museum_events')) {
 		$publicEvents = \App\Models\MuseumEvent::query()
 			->where('is_published', true)
@@ -166,7 +200,7 @@ $publicMuseumPage = function (string $publicPage = 'home') {
 		$aboutSpaceImageUrl = $spacePath && Storage::disk('public')->exists($spacePath) ? Storage::url($spacePath) : null;
 	}
 
-	return view('welcome', compact('homeArtworks', 'publicPage', 'publicEvents', 'eventContent', 'publicArtistProfiles', 'artistsCmsConfigured', 'artistContent', 'publicCollectionItems', 'collectionCmsConfigured', 'collectionContent', 'aboutContent', 'aboutHeroImageUrl', 'aboutSpaceImageUrl'));
+	return view('welcome', compact('homeArtworks', 'publicPage', 'publicEvents', 'eventContent', 'publicArtistProfiles', 'artistsCmsConfigured', 'artistContent', 'publicCollectionItems', 'collectionCmsConfigured', 'collectionContent', 'aboutContent', 'aboutHeroImageUrl', 'aboutSpaceImageUrl', 'homeContent', 'homeHeroVideoUrl', 'homeHeroPosterUrl', 'homeFeaturedEvents', 'homeFeaturedArtists', 'homeSelectedWorks'));
 };
 
 Route::get('/', function () use ($publicMuseumPage) {
@@ -268,6 +302,8 @@ Route::middleware('auth')->group(function () {
 		Route::put('public-collection-content', [AdminPublicCollectionController::class, 'updateContent'])->name('public-collection.content.update');
 		Route::get('about-page', [AdminAboutPageController::class, 'index'])->name('about.index');
 		Route::put('about-page', [AdminAboutPageController::class, 'update'])->name('about.update');
+		Route::get('home-page', [AdminHomePageController::class, 'index'])->name('home.index');
+		Route::put('home-page', [AdminHomePageController::class, 'update'])->name('home.update');
 		Route::get('visit-requests', [AdminVisitRequestController::class, 'index'])->name('visit-requests.index');
 		Route::patch('visit-requests/{visitRequest}/reviewed', [AdminVisitRequestController::class, 'markReviewed'])->name('visit-requests.reviewed');
 		Route::get('messages', [AdminContactMessageController::class, 'index'])->name('contact-messages.index');

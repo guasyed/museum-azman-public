@@ -633,6 +633,9 @@
 
             @if(auth()->check() && auth()->user()->isAdmin())
                 <p class="museum-nav-group-label">Public Website</p>
+                <a href="{{ route('admin.home.index', [], false) }}" class="museum-nav-item flex items-center gap-3 {{ request()->routeIs('admin.home.*') ? 'active' : '' }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="m3 11 9-8 9 8"></path><path d="M5 10v10h14V10"></path></svg><span>Home CMS</span>
+                </a>
                 <a href="{{ route('admin.about.index', [], false) }}" class="museum-nav-item flex items-center gap-3 {{ request()->routeIs('admin.about.*') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
                     <span>About CMS</span>
@@ -827,6 +830,7 @@
         <a href="{{ route('settings.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('settings.*') ? 'active' : '' }}">Settings</a>
         @if(auth()->check() && auth()->user()->isAdmin())
             <p class="mobile-nav-group-label">Public Website</p>
+            <a href="{{ route('admin.home.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.home.*') ? 'active' : '' }}">Home CMS</a>
             <a href="{{ route('admin.about.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.about.*') ? 'active' : '' }}">About CMS</a>
             <a href="{{ route('admin.events.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.events.*') ? 'active' : '' }}">Events CMS</a>
             <a href="{{ route('admin.public-artists.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.public-artists.*') ? 'active' : '' }}">Artists CMS</a>

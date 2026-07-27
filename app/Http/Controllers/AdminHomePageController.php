@@ -32,6 +32,7 @@ class AdminHomePageController extends Controller
             'selectedArtistIds' => $this->decodedIds($selectionSettings['public_home_featured_artist_ids'] ?? null),
             'selectedWorkIds' => $this->decodedIds($selectionSettings['public_home_selected_work_ids'] ?? null),
             'selectedStoryWorkId' => $this->decodedIds($selectionSettings['public_home_story_work_id'] ?? null)[0] ?? null,
+            'storyImageUrl' => $this->imageUrl($content['public_home_story_image_path']),
         ]);
     }
 
@@ -51,6 +52,8 @@ class AdminHomePageController extends Controller
         $rules['selected_work_ids'] = ['nullable', 'array', 'max:3'];
         $rules['selected_work_ids.*'] = ['nullable', 'integer', 'distinct', 'exists:public_collection_items,id'];
         $rules['story_work_id'] = ['nullable', 'integer', 'exists:public_collection_items,id'];
+        $rules['public_home_story_source'] = ['required', 'in:collection,custom'];
+        $rules['story_image'] = ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:15360'];
         $validated = $request->validate($rules);
 
         foreach (array_keys(HomePageContent::DEFAULTS) as $key) {
@@ -59,6 +62,7 @@ class AdminHomePageController extends Controller
             }
         }
         $this->saveUpload($request, 'hero_image', 'public_home_hero_poster_path');
+        $this->saveUpload($request, 'story_image', 'public_home_story_image_path');
         $this->saveIds('public_home_featured_event_ids', $validated['featured_event_ids'] ?? []);
         $this->saveIds('public_home_selected_work_ids', $validated['selected_work_ids'] ?? []);
         $this->saveIds('public_home_story_work_id', filled($validated['story_work_id'] ?? null) ? [(int) $validated['story_work_id']] : []);
@@ -84,5 +88,10 @@ class AdminHomePageController extends Controller
         $old = Setting::query()->where('key', $key)->value('value');
         if ($old) Storage::disk('public')->delete($old);
         Setting::updateOrCreate(['key' => $key], ['value' => $request->file($field)->store('home', 'public')]);
+    }
+
+    private function imageUrl(?string $path): ?string
+    {
+        return $path && Storage::disk('public')->exists($path) ? Storage::url($path) : null;
     }
 }

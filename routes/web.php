@@ -109,6 +109,7 @@ $publicMuseumPage = function (string $publicPage = 'home') {
 	$homeContent = \App\Support\HomePageContent::DEFAULTS;
 	$homeHeroVideoUrl = null;
 	$homeHeroPosterUrl = null;
+	$homeStoryImageUrl = null;
 	$homeFeaturedEvents = collect();
 	$homeFeaturedArtists = collect();
 	$homeSelectedWorks = collect();
@@ -120,6 +121,8 @@ $publicMuseumPage = function (string $publicPage = 'home') {
 			$posterPath = $homeContent['public_home_hero_poster_path'];
 			$homeHeroVideoUrl = $videoPath && Storage::disk('public')->exists($videoPath) ? Storage::url($videoPath) : null;
 			$homeHeroPosterUrl = $posterPath && Storage::disk('public')->exists($posterPath) ? Storage::url($posterPath) : null;
+			$storyImagePath = $homeContent['public_home_story_image_path'];
+			$homeStoryImageUrl = $storyImagePath && Storage::disk('public')->exists($storyImagePath) ? Storage::url($storyImagePath) : null;
 		}
 		$homeSelectionSettings = \Illuminate\Support\Facades\Schema::hasTable('settings') ? \App\Models\Setting::query()->whereIn('key', ['public_home_featured_event_ids', 'public_home_featured_artist_ids', 'public_home_selected_work_ids', 'public_home_story_work_id'])->pluck('value', 'key') : collect();
 		$orderedSelection = static function ($records, ?string $json, int $limit) {
@@ -202,7 +205,7 @@ $publicMuseumPage = function (string $publicPage = 'home') {
 		$aboutSpaceImageUrl = $spacePath && Storage::disk('public')->exists($spacePath) ? Storage::url($spacePath) : null;
 	}
 
-	return view('welcome', compact('homeArtworks', 'publicPage', 'publicEvents', 'eventContent', 'publicArtistProfiles', 'artistsCmsConfigured', 'artistContent', 'publicCollectionItems', 'collectionCmsConfigured', 'collectionContent', 'aboutContent', 'aboutHeroImageUrl', 'aboutSpaceImageUrl', 'homeContent', 'homeHeroVideoUrl', 'homeHeroPosterUrl', 'homeFeaturedEvents', 'homeFeaturedArtists', 'homeSelectedWorks', 'homeStoryWork'));
+	return view('welcome', compact('homeArtworks', 'publicPage', 'publicEvents', 'eventContent', 'publicArtistProfiles', 'artistsCmsConfigured', 'artistContent', 'publicCollectionItems', 'collectionCmsConfigured', 'collectionContent', 'aboutContent', 'aboutHeroImageUrl', 'aboutSpaceImageUrl', 'homeContent', 'homeHeroVideoUrl', 'homeHeroPosterUrl', 'homeStoryImageUrl', 'homeFeaturedEvents', 'homeFeaturedArtists', 'homeSelectedWorks', 'homeStoryWork'));
 };
 
 Route::get('/', function () use ($publicMuseumPage) {

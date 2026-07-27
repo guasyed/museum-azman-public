@@ -140,6 +140,26 @@
             color: var(--gold-soft);
         }
 
+        .nav-toggle {
+            display: none;
+            width: 44px;
+            height: 44px;
+            padding: 11px 9px;
+            border: 0;
+            background: transparent;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .nav-toggle span {
+            display: block;
+            width: 100%;
+            height: 1px;
+            margin: 6px 0;
+            background: currentColor;
+            transition: transform 220ms ease, opacity 180ms ease;
+        }
+
         .hero {
             position: relative;
             min-height: 620px;
@@ -428,6 +448,7 @@
         .public-page-home {
             --home-ivory: #e8e1d4;
             --home-gold: #b79a55;
+            --home-artwork-mat: #d9d6cd;
             background: #070806;
         }
 
@@ -620,7 +641,7 @@
             aspect-ratio: 5 / 6;
             place-items: center;
             padding: 14px;
-            background: #d8d2c6;
+            background: var(--home-artwork-mat);
             overflow: hidden;
             box-shadow: 0 17px 0 -16px rgba(255,255,255,.11);
         }
@@ -631,6 +652,7 @@
             max-height: none;
             object-fit: contain;
             border-radius: 0;
+            background: var(--home-artwork-mat);
         }
 
         .public-page-home .collection-meta {
@@ -2327,6 +2349,7 @@
             .site-header {
                 position: absolute;
                 min-height: 76px;
+                padding: 14px 20px;
             }
 
             .hero {
@@ -2334,7 +2357,72 @@
             }
 
             .nav {
+                position: fixed;
+                z-index: -1;
+                top: 76px;
+                right: 0;
+                left: 0;
+                display: flex;
+                align-items: stretch;
+                flex-direction: column;
+                gap: 0;
+                max-height: calc(100dvh - 76px);
+                margin: 0;
+                padding: 18px 24px 30px;
+                overflow-y: auto;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+                background: rgba(13, 13, 12, 0.98);
+                box-shadow: 0 22px 45px rgba(0, 0, 0, 0.45);
+                opacity: 0;
+                visibility: hidden;
+                transform: translateY(-12px);
+                transition: opacity 180ms ease, transform 220ms ease, visibility 220ms;
+                pointer-events: none;
+            }
+
+            .nav a {
+                display: flex;
+                align-items: center;
+                min-height: 58px;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+                color: rgba(255, 255, 255, 0.78);
+                font-size: 12px;
+                letter-spacing: 0.18em;
+            }
+
+            .nav a::after {
                 display: none;
+            }
+
+            .nav-toggle {
+                position: absolute;
+                z-index: 2;
+                right: 16px;
+                display: block;
+            }
+
+            .nav-toggle[aria-expanded="true"] span:nth-child(1) {
+                transform: translateY(7px) rotate(45deg);
+            }
+
+            .nav-toggle[aria-expanded="true"] span:nth-child(2) {
+                opacity: 0;
+            }
+
+            .nav-toggle[aria-expanded="true"] span:nth-child(3) {
+                transform: translateY(-7px) rotate(-45deg);
+            }
+
+            body.mobile-nav-open {
+                overflow: hidden;
+            }
+
+            body.mobile-nav-open .nav {
+                z-index: 21;
+                opacity: 1;
+                visibility: visible;
+                transform: translateY(0);
+                pointer-events: auto;
             }
 
             .page-intro {
@@ -2484,6 +2572,8 @@
             .public-page-visit .site-header,
             .public-page-contact .site-header {
                 justify-content: center;
+                min-height: 76px;
+                padding: 14px 20px;
             }
 
             .public-page-home .brand,
@@ -2653,11 +2743,16 @@
                 ? ['about' => 'About', 'events' => 'Programmes', 'collection' => 'Collection', 'visit' => 'Visit', 'contact' => 'Contact']
                 : ['about' => 'About', 'events' => 'Events', 'artists' => 'Artists', 'collection' => 'Collection', 'visit' => 'Visit', 'contact' => 'Contact'];
         @endphp
-        <nav class="nav" aria-label="Main navigation">
+        <nav class="nav" id="main-navigation" aria-label="Main navigation">
             @foreach($mainNavigation as $key => $label)
                 <a class="{{ $publicPage === $key ? 'active' : '' }}" href="{{ $routes[$key] }}">{{ $label }}</a>
             @endforeach
         </nav>
+        <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-navigation" aria-label="Open navigation menu">
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+            <span aria-hidden="true"></span>
+        </button>
         @if(in_array($publicPage, ['home', 'about', 'events', 'collection', 'visit', 'contact'], true))
             <a class="home-access-link" href="{{ $routes['visit'] }}">Request Access</a>
         @endif
@@ -2730,6 +2825,8 @@
             @php
                 $storyArtwork = $homeStoryWork?->artwork ?: $homeSelectedWorks->first()?->artwork;
                 $storyArtist = $storyArtwork?->artist;
+                $storyUsesCustomImage = $homeContent['public_home_story_source'] === 'custom' && $homeStoryImageUrl;
+                $storyImageUrl = $storyUsesCustomImage ? $homeStoryImageUrl : ($storyArtwork?->primary_image_url ?: $imageFor(3));
                 $storyTitle = $homeContent['public_home_story_title'] ?: $storyArtwork?->title ?: 'Landscapes of the Mind.';
                 $storyDescription = $homeContent['public_home_story_description']
                     ?: (($storyArtist?->name ?: 'An artist from the Museum Azman collection')
@@ -2739,7 +2836,7 @@
             <section class="home-story">
                 <div class="home-story-inner">
                     <div class="home-story-image">
-                        <img src="{{ $storyArtwork?->primary_image_url ?: $imageFor(3) }}" alt="{{ $storyArtwork?->title ?: 'Collection highlight' }}" loading="lazy">
+                        <img src="{{ $storyImageUrl }}" alt="{{ $storyUsesCustomImage ? ($storyTitle ?: 'Story image') : ($storyArtwork?->title ?: 'Collection highlight') }}" loading="lazy">
                         <span class="home-story-label">Collection highlight / 01</span>
                     </div>
                     <div class="home-story-copy">
@@ -3174,6 +3271,40 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            const navToggle = document.querySelector('.nav-toggle');
+            const mainNavigation = document.querySelector('.nav');
+            const closeNavigation = () => {
+                if (!navToggle || !mainNavigation) {
+                    return;
+                }
+
+                document.body.classList.remove('mobile-nav-open');
+                navToggle.setAttribute('aria-expanded', 'false');
+                navToggle.setAttribute('aria-label', 'Open navigation menu');
+            };
+
+            navToggle?.addEventListener('click', () => {
+                const isOpen = navToggle.getAttribute('aria-expanded') === 'true';
+                if (isOpen) {
+                    closeNavigation();
+                    return;
+                }
+
+                document.body.classList.add('mobile-nav-open');
+                navToggle.setAttribute('aria-expanded', 'true');
+                navToggle.setAttribute('aria-label', 'Close navigation menu');
+            });
+
+            mainNavigation?.querySelectorAll('a').forEach((link) => {
+                link.addEventListener('click', closeNavigation);
+            });
+
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 980) {
+                    closeNavigation();
+                }
+            });
+
             const revealItems = document.querySelectorAll(
                 '.section-head, .center-copy, .text-panel, .contact-grid, .space-grid, .visit-stats, .program-grid, .value-grid, .grid .card'
             );
@@ -3245,8 +3376,14 @@
             });
 
             document.addEventListener('keydown', (event) => {
-                if (event.key === 'Escape' && lightbox?.classList.contains('is-open')) {
-                    close();
+                if (event.key === 'Escape') {
+                    if (lightbox?.classList.contains('is-open')) {
+                        close();
+                    }
+                    if (document.body.classList.contains('mobile-nav-open')) {
+                        closeNavigation();
+                        navToggle?.focus();
+                    }
                 }
             });
 

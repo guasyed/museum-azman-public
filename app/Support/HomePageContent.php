@@ -19,6 +19,8 @@ final class HomePageContent
         'public_home_experience_description' => 'Museum Azman offers exclusive private viewings for collectors, curators, and art enthusiasts. Engage with our collection in a contemplative environment designed for deep appreciation.',
         'public_home_experience_button' => 'Request your visit',
         'public_home_story_eyebrow' => 'One artwork, one story',
+        'public_home_story_source' => 'collection',
+        'public_home_story_image_path' => '',
         'public_home_story_title' => '',
         'public_home_story_description' => '',
         'public_home_story_button' => 'Read the first story',

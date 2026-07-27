@@ -10,6 +10,8 @@ use App\Models\PublicArtistProfile;
 use App\Models\PublicCollectionItem;
 use App\Support\HomePageContent;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class HomeCmsTest extends TestCase
@@ -55,5 +57,26 @@ class HomeCmsTest extends TestCase
 
         $this->assertDatabaseHas('settings', ['key' => 'public_home_featured_event_ids', 'value' => json_encode([$event->id, 0, 0])]);
         $this->get(route('home'))->assertOk()->assertSee('Chosen Home Event')->assertSee('Chosen Home Artist')->assertSee('Chosen Home Work')->assertSee('Private &amp; Special Visits', false);
+    }
+
+    public function test_admin_can_use_a_custom_image_for_the_home_story(): void
+    {
+        Storage::fake('public');
+        $admin = User::factory()->create(['role' => 'admin']);
+        $content = HomePageContent::DEFAULTS;
+        unset(
+            $content['public_home_hero_video_path'],
+            $content['public_home_hero_poster_path'],
+            $content['public_home_story_image_path'],
+        );
+        $content['public_home_story_source'] = 'custom';
+        $content['story_image'] = UploadedFile::fake()->image('story.jpg', 1200, 800);
+
+        $this->actingAs($admin)->put(route('admin.home.update'), $content)->assertRedirect();
+
+        $path = \App\Models\Setting::query()->where('key', 'public_home_story_image_path')->value('value');
+        Storage::disk('public')->assertExists($path);
+        $this->assertDatabaseHas('settings', ['key' => 'public_home_story_source', 'value' => 'custom']);
+        $this->get(route('home'))->assertOk()->assertSee(Storage::url($path), false);
     }
 }

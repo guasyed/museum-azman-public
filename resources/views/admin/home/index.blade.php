@@ -93,15 +93,34 @@
             <details class="museum-panel" open>
                 <summary class="museum-section-title cursor-pointer">One Artwork, One Story</summary>
                 <div class="mt-5 grid gap-4 md:grid-cols-2">
-                    <label class="museum-field md:col-span-2">
-                        <span>Story Artwork</span>
+                    <label class="museum-field">
+                        <span>Image Source *</span>
+                        <select name="public_home_story_source" required>
+                            <option value="collection" @selected(old('public_home_story_source', $content['public_home_story_source']) === 'collection')>Choose from collection</option>
+                            <option value="custom" @selected(old('public_home_story_source', $content['public_home_story_source']) === 'custom')>Custom upload</option>
+                        </select>
+                    </label>
+                    <label class="museum-field">
+                        <span>Collection Artwork</span>
                         <select name="story_work_id">
                             <option value="">Use the first Collection in Focus artwork</option>
                             @foreach($works as $item)
                                 <option value="{{ $item->id }}" @selected((string) old('story_work_id', $selectedStoryWorkId) === (string) $item->id)>{{ $item->artwork?->title ?: 'Untitled' }} — {{ $item->artwork?->artist?->name ?: 'Unknown artist' }}</option>
                             @endforeach
                         </select>
+                        <small>Used when the image source is “Choose from collection”.</small>
                     </label>
+                    <label class="museum-field md:col-span-2">
+                        <span>Custom Story Image</span>
+                        <input type="file" name="story_image" accept="image/jpeg,image/png,image/webp">
+                        <small>{{ $storyImageUrl ? 'Leave blank to retain the current custom image.' : 'Upload a JPG, PNG or WebP image up to 15 MB.' }}</small>
+                    </label>
+                    @if($storyImageUrl)
+                        <div class="md:col-span-2">
+                            <p class="mb-2 text-sm font-medium text-zinc-700">Current Custom Image</p>
+                            <img src="{{ $storyImageUrl }}" alt="Current custom story image" class="h-48 max-w-full rounded-xl border border-zinc-200 object-contain">
+                        </div>
+                    @endif
                     <label class="museum-field">
                         <span>Eyebrow *</span>
                         <input name="public_home_story_eyebrow" value="{{ old('public_home_story_eyebrow', $content['public_home_story_eyebrow']) }}" required>

@@ -33,6 +33,9 @@ class AdminHomePageController extends Controller
             'selectedWorkIds' => $this->decodedIds($selectionSettings['public_home_selected_work_ids'] ?? null),
             'selectedStoryWorkId' => $this->decodedIds($selectionSettings['public_home_story_work_id'] ?? null)[0] ?? null,
             'storyImageUrl' => $this->imageUrl($content['public_home_story_image_path']),
+            'programmeCustomImageUrls' => $this->customImageUrls($content, 'programme'),
+            'collectionCustomImageUrls' => $this->customImageUrls($content, 'collection'),
+            'experienceBackgroundUrl' => $this->imageUrl($content['public_home_experience_background_path']),
         ]);
     }
 
@@ -54,6 +57,15 @@ class AdminHomePageController extends Controller
         $rules['story_work_id'] = ['nullable', 'integer', 'exists:public_collection_items,id'];
         $rules['public_home_story_source'] = ['required', 'in:collection,custom'];
         $rules['story_image'] = ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:15360'];
+        $rules['experience_background'] = ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:15360'];
+        foreach (range(1, 3) as $slot) {
+            $rules["public_home_programme_{$slot}_source"] = ['required', 'in:existing,custom'];
+            $rules["programme_{$slot}_image"] = ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:15360'];
+            $rules["public_home_collection_{$slot}_source"] = ['required', 'in:existing,custom'];
+            $rules["collection_{$slot}_image"] = ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:15360'];
+            $rules["public_home_programme_{$slot}_link"] = ['nullable', 'url:http,https', 'max:500'];
+            $rules["public_home_collection_{$slot}_link"] = ['nullable', 'url:http,https', 'max:500'];
+        }
         $validated = $request->validate($rules);
 
         foreach (array_keys(HomePageContent::DEFAULTS) as $key) {
@@ -63,6 +75,11 @@ class AdminHomePageController extends Controller
         }
         $this->saveUpload($request, 'hero_image', 'public_home_hero_poster_path');
         $this->saveUpload($request, 'story_image', 'public_home_story_image_path');
+        $this->saveUpload($request, 'experience_background', 'public_home_experience_background_path');
+        foreach (range(1, 3) as $slot) {
+            $this->saveUpload($request, "programme_{$slot}_image", "public_home_programme_{$slot}_image_path");
+            $this->saveUpload($request, "collection_{$slot}_image", "public_home_collection_{$slot}_image_path");
+        }
         $this->saveIds('public_home_featured_event_ids', $validated['featured_event_ids'] ?? []);
         $this->saveIds('public_home_selected_work_ids', $validated['selected_work_ids'] ?? []);
         $this->saveIds('public_home_story_work_id', filled($validated['story_work_id'] ?? null) ? [(int) $validated['story_work_id']] : []);
@@ -93,5 +110,14 @@ class AdminHomePageController extends Controller
     private function imageUrl(?string $path): ?string
     {
         return $path && Storage::disk('public')->exists($path) ? Storage::url($path) : null;
+    }
+
+    private function customImageUrls(array $content, string $type): array
+    {
+        return collect(range(1, 3))
+            ->mapWithKeys(fn (int $slot) => [
+                $slot => $this->imageUrl($content["public_home_{$type}_{$slot}_image_path"] ?? null),
+            ])
+            ->all();
     }
 }

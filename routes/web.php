@@ -97,6 +97,8 @@ $publicMuseumPage = function (string $publicPage = 'home') {
 
 	$publicEvents = collect();
 	$eventContent = \App\Models\MuseumEvent::CONTENT_DEFAULTS;
+	$eventsHeroImageUrl = null;
+	$eventsStoryImageUrl = null;
 	$publicArtistProfiles = collect();
 	$artistsCmsConfigured = false;
 	$artistContent = \App\Models\PublicArtistProfile::CONTENT_DEFAULTS;
@@ -110,6 +112,9 @@ $publicMuseumPage = function (string $publicPage = 'home') {
 	$homeHeroVideoUrl = null;
 	$homeHeroPosterUrl = null;
 	$homeStoryImageUrl = null;
+	$homeCustomProgrammeImageUrls = [];
+	$homeCustomCollectionImageUrls = [];
+	$homeExperienceBackgroundUrl = null;
 	$homeFeaturedEvents = collect();
 	$homeFeaturedArtists = collect();
 	$homeSelectedWorks = collect();
@@ -123,6 +128,14 @@ $publicMuseumPage = function (string $publicPage = 'home') {
 			$homeHeroPosterUrl = $posterPath && Storage::disk('public')->exists($posterPath) ? Storage::url($posterPath) : null;
 			$storyImagePath = $homeContent['public_home_story_image_path'];
 			$homeStoryImageUrl = $storyImagePath && Storage::disk('public')->exists($storyImagePath) ? Storage::url($storyImagePath) : null;
+			$experienceBackgroundPath = $homeContent['public_home_experience_background_path'];
+			$homeExperienceBackgroundUrl = $experienceBackgroundPath && Storage::disk('public')->exists($experienceBackgroundPath) ? Storage::url($experienceBackgroundPath) : null;
+			foreach (range(1, 3) as $slot) {
+				$programmePath = $homeContent["public_home_programme_{$slot}_image_path"];
+				$collectionPath = $homeContent["public_home_collection_{$slot}_image_path"];
+				$homeCustomProgrammeImageUrls[$slot] = $programmePath && Storage::disk('public')->exists($programmePath) ? Storage::url($programmePath) : null;
+				$homeCustomCollectionImageUrls[$slot] = $collectionPath && Storage::disk('public')->exists($collectionPath) ? Storage::url($collectionPath) : null;
+			}
 		}
 		$homeSelectionSettings = \Illuminate\Support\Facades\Schema::hasTable('settings') ? \App\Models\Setting::query()->whereIn('key', ['public_home_featured_event_ids', 'public_home_featured_artist_ids', 'public_home_selected_work_ids', 'public_home_story_work_id'])->pluck('value', 'key') : collect();
 		$orderedSelection = static function ($records, ?string $json, int $limit) {
@@ -157,6 +170,10 @@ $publicMuseumPage = function (string $publicPage = 'home') {
 				$eventContent,
 				\App\Models\Setting::query()->whereIn('key', array_keys($eventContent))->pluck('value', 'key')->all(),
 			);
+			$eventsHeroPath = $eventContent['public_events_hero_image_path'];
+			$eventsStoryPath = $eventContent['public_events_story_image_path'];
+			$eventsHeroImageUrl = $eventsHeroPath && Storage::disk('public')->exists($eventsHeroPath) ? Storage::url($eventsHeroPath) : null;
+			$eventsStoryImageUrl = $eventsStoryPath && Storage::disk('public')->exists($eventsStoryPath) ? Storage::url($eventsStoryPath) : null;
 		}
 	}
 
@@ -205,7 +222,7 @@ $publicMuseumPage = function (string $publicPage = 'home') {
 		$aboutSpaceImageUrl = $spacePath && Storage::disk('public')->exists($spacePath) ? Storage::url($spacePath) : null;
 	}
 
-	return view('welcome', compact('homeArtworks', 'publicPage', 'publicEvents', 'eventContent', 'publicArtistProfiles', 'artistsCmsConfigured', 'artistContent', 'publicCollectionItems', 'collectionCmsConfigured', 'collectionContent', 'aboutContent', 'aboutHeroImageUrl', 'aboutSpaceImageUrl', 'homeContent', 'homeHeroVideoUrl', 'homeHeroPosterUrl', 'homeStoryImageUrl', 'homeFeaturedEvents', 'homeFeaturedArtists', 'homeSelectedWorks', 'homeStoryWork'));
+	return view('welcome', compact('homeArtworks', 'publicPage', 'publicEvents', 'eventContent', 'eventsHeroImageUrl', 'eventsStoryImageUrl', 'publicArtistProfiles', 'artistsCmsConfigured', 'artistContent', 'publicCollectionItems', 'collectionCmsConfigured', 'collectionContent', 'aboutContent', 'aboutHeroImageUrl', 'aboutSpaceImageUrl', 'homeContent', 'homeHeroVideoUrl', 'homeHeroPosterUrl', 'homeStoryImageUrl', 'homeCustomProgrammeImageUrls', 'homeCustomCollectionImageUrls', 'homeExperienceBackgroundUrl', 'homeFeaturedEvents', 'homeFeaturedArtists', 'homeSelectedWorks', 'homeStoryWork'));
 };
 
 Route::get('/', function () use ($publicMuseumPage) {

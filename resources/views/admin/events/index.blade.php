@@ -8,18 +8,55 @@
         <details class="museum-panel" open>
             <summary class="museum-section-title cursor-pointer">Page Content</summary>
             <p class="mt-2 text-sm text-zinc-500">Edit the introduction and “In preparation” section on the public Programmes page.</p>
-            <form method="POST" action="{{ route('admin.events.content.update', [], false) }}" class="mt-5 grid gap-4 md:grid-cols-2">
+            <form method="POST" action="{{ route('admin.events.content.update', [], false) }}" enctype="multipart/form-data" class="mt-5 grid gap-4 md:grid-cols-2">
                 @csrf
                 @method('PUT')
                 <label class="museum-field"><span>Page Title *</span><input name="public_events_page_title" value="{{ old('public_events_page_title', $content['public_events_page_title']) }}" required></label>
                 <label class="museum-field md:col-span-2"><span>Page Introduction *</span><textarea name="public_events_page_description" rows="3" required>{{ old('public_events_page_description', $content['public_events_page_description']) }}</textarea></label>
+                <div class="grid gap-4 rounded-xl border border-zinc-200 p-4 md:col-span-2 md:grid-cols-2">
+                    <h3 class="font-semibold md:col-span-2">Hero</h3>
+                    <label class="museum-field"><span>Hero Kicker *</span><input name="public_events_hero_kicker" value="{{ old('public_events_hero_kicker', $content['public_events_hero_kicker']) }}" required></label>
+                    <label class="museum-field"><span>Hero Label *</span><textarea name="public_events_hero_label" rows="2" required>{{ old('public_events_hero_label', $content['public_events_hero_label']) }}</textarea></label>
+                    <label class="museum-field md:col-span-2"><span>Replace Hero Image</span><input name="hero_image" type="file" accept="image/jpeg,image/png,image/webp"><small>Recommended portrait or tall image. Leave blank to retain the current image.</small></label>
+                    @if($heroImageUrl)
+                        <div class="md:col-span-2"><p class="mb-2 text-sm font-medium text-zinc-700">Current Hero Image</p><img src="{{ $heroImageUrl }}" alt="Current Programmes hero" class="rounded-xl border border-zinc-200 object-cover" style="width: 240px; max-width: 100%; height: 180px;"></div>
+                    @endif
+                </div>
+                <div class="grid gap-4 rounded-xl border border-zinc-200 p-4 md:col-span-2 md:grid-cols-2">
+                    <h3 class="font-semibold md:col-span-2">Programme List</h3>
+                    <label class="museum-field"><span>Eyebrow *</span><input name="public_events_list_eyebrow" value="{{ old('public_events_list_eyebrow', $content['public_events_list_eyebrow']) }}" required></label>
+                    <label class="museum-field"><span>Heading *</span><input name="public_events_list_title" value="{{ old('public_events_list_title', $content['public_events_list_title']) }}" required></label>
+                    <label class="museum-field md:col-span-2"><span>Description *</span><textarea name="public_events_list_description" rows="2" required>{{ old('public_events_list_description', $content['public_events_list_description']) }}</textarea></label>
+                    <label class="museum-field"><span>Button Text *</span><input name="public_events_list_button" value="{{ old('public_events_list_button', $content['public_events_list_button']) }}" required></label>
+                </div>
+                <div class="grid gap-4 rounded-xl border border-zinc-200 p-4 md:col-span-2 md:grid-cols-2">
+                    <h3 class="font-semibold md:col-span-2">One Artwork, One Story</h3>
+                    <label class="museum-field"><span>Eyebrow *</span><input name="public_events_story_eyebrow" value="{{ old('public_events_story_eyebrow', $content['public_events_story_eyebrow']) }}" required></label>
+                    <label class="museum-field"><span>Image Caption *</span><input name="public_events_story_caption" value="{{ old('public_events_story_caption', $content['public_events_story_caption']) }}" required></label>
+                    <label class="museum-field md:col-span-2"><span>Title *</span><input name="public_events_story_title" value="{{ old('public_events_story_title', $content['public_events_story_title']) }}" required></label>
+                    <label class="museum-field md:col-span-2"><span>Description *</span><textarea name="public_events_story_description" rows="3" required>{{ old('public_events_story_description', $content['public_events_story_description']) }}</textarea></label>
+                    <label class="museum-field"><span>Button Text *</span><input name="public_events_story_button" value="{{ old('public_events_story_button', $content['public_events_story_button']) }}" required></label>
+                    <label class="museum-field md:col-span-2"><span>Replace Story Image</span><input name="story_image" type="file" accept="image/jpeg,image/png,image/webp"><small>Leave blank to retain the current image.</small></label>
+                    @if($storyImageUrl)
+                        <div class="md:col-span-2"><p class="mb-2 text-sm font-medium text-zinc-700">Current Story Image</p><img src="{{ $storyImageUrl }}" alt="Current Programmes story" class="rounded-xl border border-zinc-200 object-cover" style="width: 240px; max-width: 100%; height: 180px;"></div>
+                    @endif
+                </div>
                 <label class="museum-field"><span>In Preparation Title *</span><input name="public_events_programming_title" value="{{ old('public_events_programming_title', $content['public_events_programming_title']) }}" required></label>
+                <label class="museum-field"><span>In Preparation Description *</span><textarea name="public_events_programming_description" rows="2" required>{{ old('public_events_programming_description', $content['public_events_programming_description']) }}</textarea></label>
                 @foreach(range(1, 2) as $number)
                     <div class="grid gap-4 rounded-xl border border-zinc-200 p-4 md:col-span-2 md:grid-cols-2">
+                        <label class="museum-field"><span>Upcoming Initiative {{ $number }} Label *</span><input name="public_events_program_{{ $number }}_label" value="{{ old('public_events_program_'.$number.'_label', $content['public_events_program_'.$number.'_label']) }}" required></label>
                         <label class="museum-field"><span>Upcoming Initiative {{ $number }} Title *</span><input name="public_events_program_{{ $number }}_title" value="{{ old('public_events_program_'.$number.'_title', $content['public_events_program_'.$number.'_title']) }}" required></label>
                         <label class="museum-field"><span>Upcoming Initiative {{ $number }} Description *</span><textarea name="public_events_program_{{ $number }}_description" rows="2" required>{{ old('public_events_program_'.$number.'_description', $content['public_events_program_'.$number.'_description']) }}</textarea></label>
                     </div>
                 @endforeach
+                <div class="grid gap-4 rounded-xl border border-zinc-200 p-4 md:col-span-2 md:grid-cols-2">
+                    <h3 class="font-semibold md:col-span-2">Research Call to Action</h3>
+                    <label class="museum-field"><span>Eyebrow *</span><input name="public_events_research_eyebrow" value="{{ old('public_events_research_eyebrow', $content['public_events_research_eyebrow']) }}" required></label>
+                    <label class="museum-field"><span>Button Text *</span><input name="public_events_research_button" value="{{ old('public_events_research_button', $content['public_events_research_button']) }}" required></label>
+                    <label class="museum-field md:col-span-2"><span>Title *</span><textarea name="public_events_research_title" rows="2" required>{{ old('public_events_research_title', $content['public_events_research_title']) }}</textarea></label>
+                    <label class="museum-field md:col-span-2"><span>Description *</span><textarea name="public_events_research_description" rows="2" required>{{ old('public_events_research_description', $content['public_events_research_description']) }}</textarea></label>
+                </div>
                 <div class="md:col-span-2"><button class="museum-btn" type="submit">Save Page Content</button></div>
             </form>
         </details>

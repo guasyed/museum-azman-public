@@ -56,6 +56,31 @@
                             </label>
                         @endforeach
                     </div>
+                    <div class="mt-6 grid gap-4 xl:grid-cols-3">
+                        @foreach(range(1, 3) as $slot)
+                            @php $programmePrefix = "public_home_programme_{$slot}_"; @endphp
+                            <details class="rounded-xl border border-zinc-200 p-4" @if(old($programmePrefix.'source', $content[$programmePrefix.'source']) === 'custom') open @endif>
+                                <summary class="cursor-pointer font-semibold">Programme {{ $slot }} custom card</summary>
+                                <div class="mt-4 space-y-4">
+                                    <label class="museum-field">
+                                        <span>Card Source *</span>
+                                        <select name="{{ $programmePrefix }}source" required>
+                                            <option value="existing" @selected(old($programmePrefix.'source', $content[$programmePrefix.'source']) === 'existing')>Selected/default programme</option>
+                                            <option value="custom" @selected(old($programmePrefix.'source', $content[$programmePrefix.'source']) === 'custom')>Custom card</option>
+                                        </select>
+                                    </label>
+                                    <label class="museum-field"><span>Custom Image</span><input type="file" name="programme_{{ $slot }}_image" accept="image/jpeg,image/png,image/webp"></label>
+                                    @if($programmeCustomImageUrls[$slot])
+                                        <img src="{{ $programmeCustomImageUrls[$slot] }}" alt="Programme {{ $slot }} custom image" class="rounded-lg border border-zinc-200 object-cover" style="width: 180px; height: 120px;">
+                                    @endif
+                                    <label class="museum-field"><span>Label</span><input name="{{ $programmePrefix }}label" value="{{ old($programmePrefix.'label', $content[$programmePrefix.'label']) }}" placeholder="By appointment"></label>
+                                    <label class="museum-field"><span>Title</span><input name="{{ $programmePrefix }}title" value="{{ old($programmePrefix.'title', $content[$programmePrefix.'title']) }}"></label>
+                                    <label class="museum-field"><span>Description</span><textarea name="{{ $programmePrefix }}description" rows="3">{{ old($programmePrefix.'description', $content[$programmePrefix.'description']) }}</textarea></label>
+                                    <label class="museum-field"><span>Link</span><input type="url" name="{{ $programmePrefix }}link" value="{{ old($programmePrefix.'link', $content[$programmePrefix.'link']) }}" placeholder="https://example.com"></label>
+                                </div>
+                            </details>
+                        @endforeach
+                    </div>
                 </div>
             </details>
 
@@ -85,6 +110,34 @@
                                     @endforeach
                                 </select>
                             </label>
+                        @endforeach
+                    </div>
+                    <div class="mt-6 grid gap-4 xl:grid-cols-3">
+                        @foreach(range(1, 3) as $slot)
+                            @php $collectionPrefix = "public_home_collection_{$slot}_"; @endphp
+                            <details class="rounded-xl border border-zinc-200 p-4" @if(old($collectionPrefix.'source', $content[$collectionPrefix.'source']) === 'custom') open @endif>
+                                <summary class="cursor-pointer font-semibold">Artwork {{ $slot }} custom card</summary>
+                                <div class="mt-4 space-y-4">
+                                    <label class="museum-field">
+                                        <span>Card Source *</span>
+                                        <select name="{{ $collectionPrefix }}source" required>
+                                            <option value="existing" @selected(old($collectionPrefix.'source', $content[$collectionPrefix.'source']) === 'existing')>Selected/default artwork</option>
+                                            <option value="custom" @selected(old($collectionPrefix.'source', $content[$collectionPrefix.'source']) === 'custom')>Custom card</option>
+                                        </select>
+                                    </label>
+                                    <label class="museum-field"><span>Custom Image</span><input type="file" name="collection_{{ $slot }}_image" accept="image/jpeg,image/png,image/webp"></label>
+                                    @if($collectionCustomImageUrls[$slot])
+                                        <img src="{{ $collectionCustomImageUrls[$slot] }}" alt="Artwork {{ $slot }} custom image" class="rounded-lg border border-zinc-200 object-contain" style="width: 180px; height: 120px;">
+                                    @endif
+                                    <label class="museum-field"><span>Title</span><input name="{{ $collectionPrefix }}title" value="{{ old($collectionPrefix.'title', $content[$collectionPrefix.'title']) }}"></label>
+                                    <label class="museum-field"><span>Artist</span><input name="{{ $collectionPrefix }}artist" value="{{ old($collectionPrefix.'artist', $content[$collectionPrefix.'artist']) }}"></label>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <label class="museum-field"><span>Year</span><input name="{{ $collectionPrefix }}year" value="{{ old($collectionPrefix.'year', $content[$collectionPrefix.'year']) }}"></label>
+                                        <label class="museum-field"><span>Medium</span><input name="{{ $collectionPrefix }}medium" value="{{ old($collectionPrefix.'medium', $content[$collectionPrefix.'medium']) }}"></label>
+                                    </div>
+                                    <label class="museum-field"><span>Link</span><input type="url" name="{{ $collectionPrefix }}link" value="{{ old($collectionPrefix.'link', $content[$collectionPrefix.'link']) }}" placeholder="https://example.com"></label>
+                                </div>
+                            </details>
                         @endforeach
                     </div>
                 </div>
@@ -118,7 +171,12 @@
                     @if($storyImageUrl)
                         <div class="md:col-span-2">
                             <p class="mb-2 text-sm font-medium text-zinc-700">Current Custom Image</p>
-                            <img src="{{ $storyImageUrl }}" alt="Current custom story image" class="h-48 max-w-full rounded-xl border border-zinc-200 object-contain">
+                            <img
+                                src="{{ $storyImageUrl }}"
+                                alt="Current custom story image"
+                                class="rounded-xl border border-zinc-200 bg-zinc-50 object-contain"
+                                style="width: 320px; max-width: 100%; height: 180px;"
+                            >
                         </div>
                     @endif
                     <label class="museum-field">
@@ -146,6 +204,17 @@
                     <label class="museum-field"><span>Title *</span><input name="public_home_experience_title" value="{{ old('public_home_experience_title', $content['public_home_experience_title']) }}" required></label>
                     <label class="museum-field"><span>Button Text *</span><input name="public_home_experience_button" value="{{ old('public_home_experience_button', $content['public_home_experience_button']) }}" required></label>
                     <label class="museum-field md:col-span-2"><span>Description *</span><textarea name="public_home_experience_description" rows="3" required>{{ old('public_home_experience_description', $content['public_home_experience_description']) }}</textarea></label>
+                    <label class="museum-field md:col-span-2">
+                        <span>Custom Background Image</span>
+                        <input type="file" name="experience_background" accept="image/jpeg,image/png,image/webp">
+                        <small>{{ $experienceBackgroundUrl ? 'Leave blank to retain the current background.' : 'Upload a wide JPG, PNG or WebP image up to 15 MB.' }}</small>
+                    </label>
+                    @if($experienceBackgroundUrl)
+                        <div class="md:col-span-2">
+                            <p class="mb-2 text-sm font-medium text-zinc-700">Current Background</p>
+                            <img src="{{ $experienceBackgroundUrl }}" alt="Current Experience Art Intimately background" class="rounded-xl border border-zinc-200 object-cover" style="width: 320px; max-width: 100%; height: 180px;">
+                        </div>
+                    @endif
                 </div>
             </details>
 

@@ -5,6 +5,8 @@ namespace Tests\Feature;
 use App\Models\MuseumEvent;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class EventsCmsTest extends TestCase
@@ -56,12 +58,21 @@ class EventsCmsTest extends TestCase
 
     public function test_admin_can_update_the_events_page_content(): void
     {
+        Storage::fake('public');
         $admin = User::factory()->create(['role' => 'admin']);
         $content = MuseumEvent::CONTENT_DEFAULTS;
+        unset(
+            $content['public_events_hero_image_path'],
+            $content['public_events_story_image_path'],
+        );
         $content['public_events_page_title'] = 'Museum Programmes';
         $content['public_events_page_description'] = 'A CMS-managed introduction for the events page.';
         $content['public_events_programming_title'] = 'Our Programmes';
         $content['public_events_program_1_title'] = 'New Exhibitions';
+        $content['public_events_list_title'] = 'Custom Ways to Visit';
+        $content['public_events_story_caption'] = 'A Custom Story Image';
+        $content['hero_image'] = UploadedFile::fake()->image('hero.jpg', 1200, 1600);
+        $content['story_image'] = UploadedFile::fake()->image('story.jpg', 1200, 900);
 
         $this->actingAs($admin)
             ->put(route('admin.events.content.update'), $content)
@@ -71,12 +82,20 @@ class EventsCmsTest extends TestCase
             'key' => 'public_events_page_title',
             'value' => 'Museum Programmes',
         ]);
+        $heroPath = \App\Models\Setting::query()->where('key', 'public_events_hero_image_path')->value('value');
+        $storyPath = \App\Models\Setting::query()->where('key', 'public_events_story_image_path')->value('value');
+        Storage::disk('public')->assertExists($heroPath);
+        Storage::disk('public')->assertExists($storyPath);
 
         $this->get(route('public.events'))
             ->assertOk()
             ->assertSee('Museum Programmes')
             ->assertSee('A CMS-managed introduction for the events page.')
             ->assertSee('Our Programmes')
-            ->assertSee('New Exhibitions');
+            ->assertSee('New Exhibitions')
+            ->assertSee('Custom Ways to Visit')
+            ->assertSee('A Custom Story Image')
+            ->assertSee(Storage::url($heroPath), false)
+            ->assertSee(Storage::url($storyPath), false);
     }
 }

@@ -21,13 +21,17 @@ class AdminMuseumEventController extends Controller
             ->get()
             ->groupBy('section');
 
+        $content = array_replace(
+            MuseumEvent::CONTENT_DEFAULTS,
+            Setting::query()->whereIn('key', array_keys(MuseumEvent::CONTENT_DEFAULTS))->pluck('value', 'key')->all(),
+        );
+
         return view('admin.events.index', [
             'events' => $events,
             'sections' => MuseumEvent::SECTIONS,
-            'content' => array_replace(
-                MuseumEvent::CONTENT_DEFAULTS,
-                Setting::query()->whereIn('key', array_keys(MuseumEvent::CONTENT_DEFAULTS))->pluck('value', 'key')->all(),
-            ),
+            'content' => $content,
+            'heroImageUrl' => $this->imageUrl($content['public_events_hero_image_path']),
+            'storyImageUrl' => $this->imageUrl($content['public_events_story_image_path']),
         ]);
     }
 
@@ -35,16 +39,49 @@ class AdminMuseumEventController extends Controller
     {
         $rules = [];
         foreach (MuseumEvent::CONTENT_DEFAULTS as $key => $default) {
+            if (str_ends_with($key, '_path')) {
+                continue;
+            }
             $rules[$key] = ['required', 'string', str_ends_with($key, '_description') ? 'max:1000' : 'max:255'];
         }
+        $rules['hero_image'] = ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:15360'];
+        $rules['story_image'] = ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:15360'];
 
         $validated = $request->validate($rules);
 
-        foreach ($validated as $key => $value) {
-            Setting::updateOrCreate(['key' => $key], ['value' => trim($value)]);
+        foreach (array_keys(MuseumEvent::CONTENT_DEFAULTS) as $key) {
+            if (! str_ends_with($key, '_path') && array_key_exists($key, $validated)) {
+                Setting::updateOrCreate(['key' => $key], ['value' => trim($validated[$key])]);
+            }
         }
 
+        $this->savePageImage($request, 'hero_image', 'public_events_hero_image_path');
+        $this->savePageImage($request, 'story_image', 'public_events_story_image_path');
+
         return back()->with('success', 'Programmes page content updated successfully.');
+    }
+
+    private function savePageImage(Request $request, string $field, string $key): void
+    {
+        if (! $request->hasFile($field)) {
+            return;
+        }
+
+        $old = Setting::query()->where('key', $key)->value('value');
+        if ($old) {
+            Storage::disk('public')->delete($old);
+        }
+
+        Setting::updateOrCreate([
+            'key' => $key,
+        ], [
+            'value' => $request->file($field)->store('events/page', 'public'),
+        ]);
+    }
+
+    private function imageUrl(?string $path): ?string
+    {
+        return $path && Storage::disk('public')->exists($path) ? Storage::url($path) : null;
     }
 
     public function store(Request $request): RedirectResponse

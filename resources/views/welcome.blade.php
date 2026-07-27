@@ -31,6 +31,22 @@
     <title>Museum Azman | {{ $publicPage === 'home' ? 'Contemporary Art' : ucfirst($publicPage) }}</title>
     <meta name="description" content="Museum Azman is a private contemporary art museum featuring artists from the Americas to Southeast Asia.">
     <style>
+        @font-face {
+            font-family: "Cormorant Garamond";
+            src: url("{{ asset('fonts/cormorant-garamond-regular.ttf') }}") format("truetype");
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+        }
+
+        @font-face {
+            font-family: "Cormorant Garamond";
+            src: url("{{ asset('fonts/cormorant-garamond-italic.ttf') }}") format("truetype");
+            font-style: italic;
+            font-weight: 400;
+            font-display: swap;
+        }
+
         :root {
             --page: #050505;
             --panel: #0b0b0a;
@@ -43,7 +59,7 @@
             --gold: #c8a85d;
             --gold-soft: #e7d295;
             --public-font-sans: Arial, Helvetica, sans-serif;
-            --public-font-serif: Georgia, "Times New Roman", serif;
+            --public-font-serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
             --public-size-nav: 14px;
             --public-size-body: 18px;
             --public-size-section-title: clamp(2rem, 2.6vw, 2.5rem);
@@ -63,7 +79,8 @@
             margin: 0;
             background: var(--page);
             color: var(--text);
-            font-family: var(--public-font-sans);
+            /*font-family: var(--public-font-sans);*/
+            font-family: "Cormorant Garamond", Georgia, serif !important;
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
             text-rendering: optimizeLegibility;
@@ -129,6 +146,7 @@
             font-weight: 500;
             letter-spacing: 0.02em;
             text-transform: uppercase;
+            font-family: "Inter", Arial, sans-serif;
         }
 
         .nav a {
@@ -491,6 +509,7 @@
             letter-spacing: .16em;
             text-transform: uppercase;
             transition: border-color 250ms ease, background 250ms ease;
+            font-family: "Inter", Arial, sans-serif;
         }
 
         .home-access-link:hover {
@@ -660,23 +679,38 @@
             justify-content: space-between;
             align-items: baseline;
             gap: 18px;
-            margin-top: 27px;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255, 255, 255, .12);
         }
 
         .public-page-home .collection-card .collection-meta h3 {
             margin-top: 0;
-            font-size: 23px;
+            color: rgba(239, 234, 224, .94);
+            font-size: 22px;
+            line-height: 1.12;
+            transition: color 220ms ease;
         }
 
         .public-page-home .collection-card .collection-meta p {
-            margin-top: 9px;
+            margin-top: 10px;
+            color: rgba(255, 255, 255, .6);
             font-size: 14px;
+            font-weight: 400;
         }
 
         .public-page-home .collection-card .collection-meta .home-card-overline {
             flex: 0 0 auto;
             margin-top: 0;
+            color: rgba(255, 255, 255, .52);
             font-size: 10px;
+            font-weight: 500;
+            letter-spacing: .18em;
+        }
+
+        .public-page-home .collection-card:hover .collection-meta h3,
+        .public-page-home .collection-card:focus-visible .collection-meta h3 {
+            color: var(--home-gold);
         }
 
         .public-page-home .home-collection-focus {
@@ -690,8 +724,10 @@
         }
 
         .public-page-home .home-collection-focus .collection-card > small {
-            margin-top: 7px;
+            margin-top: 8px;
+            color: rgba(255, 255, 255, .4);
             font-size: 10px;
+            font-weight: 500;
             letter-spacing: .18em;
         }
 
@@ -759,25 +795,41 @@
             background: #0c0c0b;
         }
 
+        .home-story-image::after {
+            content: "";
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            left: 0;
+            height: 34%;
+            background: linear-gradient(180deg, transparent, rgba(0, 0, 0, .56));
+            pointer-events: none;
+        }
+
         .home-story-image img {
             width: 100%;
             aspect-ratio: 16 / 9;
             object-fit: cover;
-            transition: transform 800ms cubic-bezier(.22,1,.36,1);
+            filter: brightness(.68) saturate(.84) contrast(1.03) sepia(.02);
+            transition: transform 800ms cubic-bezier(.22,1,.36,1), filter 350ms ease;
         }
 
         .home-story-image:hover img {
             transform: scale(1.035);
+            filter: brightness(.72) saturate(.87) contrast(1.04) sepia(.02);
         }
 
         .home-story-label {
             position: absolute;
+            z-index: 1;
             left: 24px;
             bottom: 20px;
-            color: rgba(255,255,255,.72);
+            color: rgba(255,255,255,.96);
             font-size: 10px;
             font-weight: 800;
             letter-spacing: .18em;
+            line-height: 1.3;
+            text-shadow: 0 1px 5px rgba(0,0,0,.9);
             text-transform: uppercase;
         }
 
@@ -793,8 +845,12 @@
             max-width: 430px;
             margin-top: 22px;
             color: var(--home-ivory);
-            font-size: clamp(2.8rem, 3.4vw, 56px);
-            line-height: .96;
+            font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+            font-size: clamp(3.25rem, 4.2vw, 68px);
+            font-weight: 500;
+            letter-spacing: -.021em;
+            line-height: .93;
+            text-wrap: balance;
         }
 
         .home-story-copy p {
@@ -806,15 +862,24 @@
         }
 
         .home-text-link {
-            display: inline-block;
-            margin-top: 24px;
-            padding-bottom: 7px;
+            display: inline-flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 30px;
+            padding-bottom: 10px;
             border-bottom: 1px solid var(--home-gold);
-            color: var(--home-gold);
-            font-size: 10px;
+            color: rgba(244, 240, 232, .9);
+            font-size: 11px;
             font-weight: 800;
-            letter-spacing: .18em;
+            line-height: 1;
+            letter-spacing: .2em;
             text-transform: uppercase;
+            transition: color 180ms ease, border-color 180ms ease;
+        }
+
+        .home-text-link:hover {
+            border-color: var(--gold-soft);
+            color: #fff;
         }
 
         .public-page-home .vision {
@@ -870,7 +935,7 @@
             display: grid;
             place-items: center;
             overflow: hidden;
-            background-image: linear-gradient(rgba(0, 0, 0, 0.54), rgba(0, 0, 0, 0.58)), url("{{ $imageFor(10) }}");
+            background-image: linear-gradient(rgba(0, 0, 0, 0.54), rgba(0, 0, 0, 0.58)), url("{{ $homeExperienceBackgroundUrl ?: $imageFor(10) }}");
             background-size: cover;
             background-position: center;
             text-align: center;
@@ -884,10 +949,11 @@
             min-height: 98px;
             padding: 14px clamp(34px, 6.2vw, 106px);
             background: linear-gradient(90deg, #17140f 0%, #202120 46%, #201f1d 100%);
+            font-family: "Cormorant Garamond", Georgia, serif !important;
         }
 
         .public-page-about .image-hero {
-            min-height: clamp(300px, 18vw, 330px);
+            min-height: clamp(420px, 26vw, 470px);
             margin-top: 98px;
             place-items: end start;
         }
@@ -910,8 +976,9 @@
         .public-page-about .image-hero-content h1 {
             max-width: 590px;
             color: #eee9df;
-            font-size: clamp(3.6rem, 5.2vw, 5.2rem);
+            font-size: clamp(3.6rem, 5.2vw, 6rem);
             line-height: .96;
+            font-family: "Cormorant Garamond", Georgia, serif !important;
         }
 
         .public-page-about .image-hero-content p {
@@ -1034,17 +1101,24 @@
             font-weight: 700;
             letter-spacing: .22em;
             text-transform: uppercase;
+            font-family: "Inter", Arial, sans-serif;
         }
 
         .programme-hero h1 {
             margin-top: 34px;
             color: var(--programme-ivory);
+            font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
             font-size: clamp(4.5rem, 8.8vw, 9.4rem);
+            font-weight: 400;
+            letter-spacing: -.035em;
             line-height: .86;
         }
 
         .programme-hero h1 em {
+            font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+            font-style: italic;
             font-weight: 400;
+            letter-spacing: -.045em;
         }
 
         .programme-hero-summary {
@@ -1060,6 +1134,7 @@
             color: rgba(255,255,255,.64);
             font-size: 15px;
             line-height: 1.6;
+            font-family: "Inter", Arial, sans-serif;
         }
 
         .programme-hero-image {
@@ -1081,7 +1156,7 @@
         }
 
         .programme-list {
-            padding: 62px clamp(34px, 6.5vw, 105px) 72px;
+            padding: 26px clamp(34px, 6.1vw, 105px) 18px;
             background: #070806;
         }
 
@@ -1089,7 +1164,7 @@
         .programme-editorial-inner,
         .programme-preparation-inner,
         .programme-research-inner {
-            width: min(1500px, 100%);
+            width: min(1645px, 100%);
             margin: 0 auto;
         }
 
@@ -1106,14 +1181,18 @@
         .programme-preparation h2 {
             margin-top: 15px;
             color: var(--programme-ivory);
-            font-size: clamp(2.6rem, 3.8vw, 4rem);
-            line-height: 1.05;
+            font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+            font-size: clamp(2.8rem, 3.5vw, 3.75rem);
+            font-weight: 400;
+            letter-spacing: -.02em;
+            line-height: 1;
         }
 
         .programme-list-heading p {
             color: rgba(255,255,255,.62);
-            font-size: 18px;
-            line-height: 1.55;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 15px;
+            line-height: 1.6;
         }
 
         .programme-row {
@@ -1131,14 +1210,19 @@
 
         .programme-number {
             color: rgba(255,255,255,.32);
-            font-size: 34px;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 31px;
+            font-weight: 300;
         }
 
         .programme-row h3 {
             margin-top: 10px;
             color: #fff;
-            font-size: 48px;
-            line-height: 1.1;
+            font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+            font-size: clamp(2.35rem, 2.7vw, 2.9rem);
+            font-weight: 400;
+            letter-spacing: -.02em;
+            line-height: 1.05;
             transition: color .2s ease;
         }
 
@@ -1148,8 +1232,9 @@
 
         .programme-row-description {
             color: rgba(255,255,255,.64);
-            font-size: 18px;
-            line-height: 1.55;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 15px;
+            line-height: 1.6;
         }
 
         .programme-row img {
@@ -1160,9 +1245,9 @@
 
         .programme-action {
             display: inline-block;
-            margin-top: 38px;
+            margin-top: 28px;
             padding-bottom: 8px;
-            border-bottom: 1px solid var(--programme-gold);
+            /* border-bottom: 1px solid var(--programme-gold); */
             color: var(--programme-ivory);
             font-size: 10px;
             font-weight: 700;
@@ -1170,59 +1255,153 @@
             text-transform: uppercase;
         }
 
+        .programme-action:hover {
+            color: var(--programme-gold);
+        }
+
+        .programme-list .programme-action {
+            display: inline-flex;
+            align-items: center;
+            width: fit-content;
+            max-width: 100%;
+            white-space: nowrap;
+        }
+
         .programme-editorial {
             padding: 0;
-            background: #12100d;
+            overflow: hidden;
+            background: #0c0c0b;
             border-block: 1px solid var(--line);
         }
 
         .programme-editorial-inner {
             display: grid;
-            grid-template-columns: .92fr 1.08fr;
-            min-height: 430px;
+            grid-template-columns: .45fr .55fr;
+            width: 100%;
+            max-width: none;
+            height: clamp(430px, 25.5vw, 445px);
+            min-height: 0;
         }
 
         .programme-editorial-copy {
-            padding: 52px clamp(34px, 6vw, 90px);
+            display: flex;
+            align-items: flex-start;
+            flex-direction: column;
+            justify-content: center;
+            width: 100%;
+            padding: 48px clamp(42px, 5.6vw, 96px);
         }
 
         .programme-editorial h2 {
-            max-width: 460px;
+            max-width: 560px;
             margin-top: 18px;
             color: var(--programme-ivory);
-            font-size: clamp(2.5rem, 4.2vw, 4.4rem);
-            line-height: .95;
+            font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+            font-size: clamp(3.2rem, 3.7vw, 4rem);
+            font-weight: 400;
+            letter-spacing: -.025em;
+            line-height: .9;
+            text-wrap: balance;
         }
 
         .programme-editorial p {
-            max-width: 470px;
-            margin-top: 22px;
-            color: rgba(255,255,255,.64);
+            max-width: 480px;
+            margin-top: 16px;
+            color: rgba(255,255,255,.66);
+            font-family: Arial, Helvetica, sans-serif;
             font-size: 15px;
-            line-height: 1.55;
+            line-height: 1.85;
+        }
+
+        .programme-editorial-copy .programme-action {
+            display: inline-flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 220px;
+            max-width: 100%;
+            margin-top: 28px;
+            padding-bottom: 11px;
+            border-color: var(--programme-gold);
+            color: rgba(239, 234, 224, .92);
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .2em;
+            line-height: 1;
+            white-space: nowrap;
+            transition: color 180ms ease, border-color 180ms ease;
+        }
+
+        .programme-editorial-copy .programme-action span:last-child {
+            font-size: 15px;
+            letter-spacing: 0;
+            transition: transform 180ms ease;
+        }
+
+        .programme-editorial-copy .programme-action:hover,
+        .programme-editorial-copy .programme-action:focus-visible {
+            border-color: var(--gold-soft);
+            color: var(--gold-soft);
+        }
+
+        .programme-editorial-copy .programme-action:hover span:last-child,
+        .programme-editorial-copy .programme-action:focus-visible span:last-child {
+            transform: translate(3px, -3px);
         }
 
         .programme-editorial-image {
             position: relative;
-            min-height: 430px;
+            width: 90%;
+            height: 100%;
+            min-height: 0;
+            overflow: hidden;
+            padding-inline: clamp(40px, 3.5vw, 60px);
+            background: #262116;
+        }
+
+        .programme-editorial-image::after {
+            content: "";
+            position: absolute;
+            inset: 45% 0 0;
+            background: linear-gradient(180deg, transparent, rgba(0,0,0,.62));
+            pointer-events: none;
         }
 
         .programme-editorial-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            object-position: center;
+            filter: brightness(.7) saturate(.86) contrast(1.02);
         }
 
         .programme-editorial-image h3 {
             position: absolute;
-            left: 34px;
-            bottom: 25px;
+            z-index: 1;
+            left: 48px;
+            bottom: 34px;
             color: #eee9df;
-            font-size: clamp(2rem, 3vw, 3.2rem);
+            font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+            font-size: clamp(2.2rem, 3vw, 3.25rem);
+            font-weight: 400;
+            letter-spacing: -.025em;
+        }
+
+        .programme-editorial-label {
+            position: absolute;
+            z-index: 1;
+            left: 48px;
+            bottom: 98px;
+            color: rgba(255,255,255,.72);
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: .18em;
+            text-transform: uppercase;
         }
 
         .programme-preparation {
-            padding: 60px clamp(34px, 6.5vw, 105px) 72px;
+            min-height: 535px;
+            padding: 64px clamp(34px, 6.1vw, 105px);
             background: #070806;
         }
 
@@ -1231,78 +1410,148 @@
         }
 
         .programme-preparation-intro > p {
-            margin-top: 18px;
-            color: rgba(255,255,255,.6);
+            margin-top: 20px;
+            color: rgba(255,255,255,.64);
+            font-family: Arial, Helvetica, sans-serif;
             font-size: 15px;
+            line-height: 1.55;
         }
 
         .programme-coming-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 0;
-            margin-top: 38px;
+            margin-top: 36px;
         }
 
         .programme-coming-card {
             position: relative;
-            min-height: 205px;
-            padding: 42px 28px;
-            border: 1px solid var(--line);
+            min-height: 240px;
+            padding: 28px;
+            border: 0;
         }
 
         .programme-coming-card + .programme-coming-card {
-            border-left: 0;
+            border-left: 1px solid rgba(255,255,255,.13);
         }
 
         .programme-coming-card h3 {
-            margin-top: 18px;
+            margin-top: 12px;
             color: var(--programme-ivory);
-            font-size: 28px;
+            font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+            font-size: clamp(2rem, 2.3vw, 2.35rem);
+            font-weight: 400;
+            letter-spacing: -.02em;
+            line-height: 1.05;
         }
 
         .programme-coming-card p {
             max-width: 500px;
-            margin-top: 12px;
-            color: rgba(255,255,255,.6);
-            font-size: 14px;
+            margin-top: 15px;
+            color: rgba(255,255,255,.64);
+            font-size: 15px;
+            line-height: 1.55;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
         .programme-coming-badge {
             position: absolute;
-            top: 24px;
+            top: 28px;
             right: 24px;
-            padding: 5px 9px;
-            border: 1px solid var(--line);
-            color: rgba(255,255,255,.55);
-            font-size: 8px;
-            letter-spacing: .16em;
+            padding: 6px 10px;
+            border: 1px solid rgba(255,255,255,.16);
+            color: rgba(255,255,255,.6);
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 9px;
+            letter-spacing: .18em;
             text-transform: uppercase;
         }
 
+        .programme-coming-icon {
+            display: block;
+            width: 22px;
+            height: 22px;
+            margin-bottom: 28px;
+            color: var(--programme-gold);
+        }
+
         .programme-research {
-            padding: 58px clamp(34px, 6.5vw, 105px);
-            background: #14110e;
+            min-height: 290px;
+            padding: 54px clamp(34px, 3.3vw, 58px);
+            background: #15130f;
             border-block: 1px solid var(--line);
         }
 
         .programme-research-inner {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 80px;
+            grid-template-columns: 1.25fr 1fr;
+            gap: clamp(120px, 18vw, 300px);
             align-items: center;
+            width: 100%;
+            max-width: none;
         }
 
         .programme-research h2 {
-            margin-top: 16px;
+            max-width: 650px;
+            margin-top: 18px;
             color: var(--programme-ivory);
-            font-size: clamp(2.8rem, 4.5vw, 4.7rem);
+            font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+            font-size: clamp(3.2rem, 4vw, 4.2rem);
+            font-weight: 400;
+            letter-spacing: -.025em;
             line-height: .92;
         }
 
+        .programme-research h2 em {
+            font-style: italic;
+            font-weight: 400;
+        }
+
         .programme-research p {
-            color: rgba(255,255,255,.64);
-            font-size: 15px;
-            line-height: 1.6;
+            max-width: 610px;
+            margin-top: 22px;
+            color: rgba(255,255,255,.68);
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 18px;
+            line-height: 1.55;
+        }
+
+        .programme-research-icon {
+            width: 20px;
+            height: 20px;
+            color: var(--programme-gold);
+        }
+
+        .programme-research-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 13px;
+            min-width: 225px;
+            min-height: 40px;
+            margin-top: 28px;
+            padding: 0 22px;
+            border: 1px solid rgba(255,255,255,.28);
+            background: #eeeae3;
+            color: #1a1916;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: .19em;
+            text-transform: uppercase;
+            transition: background 180ms ease, transform 180ms ease;
+        }
+
+        .programme-research-button:hover,
+        .programme-research-button:focus-visible {
+            background: #fff;
+            transform: translateY(-2px);
+        }
+
+        .programme-research-button svg {
+            width: 14px;
+            height: 14px;
+            flex: 0 0 auto;
         }
 
         .public-page-collection {
@@ -1869,6 +2118,12 @@
             line-height: 1.05;
         }
 
+        .experience h2{
+            font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+            font-weight: 500;
+            font-size: 3.25rem !important;
+        }
+
         .experience p,
         .vision p,
         .center-copy p,
@@ -2096,6 +2351,7 @@
             padding: 54px clamp(44px, 6.1vw, 104px) 44px;
             background: #080907;
             border-top: 1px solid var(--line);
+            font-family: "Inter", Arial, sans-serif;
         }
 
         .footer p,
@@ -2490,6 +2746,26 @@
                 grid-template-columns: 1fr;
             }
 
+            .programme-research-inner {
+                gap: 40px;
+            }
+
+            .programme-editorial-inner {
+                height: auto;
+            }
+
+            .programme-editorial-copy,
+            .programme-editorial-image {
+                width: 100%;
+            }
+
+            .programme-editorial-image {
+                height: auto;
+                min-height: 360px;
+                padding-inline: 24px;
+                aspect-ratio: 4 / 3;
+            }
+
             .programme-row {
                 grid-template-columns: 48px 1fr 130px;
                 padding: 28px 0;
@@ -2511,8 +2787,8 @@
             }
 
             .programme-coming-card + .programme-coming-card {
-                border-top: 0;
-                border-left: 1px solid var(--line);
+                border-top: 1px solid var(--line);
+                border-left: 0;
             }
 
             .collection-index-intro {
@@ -2691,6 +2967,24 @@
                 padding: 48px 18px;
             }
 
+            .programme-editorial-image {
+                min-height: 300px;
+                padding-inline: 0;
+                aspect-ratio: 1 / 1;
+            }
+
+            .programme-editorial-image h3 {
+                right: 24px;
+                bottom: 28px;
+                left: 24px;
+                font-size: clamp(2rem, 10vw, 2.8rem);
+            }
+
+            .programme-editorial-label {
+                left: 24px;
+                bottom: 84px;
+            }
+
             .collection-index-intro,
             .collection-artist-index,
             .collection-reading {
@@ -2763,7 +3057,7 @@
             <section class="hero" aria-label="Museum Azman">
                 <img class="hero-media" src="{{ $homeHeroPosterUrl ?: asset('media/museum-azman-hero.png') }}" alt="Museum Azman gallery interior" fetchpriority="high">
                 <div class="hero-content">
-                    <h1>{{ $homeContent['public_home_hero_title'] ?: 'Museum Azman' }}</h1>
+                    <h1 style="font-family: &quot;Cormorant Garamond&quot;, Georgia, serif !important;">{{ $homeContent['public_home_hero_title'] ?: 'Museum Azman' }}</h1>
                     <p class="home-hero-copy">{{ $homeContent['public_home_hero_subtitle'] ?: 'A private contemporary art museum creating dialogue between East and West.' }}</p>
                     <span class="home-eyebrow">Currently open by invitation only</span>
                     <a class="home-primary-button" href="{{ $routes['visit'] }}">Request Private Viewing <span aria-hidden="true">→</span></a>
@@ -2779,18 +3073,37 @@
                         @foreach(range(0, 2) as $slot)
                             @php
                                 $event = $homeFeaturedEvents->get($slot);
+                                $programmeNumber = $slot + 1;
+                                $programmePrefix = "public_home_programme_{$programmeNumber}_";
+                                $useCustomProgramme = $homeContent[$programmePrefix.'source'] === 'custom';
                                 $programmeDefaults = [
                                     ['image' => 'media/museum-programme-1.jpg', 'label' => 'By appointment', 'title' => 'Museum Tours', 'description' => 'A slow encounter with the permanent collection'],
                                     ['image' => 'media/museum-programme-2.jpg', 'label' => 'By appointment', 'title' => 'Private & Special Visits', 'description' => 'Tailored encounters with the collection'],
                                     ['image' => 'media/museum-programme-3.jpg', 'label' => 'For small groups', 'title' => 'Education Programmes', 'description' => 'Learning through close looking and exchange'],
                                 ][$slot];
+                                $programmeImage = $useCustomProgramme
+                                    ? ($homeCustomProgrammeImageUrls[$programmeNumber] ?? null)
+                                    : $event?->image_url;
+                                $programmeImage ??= asset($programmeDefaults['image']);
+                                $programmeLabel = $useCustomProgramme
+                                    ? ($homeContent[$programmePrefix.'label'] ?: $programmeDefaults['label'])
+                                    : ($event?->schedule ?: $programmeDefaults['label']);
+                                $programmeTitle = $useCustomProgramme
+                                    ? ($homeContent[$programmePrefix.'title'] ?: $programmeDefaults['title'])
+                                    : ($event?->title ?: $programmeDefaults['title']);
+                                $programmeDescription = $useCustomProgramme
+                                    ? ($homeContent[$programmePrefix.'description'] ?: $programmeDefaults['description'])
+                                    : ($event?->description ?: $programmeDefaults['description']);
+                                $programmeLink = $useCustomProgramme && $homeContent[$programmePrefix.'link']
+                                    ? $homeContent[$programmePrefix.'link']
+                                    : $routes['events'];
                             @endphp
-                            <article class="card home-card">
-                                <img src="{{ $event?->image_url ?: asset($programmeDefaults['image']) }}" alt="{{ $event?->title ?: $programmeDefaults['title'] }}" loading="lazy">
-                                <span class="home-card-overline">{{ $event?->schedule ?: $programmeDefaults['label'] }}</span>
-                                <h3>{{ $event?->title ?: $programmeDefaults['title'] }}</h3>
-                                <p>{{ $event?->description ?: $programmeDefaults['description'] }}</p>
-                            </article>
+                            <a class="card home-card" href="{{ $programmeLink }}">
+                                <img src="{{ $programmeImage }}" alt="{{ $programmeTitle }}" loading="lazy">
+                                <span class="home-card-overline">{{ $programmeLabel }}</span>
+                                <h3>{{ $programmeTitle }}</h3>
+                                <p>{{ $programmeDescription }}</p>
+                            </a>
                         @endforeach
                     </div>
                     <a class="section-link" href="{{ $routes['events'] }}">Explore programmes &nbsp; →</a>
@@ -2804,12 +3117,37 @@
                     </div>
                     <div class="grid three">
                         @foreach(range(0, 2) as $slot)
-                            @php $item = $homeSelectedWorks->get($slot); $featuredArtwork = $item?->artwork; @endphp
-                            <article class="card home-card collection-card">
-                                <div class="collection-frame"><img src="{{ $featuredArtwork?->primary_image_url ?: $imageFor($slot) }}" alt="{{ $featuredArtwork?->title ?: 'Collection artwork' }}" loading="lazy"></div>
-                                <div class="collection-meta"><div><h3>{{ $featuredArtwork?->title ?: ['Walhalla', 'Material (SC) I', 'Untitled'][$slot] }}</h3><p>{{ $featuredArtwork?->artist?->name ?: $artistFor($slot) }}</p></div><span class="home-card-overline">{{ $featuredArtwork?->year ?: $yearFor($slot, '2025') }}</span></div>
-                                <small>{{ $featuredArtwork?->medium ?: $mediumFor($slot, 'Mixed media') }}</small>
-                            </article>
+                            @php
+                                $item = $homeSelectedWorks->get($slot);
+                                $featuredArtwork = $item?->artwork;
+                                $collectionNumber = $slot + 1;
+                                $collectionPrefix = "public_home_collection_{$collectionNumber}_";
+                                $useCustomCollection = $homeContent[$collectionPrefix.'source'] === 'custom';
+                                $collectionTitle = $useCustomCollection
+                                    ? ($homeContent[$collectionPrefix.'title'] ?: ['Walhalla', 'Material (SC) I', 'Untitled'][$slot])
+                                    : ($featuredArtwork?->title ?: ['Walhalla', 'Material (SC) I', 'Untitled'][$slot]);
+                                $collectionArtist = $useCustomCollection
+                                    ? ($homeContent[$collectionPrefix.'artist'] ?: $artistFor($slot))
+                                    : ($featuredArtwork?->artist?->name ?: $artistFor($slot));
+                                $collectionYear = $useCustomCollection
+                                    ? ($homeContent[$collectionPrefix.'year'] ?: $yearFor($slot, '2025'))
+                                    : ($featuredArtwork?->year ?: $yearFor($slot, '2025'));
+                                $collectionMedium = $useCustomCollection
+                                    ? ($homeContent[$collectionPrefix.'medium'] ?: $mediumFor($slot, 'Mixed media'))
+                                    : ($featuredArtwork?->medium ?: $mediumFor($slot, 'Mixed media'));
+                                $collectionImage = $useCustomCollection
+                                    ? ($homeCustomCollectionImageUrls[$collectionNumber] ?? null)
+                                    : $featuredArtwork?->primary_image_url;
+                                $collectionImage ??= $imageFor($slot);
+                                $collectionLink = $useCustomCollection && $homeContent[$collectionPrefix.'link']
+                                    ? $homeContent[$collectionPrefix.'link']
+                                    : $routes['collection'];
+                            @endphp
+                            <a class="card home-card collection-card" href="{{ $collectionLink }}">
+                                <div class="collection-frame"><img src="{{ $collectionImage }}" alt="{{ $collectionTitle }}" loading="lazy"></div>
+                                <div class="collection-meta"><div><h3>{{ $collectionTitle }}</h3><p>{{ $collectionArtist }}</p></div><span class="home-card-overline">{{ $collectionYear }}</span></div>
+                                <small>{{ $collectionMedium }}</small>
+                            </a>
                         @endforeach
                     </div>
                     <a class="section-link" href="{{ $routes['collection'] }}">Explore the collection &nbsp; →</a>
@@ -2882,11 +3220,15 @@
                     $eventContent['public_events_program_1_description'],
                     $eventContent['public_events_program_2_description'],
                 ];
+                $comingLabels = [
+                    $eventContent['public_events_program_1_label'],
+                    $eventContent['public_events_program_2_label'],
+                ];
             @endphp
 
             <section class="programme-hero">
                 <div class="programme-hero-copy">
-                    <span class="programme-kicker">Museum Azman / What's on</span>
+                    <span class="programme-kicker">{{ $eventContent['public_events_hero_kicker'] }}</span>
                     <h1>
                         @if($programmePageTitle === "Programmes\n& stories")
                             Programmes<br><em>&amp; stories</em>
@@ -2895,20 +3237,20 @@
                         @endif
                     </h1>
                     <div class="programme-hero-summary">
-                        <span class="programme-overline">Private museum<br>Permanent collection</span>
+                        <span class="programme-overline">{!! nl2br(e($eventContent['public_events_hero_label'])) !!}</span>
                         <p>{{ $programmePageDescription }}</p>
                     </div>
                 </div>
                 <div class="programme-hero-image">
-                    <img src="{{ $imageFor(6) }}" alt="Artwork from the Museum Azman collection" fetchpriority="high">
+                    <img src="{{ $eventsHeroImageUrl ?: $imageFor(6) }}" alt="{{ $programmePageTitle }}" fetchpriority="high">
                 </div>
             </section>
 
             <section class="programme-list">
                 <div class="programme-list-inner">
                     <div class="programme-list-heading">
-                        <div><span class="programme-overline">The museum, in use</span><h2>Ways of being here.</h2></div>
-                        <p>The museum does not operate a conventional exhibition calendar. Its programmes offer a deeper way into the works that remain.</p>
+                        <div><span class="programme-overline">{{ $eventContent['public_events_list_eyebrow'] }}</span><h2>{{ $eventContent['public_events_list_title'] }}</h2></div>
+                        <p>{{ $eventContent['public_events_list_description'] }}</p>
                     </div>
                     @foreach(range(0, 2) as $slot)
                         @php $event = $programmeEvents->get($slot); $fallback = $programmeDefaults[$slot]; @endphp
@@ -2922,21 +3264,25 @@
                             <img src="{{ $event?->image_url ?: asset($fallback['image']) }}" alt="{{ $event?->title ?: $fallback['title'] }}" loading="lazy">
                         </article>
                     @endforeach
-                    <a class="programme-action" href="{{ $routes['visit'] }}">Request a visit &nbsp; →</a>
+                    <a class="programme-action" style="font-family: Arial, Helvetica, sans-serif;border-bottom: 1px solid var(--programme-gold);" href="{{ $routes['visit'] }}">{{ $eventContent['public_events_list_button'] }} &nbsp; →</a>
                 </div>
             </section>
 
             <section class="programme-editorial">
                 <div class="programme-editorial-inner">
                     <div class="programme-editorial-copy">
-                        <span class="programme-overline">One artwork, one story</span>
-                        <h2>One Artwork,<br>One Story: Marina Perez Simão.</h2>
-                        <p>Look closely at this painting and a familiar terrain emerges: rolling hills, a winding body of water and a glowing sun. Look closer, and the illusion fractures—nothing here is actually real.</p>
-                        <a class="programme-action" href="{{ $routes['collection'] }}">Read the first story &nbsp; ↗</a>
+                        <span class="programme-overline">{{ $eventContent['public_events_story_eyebrow'] }}</span>
+                        <h2>{{ $eventContent['public_events_story_title'] }}</h2>
+                        <p>{{ $eventContent['public_events_story_description'] }}</p>
+                        <a class="programme-action" href="{{ $routes['collection'] }}">
+                            <span>{{ $eventContent['public_events_story_button'] }}</span>
+                            <span aria-hidden="true">↗</span>
+                        </a>
                     </div>
                     <div class="programme-editorial-image">
-                        <img src="{{ $programmeStoryArtwork?->primary_image_url ?: $imageFor(3) }}" alt="{{ $programmeStoryArtwork?->title ?: 'Landscapes of the Mind' }}" loading="lazy">
-                        <h3>Landscapes of the Mind.</h3>
+                        <img src="{{ $eventsStoryImageUrl ?: $programmeStoryArtwork?->primary_image_url ?: $imageFor(3) }}" alt="{{ $eventContent['public_events_story_caption'] }}" loading="lazy">
+                        <span class="programme-editorial-label">Collection highlight / 01</span>
+                        <h3>{{ $eventContent['public_events_story_caption'] }}</h3>
                     </div>
                 </div>
             </section>
@@ -2946,18 +3292,20 @@
                     <div class="programme-preparation-intro">
                         <span class="programme-overline">In preparation</span>
                         <h2>{{ $programmePreparationTitle }}</h2>
-                        <p>Two new editorial initiatives are taking shape. Their quiet arrival is part of the programme.</p>
+                        <p>{{ $eventContent['public_events_programming_description'] }}</p>
                     </div>
                     <div class="programme-coming-grid">
                         <article class="programme-coming-card">
                             <span class="programme-coming-badge">Coming soon</span>
-                            <span class="programme-overline">In development</span>
+                            <svg class="programme-coming-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M12 2l1.7 5.3L19 9l-5.3 1.7L12 16l-1.7-5.3L5 9l5.3-1.7L12 2Z"></path><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z"></path></svg>
+                            <span class="programme-overline">{{ $comingLabels[0] }}</span>
                             <h3>{{ $comingTitles[0] }}</h3>
                             <p>{{ $comingDescriptions[0] }}</p>
                         </article>
                         <article class="programme-coming-card">
                             <span class="programme-coming-badge">Coming soon</span>
-                            <span class="programme-overline">Audio journal</span>
+                            <svg class="programme-coming-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 14v-2a8 8 0 0 1 16 0v2"></path><path d="M4 14h3v7H5.5A1.5 1.5 0 0 1 4 19.5V14Zm16 0h-3v7h1.5a1.5 1.5 0 0 0 1.5-1.5V14Z"></path></svg>
+                            <span class="programme-overline">{{ $comingLabels[1] }}</span>
                             <h3>{{ $comingTitles[1] }}</h3>
                             <p>{{ $comingDescriptions[1] }}</p>
                         </article>
@@ -2966,9 +3314,26 @@
             </section>
 
             <section class="programme-research">
+                @php $researchTitleLines = preg_split('/\R/', $eventContent['public_events_research_title'], 2); @endphp
                 <div class="programme-research-inner">
-                    <div><span class="programme-overline">For collectors &amp; researchers</span><h2>A collection<br><em>to return to.</em></h2></div>
-                    <div><p>Whether you are beginning a research enquiry or planning a thoughtful visit, our team can help shape an encounter with the collection.</p><a class="home-primary-button" href="{{ $routes['contact'] }}">Start a conversation &nbsp; →</a></div>
+                    <div>
+                        <span class="programme-overline">{{ $eventContent['public_events_research_eyebrow'] }}</span>
+                        <h2>
+                            {{ $researchTitleLines[0] ?? '' }}
+                            @if(isset($researchTitleLines[1]))<br><em>{{ $researchTitleLines[1] }}</em>@endif
+                        </h2>
+                    </div>
+                    <div>
+                        <svg class="programme-research-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                            <path d="M3.5 5.5A3.5 3.5 0 0 1 7 2h4v17H7a3.5 3.5 0 0 0-3.5 3V5.5Z"></path>
+                            <path d="M20.5 5.5A3.5 3.5 0 0 0 17 2h-4v17h4a3.5 3.5 0 0 1 3.5 3V5.5Z"></path>
+                        </svg>
+                        <p>{{ $eventContent['public_events_research_description'] }}</p>
+                        <a class="programme-research-button" href="{{ $routes['contact'] }}">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="5" y="10" width="14" height="11" rx="1.5"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+                            <span>{{ $eventContent['public_events_research_button'] }}</span>
+                        </a>
+                    </div>
                 </div>
             </section>
         @elseif($publicPage === 'artists')
@@ -3213,7 +3578,7 @@
             </section>
 
             <section class="section alt about-space">
-                <div class="space-grid">
+                <div class="space-grid" style='font-family: "Inter", Arial, sans-serif;'>
                     <div>
                         <h2>{{ $aboutContent['public_about_space_title'] }}</h2>
                         <p class="page-copy">{{ $aboutContent['public_about_space_paragraph_1'] }}</p>

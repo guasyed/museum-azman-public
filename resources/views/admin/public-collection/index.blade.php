@@ -2,17 +2,27 @@
     <section class="space-y-6">
         <div>
             <h2 class="museum-page-title">Collection CMS</h2>
-            <p class="museum-page-subtitle">Choose and arrange artworks displayed on the public Collection page</p>
+            <p class="museum-page-subtitle">Manage the selected artists and editorial content displayed on the public Collection page.</p>
         </div>
 
         <details class="museum-panel" open>
             <summary class="museum-section-title cursor-pointer">Page Content</summary>
-            <p class="mt-2 text-sm text-zinc-500">Edit the page introduction and Collecting Philosophy text panel.</p>
+            <p class="mt-2 text-sm text-zinc-500">Edit the introduction and each editorial section on the public Collection page.</p>
             <form method="POST" action="{{ route('admin.public-collection.content.update', [], false) }}" class="mt-5 grid gap-4 md:grid-cols-2">
                 @csrf
                 @method('PUT')
                 <label class="museum-field"><span>Page Title *</span><input name="public_collection_page_title" value="{{ old('public_collection_page_title', $content['public_collection_page_title']) }}" required></label>
                 <label class="museum-field md:col-span-2"><span>Page Introduction *</span><textarea name="public_collection_page_description" rows="3" required>{{ old('public_collection_page_description', $content['public_collection_page_description']) }}</textarea></label>
+                <div class="md:col-span-2 mt-2 border-t border-zinc-200 pt-5"><h3 class="font-semibold">Selected Artists</h3></div>
+                <label class="museum-field"><span>Eyebrow *</span><input name="public_collection_artists_eyebrow" value="{{ old('public_collection_artists_eyebrow', $content['public_collection_artists_eyebrow']) }}" required></label>
+                <label class="museum-field"><span>Section Title *</span><input name="public_collection_artists_title" value="{{ old('public_collection_artists_title', $content['public_collection_artists_title']) }}" required></label>
+                <label class="museum-field md:col-span-2"><span>Listing Note *</span><textarea name="public_collection_artists_note" rows="2" required>{{ old('public_collection_artists_note', $content['public_collection_artists_note']) }}</textarea></label>
+                <div class="md:col-span-2 mt-2 border-t border-zinc-200 pt-5"><h3 class="font-semibold">One Artwork, One Story</h3></div>
+                <label class="museum-field"><span>Eyebrow *</span><input name="public_collection_story_eyebrow" value="{{ old('public_collection_story_eyebrow', $content['public_collection_story_eyebrow']) }}" required></label>
+                <label class="museum-field"><span>Section Title *</span><textarea name="public_collection_story_title" rows="2" required>{{ old('public_collection_story_title', $content['public_collection_story_title']) }}</textarea></label>
+                <label class="museum-field md:col-span-2"><span>Description *</span><textarea name="public_collection_story_description" rows="3" required>{{ old('public_collection_story_description', $content['public_collection_story_description']) }}</textarea></label>
+                <label class="museum-field"><span>Link Text *</span><input name="public_collection_story_button" value="{{ old('public_collection_story_button', $content['public_collection_story_button']) }}" required></label>
+                <div class="md:col-span-2 mt-2 border-t border-zinc-200 pt-5"><h3 class="font-semibold">Collecting Philosophy</h3></div>
                 <label class="museum-field"><span>Text Panel Title *</span><input name="public_collection_philosophy_title" value="{{ old('public_collection_philosophy_title', $content['public_collection_philosophy_title']) }}" required></label>
                 @foreach(range(1, 3) as $number)
                     <label class="museum-field md:col-span-2"><span>Text Panel Paragraph {{ $number }} *</span><textarea name="public_collection_philosophy_paragraph_{{ $number }}" rows="3" required>{{ old('public_collection_philosophy_paragraph_'.$number, $content['public_collection_philosophy_paragraph_'.$number]) }}</textarea></label>

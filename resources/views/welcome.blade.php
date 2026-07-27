@@ -439,13 +439,15 @@
 
         .public-page-home .brand-logo,
         .public-page-about .brand-logo,
-        .public-page-events .brand-logo {
+        .public-page-events .brand-logo,
+        .public-page-collection .brand-logo {
             width: 132px;
         }
 
         .public-page-home .nav,
         .public-page-about .nav,
-        .public-page-events .nav {
+        .public-page-events .nav,
+        .public-page-collection .nav {
             margin-left: auto;
             margin-right: auto;
             gap: 28px;
@@ -1112,12 +1114,13 @@
 
         .programme-row h3 {
             margin-top: 10px;
-            color: var(--programme-ivory);
+            color: #fff;
             font-size: 48px;
             line-height: 1.1;
+            transition: color .2s ease;
         }
 
-        .programme-row:first-of-type h3 {
+        .programme-row:hover h3 {
             color: var(--programme-gold);
         }
 
@@ -1278,6 +1281,555 @@
             color: rgba(255,255,255,.64);
             font-size: 15px;
             line-height: 1.6;
+        }
+
+        .public-page-collection {
+            --collection-gold: #b79a55;
+            --collection-ivory: #e9e3d7;
+            --home-gold: #b79a55;
+            background: #070806;
+        }
+
+        .public-page-collection .site-header {
+            min-height: 98px;
+            padding: 14px clamp(34px, 6.2vw, 106px);
+            background: linear-gradient(90deg, #17140f 0%, #202120 46%, #201f1d 100%);
+        }
+
+        .collection-index-intro {
+            margin-top: 98px;
+            padding: 52px clamp(34px, 3.8vw, 58px) 48px;
+            border-bottom: 1px solid var(--line);
+            background: #070806;
+        }
+
+        .collection-index-intro-inner {
+            width: min(1500px, 100%);
+            margin: 0 auto;
+        }
+
+        .collection-index-intro h1 {
+            color: var(--collection-ivory);
+            font-size: clamp(3.2rem, 4.8vw, 5rem);
+            line-height: 1;
+        }
+
+        .collection-index-intro p {
+            max-width: 720px;
+            margin-top: 26px;
+            color: rgba(255,255,255,.64);
+            font-size: 18px;
+            line-height: 1.55;
+        }
+
+        .collection-artist-index {
+            padding: 0 clamp(34px, 6.5vw, 105px) 48px;
+            background: #070806;
+        }
+
+        .collection-artist-index-inner,
+        .collection-reading-inner,
+        .collection-philosophy-inner {
+            width: min(1500px, 100%);
+            margin: 0 auto;
+        }
+
+        .collection-index-heading {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 60px;
+            align-items: end;
+            padding: 20px 0 28px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .collection-overline {
+            color: var(--collection-gold);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .2em;
+            text-transform: uppercase;
+        }
+
+        .collection-index-heading h2 {
+            margin-top: 12px;
+            color: var(--collection-ivory);
+            font-size: clamp(2.5rem, 3.6vw, 3.8rem);
+            line-height: 1;
+        }
+
+        .collection-index-heading p {
+            color: rgba(255,255,255,.58);
+            font-size: 14px;
+            line-height: 1.55;
+        }
+
+        .collection-artist-row {
+            display: grid;
+            grid-template-columns: 54px 1fr auto;
+            gap: 28px;
+            align-items: center;
+            min-height: 86px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .collection-artist-number,
+        .collection-artist-country {
+            color: rgba(255,255,255,.46);
+            font-size: 9px;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+        }
+
+        .collection-artist-row h3 {
+            color: #fff;
+            font-size: clamp(2rem, 2.7vw, 3rem);
+            line-height: 1;
+            transition: color .2s ease;
+        }
+
+        .collection-artist-row:hover h3 {
+            color: var(--collection-gold);
+        }
+
+        .collection-reading {
+            padding: 50px clamp(34px, 6.5vw, 105px);
+            background: #10100f;
+            border-block: 1px solid var(--line);
+        }
+
+        .collection-reading-inner {
+            display: grid;
+            grid-template-columns: 420px 1px 1fr;
+            gap: 48px;
+            align-items: center;
+        }
+
+        .collection-reading-divider {
+            width: 1px;
+            height: 105px;
+            background: var(--line);
+        }
+
+        .collection-reading h2 {
+            margin-top: 14px;
+            color: var(--collection-ivory);
+            font-size: clamp(2.8rem, 4.2vw, 4.5rem);
+            line-height: .92;
+        }
+
+        .collection-reading p {
+            max-width: 680px;
+            color: rgba(255,255,255,.64);
+            font-size: 16px;
+            line-height: 1.55;
+        }
+
+        .collection-reading a {
+            display: inline-block;
+            margin-top: 22px;
+            padding-bottom: 7px;
+            border-bottom: 1px solid var(--collection-gold);
+            color: rgba(255,255,255,.8);
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: .17em;
+            text-transform: uppercase;
+        }
+
+        .collection-philosophy {
+            padding: 60px 22px 72px;
+            background: #0d0d0c;
+        }
+
+        .collection-philosophy-inner {
+            width: min(650px, calc(100% - 44px));
+        }
+
+        .collection-philosophy h2 {
+            color: var(--collection-ivory);
+            font-size: 32px;
+        }
+
+        .collection-philosophy p {
+            margin-top: 20px;
+            color: rgba(255,255,255,.64);
+            font-size: 16px;
+            line-height: 1.58;
+        }
+
+        .public-page-visit {
+            --visit-gold: #c7aa67;
+            --home-gold: #b79a55;
+            background: #070806;
+        }
+
+        .public-page-visit .site-header {
+            min-height: 98px;
+            padding: 14px clamp(34px, 6.2vw, 106px);
+            background: linear-gradient(90deg, #17140f 0%, #202120 46%, #201f1d 100%);
+        }
+
+        .public-page-visit .brand-logo {
+            width: 132px;
+        }
+
+        .public-page-visit .nav {
+            margin-left: auto;
+            margin-right: auto;
+            gap: 28px;
+            font-size: 10px;
+            letter-spacing: .18em;
+        }
+
+        .visit-hero {
+            height: clamp(340px, 26vw, 448px);
+            min-height: 0;
+            margin-top: 98px;
+            place-items: end start;
+        }
+
+        .visit-hero img {
+            opacity: .72;
+        }
+
+        .visit-hero::after {
+            background: linear-gradient(180deg, rgba(0,0,0,.18), rgba(0,0,0,.55));
+        }
+
+        .visit-hero .image-hero-content {
+            width: 100%;
+            padding: 0 clamp(30px, 3.3vw, 56px) 42px;
+            text-align: left;
+        }
+
+        .visit-hero h1 {
+            color: #eee9df;
+            font-size: clamp(3.4rem, 5vw, 5rem);
+        }
+
+        .visit-hero p {
+            color: rgba(255,255,255,.72);
+            font-size: 18px;
+        }
+
+        .visit-overview {
+            padding: 38px 22px 44px;
+            background: #0d0d0c;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .visit-overview .center-copy {
+            width: min(820px, 100%);
+        }
+
+        .visit-overview h2 {
+            color: #eee9df;
+            font-size: 34px;
+        }
+
+        .visit-overview .center-copy > p {
+            margin-top: 18px;
+            color: rgba(255,255,255,.65);
+            font-size: 16px;
+            line-height: 1.55;
+        }
+
+        .visit-overview .visit-stats {
+            width: min(680px, 100%);
+            margin-top: 28px;
+            gap: 52px;
+        }
+
+        .visit-overview .visit-stats h3 {
+            color: var(--visit-gold);
+            font-family: var(--public-font-sans);
+            font-size: 12px;
+        }
+
+        .visit-overview .visit-stats p {
+            font-size: 13px;
+        }
+
+        .visit-registration {
+            padding: 48px 22px 72px;
+            background: #070806;
+        }
+
+        .visit-registration .text-panel {
+            width: min(890px, calc(100% - 44px));
+        }
+
+        .visit-registration .text-panel > h2 {
+            color: #eee9df;
+            font-size: 34px;
+        }
+
+        .visit-form {
+            margin-top: 22px;
+            gap: 18px;
+        }
+
+        .visit-form .form-grid {
+            gap: 16px;
+        }
+
+        .visit-form .form-section-title {
+            margin-top: 6px;
+            padding-top: 22px;
+            border-top: 1px solid var(--line);
+            color: #eee9df;
+            font-size: 21px;
+        }
+
+        .visit-form .form-section-title:first-of-type {
+            margin-top: 0;
+            padding-top: 0;
+            border-top: 0;
+        }
+
+        .visit-form .field label {
+            margin-bottom: 8px;
+            color: rgba(255,255,255,.7);
+            font-size: 10px;
+            letter-spacing: .14em;
+        }
+
+        .visit-form .field input,
+        .visit-form .field select {
+            min-height: 52px;
+            background: #151514;
+            font-size: 14px;
+        }
+
+        .visit-form .field textarea {
+            min-height: 130px;
+            background: #151514;
+            font-size: 14px;
+        }
+
+        .visit-field-note,
+        .visit-submit-note {
+            display: block;
+            margin-top: 7px;
+            color: rgba(255,255,255,.48);
+            font-size: 10px;
+            line-height: 1.45;
+        }
+
+        .visit-form .checkbox-list {
+            gap: 14px;
+        }
+
+        .visit-form .checkbox-list label {
+            font-size: 12px;
+        }
+
+        .visit-form .checkbox-list label:last-child {
+            margin-top: 10px;
+            padding-top: 22px;
+            border-top: 1px solid var(--line);
+        }
+
+        .visit-form button {
+            min-height: 54px;
+            margin-top: 12px;
+            background: var(--visit-gold);
+            letter-spacing: .18em;
+        }
+
+        .visit-submit-note {
+            margin-top: -8px;
+            text-align: center;
+        }
+
+        .public-page-contact {
+            --contact-gold: #b79a55;
+            --home-gold: #b79a55;
+            background: #070806;
+        }
+
+        .public-page-contact .site-header {
+            min-height: 98px;
+            padding: 14px clamp(34px, 6.2vw, 106px);
+            background: linear-gradient(90deg, #17140f 0%, #202120 46%, #201f1d 100%);
+        }
+
+        .public-page-contact .brand-logo {
+            width: 132px;
+        }
+
+        .public-page-contact .nav {
+            margin-left: auto;
+            margin-right: auto;
+            gap: 28px;
+            font-size: 10px;
+            letter-spacing: .18em;
+        }
+
+        .contact-intro {
+            margin-top: 98px;
+            padding: 62px clamp(34px, 6.5vw, 105px) 58px;
+            background: #070806;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .contact-intro-inner,
+        .contact-main-inner {
+            width: min(1290px, 100%);
+            margin: 0 auto;
+        }
+
+        .contact-intro-inner {
+            display: grid;
+            grid-template-columns: 38% 62%;
+            align-items: end;
+            min-height: 180px;
+        }
+
+        .contact-overline {
+            color: var(--contact-gold);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .22em;
+            text-transform: uppercase;
+        }
+
+        .contact-intro h1 {
+            color: #eee9df;
+            font-size: clamp(4rem, 6vw, 6.4rem);
+            line-height: .95;
+        }
+
+        .contact-intro p {
+            max-width: 580px;
+            margin-top: 24px;
+            color: rgba(255,255,255,.67);
+            font-size: 20px;
+            line-height: 1.5;
+        }
+
+        .contact-main {
+            padding: 60px clamp(34px, 6.5vw, 105px);
+            background: #070806;
+        }
+
+        .contact-main-inner {
+            display: grid;
+            grid-template-columns: 40% 60%;
+            border-block: 1px solid var(--line);
+        }
+
+        .contact-enquiry {
+            display: flex;
+            min-height: 680px;
+            padding: 38px 46px 38px 0;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .contact-enquiry h2,
+        .contact-direct h2 {
+            margin-top: 18px;
+            color: #eee9df;
+            font-size: clamp(2.6rem, 3.5vw, 3.8rem);
+            line-height: 1;
+        }
+
+        .contact-enquiry-copy {
+            max-width: 430px;
+            margin-top: 28px;
+            color: rgba(255,255,255,.65);
+            font-size: 17px;
+            line-height: 1.65;
+        }
+
+        .contact-visit-link {
+            display: inline-block;
+            margin-top: 26px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--contact-gold);
+            color: var(--contact-gold);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .18em;
+            text-transform: uppercase;
+        }
+
+        .contact-hours {
+            padding-top: 24px;
+            border-top: 1px solid var(--line);
+        }
+
+        .contact-hours p {
+            margin-top: 20px;
+            color: rgba(255,255,255,.65);
+            font-size: 15px;
+            line-height: 1.8;
+        }
+
+        .contact-direct {
+            min-height: 680px;
+            padding: 38px 0 38px 46px;
+            border-left: 1px solid var(--line);
+        }
+
+        .contact-direct > p {
+            margin-top: 20px;
+            color: rgba(255,255,255,.62);
+            font-size: 15px;
+        }
+
+        .contact-form {
+            grid-template-columns: 1fr 1fr;
+            gap: 22px 18px;
+            margin-top: 28px;
+        }
+
+        .contact-form .form-response,
+        .contact-form .field:nth-of-type(3),
+        .contact-form .field:nth-of-type(4),
+        .contact-form .contact-form-actions {
+            grid-column: 1 / -1;
+        }
+
+        .contact-form .field label {
+            color: rgba(255,255,255,.72);
+            font-size: 10px;
+            letter-spacing: .16em;
+        }
+
+        .contact-form .field input {
+            min-height: 52px;
+            background: #151514;
+        }
+
+        .contact-form .field textarea {
+            min-height: 160px;
+            background: #151514;
+        }
+
+        .contact-form-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 30px;
+            padding-top: 18px;
+            border-top: 1px solid var(--line);
+        }
+
+        .contact-form-actions p {
+            color: rgba(255,255,255,.55);
+            font-size: 12px;
+        }
+
+        .contact-form-actions button {
+            width: auto;
+            min-width: 170px;
+            min-height: 52px;
+            margin-left: auto;
+            background: var(--contact-gold);
+            letter-spacing: .16em;
         }
 
         .experience-inner,
@@ -1875,25 +2427,80 @@
                 border-left: 1px solid var(--line);
             }
 
+            .collection-index-intro {
+                margin-top: 76px;
+            }
+
+            .collection-index-heading,
+            .collection-reading-inner {
+                grid-template-columns: 1fr;
+            }
+
+            .collection-reading-divider {
+                display: none;
+            }
+
+            .visit-hero {
+                height: 420px;
+                margin-top: 76px;
+            }
+
+            .contact-intro {
+                margin-top: 76px;
+            }
+
+            .contact-intro-inner,
+            .contact-main-inner {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-intro-inner {
+                gap: 28px;
+            }
+
+            .contact-enquiry,
+            .contact-direct {
+                min-height: 0;
+                padding: 42px 0;
+            }
+
+            .contact-direct {
+                border-top: 1px solid var(--line);
+                border-left: 0;
+            }
+
+            .contact-hours {
+                margin-top: 70px;
+            }
+
             .public-page-home .hero-content {
                 top: 0;
             }
 
             .public-page-home .site-header,
             .public-page-about .site-header,
-            .public-page-events .site-header {
+            .public-page-events .site-header,
+            .public-page-collection .site-header,
+            .public-page-visit .site-header,
+            .public-page-contact .site-header {
                 justify-content: center;
             }
 
             .public-page-home .brand,
             .public-page-about .brand,
-            .public-page-events .brand {
+            .public-page-events .brand,
+            .public-page-collection .brand,
+            .public-page-visit .brand,
+            .public-page-contact .brand {
                 min-width: 0;
             }
 
             .public-page-home .brand-logo,
             .public-page-about .brand-logo,
-            .public-page-events .brand-logo {
+            .public-page-events .brand-logo,
+            .public-page-collection .brand-logo,
+            .public-page-visit .brand-logo,
+            .public-page-contact .brand-logo {
                 width: 150px;
             }
 
@@ -1993,6 +2600,46 @@
             .programme-editorial-copy {
                 padding: 48px 18px;
             }
+
+            .collection-index-intro,
+            .collection-artist-index,
+            .collection-reading {
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+
+            .collection-artist-row {
+                grid-template-columns: 38px 1fr;
+                gap: 14px;
+                padding: 18px 0;
+            }
+
+            .collection-artist-country {
+                grid-column: 2;
+            }
+
+            .contact-intro,
+            .contact-main {
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+
+            .contact-form {
+                grid-template-columns: 1fr;
+            }
+
+            .contact-form .field {
+                grid-column: 1;
+            }
+
+            .contact-form-actions {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
+            .contact-form-actions button {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -2002,7 +2649,7 @@
             <img class="brand-logo" src="{{ asset('media/museum-azman-logo.svg') }}?v=2" alt="Museum Azman">
         </a>
         @php
-            $mainNavigation = in_array($publicPage, ['home', 'about', 'events'], true)
+            $mainNavigation = in_array($publicPage, ['home', 'about', 'events', 'collection', 'visit', 'contact'], true)
                 ? ['about' => 'About', 'events' => 'Programmes', 'collection' => 'Collection', 'visit' => 'Visit', 'contact' => 'Contact']
                 : ['about' => 'About', 'events' => 'Events', 'artists' => 'Artists', 'collection' => 'Collection', 'visit' => 'Visit', 'contact' => 'Contact'];
         @endphp
@@ -2011,7 +2658,7 @@
                 <a class="{{ $publicPage === $key ? 'active' : '' }}" href="{{ $routes[$key] }}">{{ $label }}</a>
             @endforeach
         </nav>
-        @if(in_array($publicPage, ['home', 'about', 'events'], true))
+        @if(in_array($publicPage, ['home', 'about', 'events', 'collection', 'visit', 'contact'], true))
             <a class="home-access-link" href="{{ $routes['visit'] }}">Request Access</a>
         @endif
     </header>
@@ -2081,9 +2728,13 @@
             </section>
 
             @php
-                $storyArtwork = $homeSelectedWorks->first()?->artwork;
-                $storyArtistProfile = $homeFeaturedArtists->first();
-                $storyArtist = $storyArtistProfile?->artist;
+                $storyArtwork = $homeStoryWork?->artwork ?: $homeSelectedWorks->first()?->artwork;
+                $storyArtist = $storyArtwork?->artist;
+                $storyTitle = $homeContent['public_home_story_title'] ?: $storyArtwork?->title ?: 'Landscapes of the Mind.';
+                $storyDescription = $homeContent['public_home_story_description']
+                    ?: (($storyArtist?->name ?: 'An artist from the Museum Azman collection')
+                        .($storyArtwork?->year ? ' ('.$storyArtwork->year.')' : '')
+                        .' invites a slower encounter with material, memory, place and the shifting perspectives held within contemporary art.');
             @endphp
             <section class="home-story">
                 <div class="home-story-inner">
@@ -2092,10 +2743,10 @@
                         <span class="home-story-label">Collection highlight / 01</span>
                     </div>
                     <div class="home-story-copy">
-                        <small>One artwork, one story</small>
-                        <h2>{{ $storyArtwork?->title ?: 'Landscapes of the Mind.' }}</h2>
-                        <p>{{ $storyArtist?->name ?: $storyArtwork?->artist?->name ?: 'An artist from the Museum Azman collection' }}{{ $storyArtwork?->year ? ' ('.$storyArtwork->year.')' : '' }} invites a slower encounter with material, memory, place and the shifting perspectives held within contemporary art.</p>
-                        <a class="home-text-link" href="{{ $routes['collection'] }}">Read the first story &nbsp; →</a>
+                        <small>{{ $homeContent['public_home_story_eyebrow'] }}</small>
+                        <h2>{{ $storyTitle }}</h2>
+                        <p>{{ $storyDescription }}</p>
+                        <a class="home-text-link" href="{{ $routes['collection'] }}">{{ $homeContent['public_home_story_button'] }} &nbsp; →</a>
                     </div>
                 </div>
             </section>
@@ -2107,9 +2758,9 @@
             </section>
 
             <section class="home-connect">
-                <h2>Stay Connected</h2>
-                <p>Register your interest for private viewings, collection stories, and news about future public access.</p>
-                <a class="home-primary-button" href="{{ $routes['visit'] }}">Register Now <span aria-hidden="true">→</span></a>
+                <h2>{{ $homeContent['public_home_connect_title'] }}</h2>
+                <p>{{ $homeContent['public_home_connect_description'] }}</p>
+                <a class="home-primary-button" href="{{ $routes['visit'] }}">{{ $homeContent['public_home_connect_button'] }} <span aria-hidden="true">→</span></a>
             </section>
         @elseif($publicPage === 'events')
             @php
@@ -2123,26 +2774,16 @@
                     ['title' => 'Education Programmes', 'label' => 'Learning through looking', 'description' => 'Small-format sessions for students and curious minds, using the collection as a prompt for close looking and exchange.', 'image' => 'media/museum-programme-3.jpg'],
                 ];
                 $programmeStoryArtwork = $artworks->get(3) ?: $artworks->first();
-                $programmePageTitle = $eventContent['public_events_page_title'] === 'Events'
-                    ? "Programmes\n& stories"
-                    : $eventContent['public_events_page_title'];
-                $programmePageDescription = $eventContent['public_events_page_description'] === \App\Models\MuseumEvent::CONTENT_DEFAULTS['public_events_page_description']
-                    ? 'A thoughtful rhythm of visits, close looking and cultural exchange—rooted in the collection and designed to make room for reflection.'
-                    : $eventContent['public_events_page_description'];
-                $programmePreparationTitle = $eventContent['public_events_programming_title'] === 'Event Programming'
-                    ? 'The conversation continues.'
-                    : $eventContent['public_events_programming_title'];
+                $programmePageTitle = $eventContent['public_events_page_title'];
+                $programmePageDescription = $eventContent['public_events_page_description'];
+                $programmePreparationTitle = $eventContent['public_events_programming_title'];
                 $comingTitles = [
-                    $eventContent['public_events_program_1_title'] === 'Exhibitions' ? 'Collector Conversations' : $eventContent['public_events_program_1_title'],
-                    $eventContent['public_events_program_2_title'] === 'Artist Talks' ? 'Museum Azman Conversations' : $eventContent['public_events_program_2_title'],
+                    $eventContent['public_events_program_1_title'],
+                    $eventContent['public_events_program_2_title'],
                 ];
                 $comingDescriptions = [
-                    $eventContent['public_events_program_1_description'] === \App\Models\MuseumEvent::CONTENT_DEFAULTS['public_events_program_1_description']
-                        ? 'A series of intimate exchanges on the instincts, encounters and responsibilities that shape a collection.'
-                        : $eventContent['public_events_program_1_description'],
-                    $eventContent['public_events_program_2_description'] === \App\Models\MuseumEvent::CONTENT_DEFAULTS['public_events_program_2_description']
-                        ? 'New voices from across the collection: artists, scholars and thinkers in sustained dialogue.'
-                        : $eventContent['public_events_program_2_description'],
+                    $eventContent['public_events_program_1_description'],
+                    $eventContent['public_events_program_2_description'],
                 ];
             @endphp
 
@@ -2281,46 +2922,49 @@
                 </div>
             </section>
         @elseif($publicPage === 'collection')
-            <section class="page-intro">
-                <div class="page-intro-inner">
-                    <h1 class="page-title">{{ $collectionContent['public_collection_page_title'] }}</h1>
-                    <p class="page-copy">{{ $collectionContent['public_collection_page_description'] }}</p>
+            @php
+                $collectionArtists = ($collectionCmsConfigured ? $publicCollectionItems->pluck('artwork.artist') : $artworks->pluck('artist'))
+                    ->filter()
+                    ->unique('id')
+                    ->take(10)
+                    ->values();
+            @endphp
+
+            <section class="collection-index-intro">
+                <div class="collection-index-intro-inner">
+                    <h1>{{ $collectionContent['public_collection_page_title'] }}</h1>
+                    <p>{{ $collectionContent['public_collection_page_description'] }}</p>
                 </div>
             </section>
 
-            <section class="section">
-                <div class="grid three">
-                    @if($collectionCmsConfigured)
-                        @forelse($publicCollectionItems as $item)
-                            @php $artwork = $item->artwork; @endphp
-                            <article class="card collection-card">
-                                @if($artwork?->primary_image_url)
-                                    <img src="{{ $artwork->primary_image_url }}" alt="{{ $artwork->title ?: 'Collection artwork' }}" loading="lazy">
-                                @else
-                                    <div class="event-placeholder" role="img" aria-label="Artwork image coming soon">Image Coming Soon</div>
-                                @endif
-                                <h3>{{ $artwork?->title ?: 'Untitled' }}</h3>
-                                <p>{{ $artwork?->artist?->name ?: 'Museum Azman' }}{{ $artwork?->year ? ', '.$artwork->year : '' }}</p>
-                                <small>{{ $artwork?->medium ?: 'Medium not specified' }}</small>
-                            </article>
-                        @empty
-                            <p class="page-copy">Collection highlights coming soon.</p>
-                        @endforelse
-                    @else
-                        @foreach(range(0, 8) as $index)
-                            <article class="card collection-card">
-                                <img src="{{ $imageFor($index) }}" alt="{{ $titleFor($index, 'Collection artwork') }}" loading="lazy">
-                                <h3>{{ $titleFor($index, ['Chromatic Resonance', 'Abstract Composition III', 'Geometric Harmony', 'Pink Dreams', 'Expressive Forms', 'Distant Shores', 'Vivid Emotions', 'Fluid Transitions', 'Color Study'][$index]) }}</h3>
-                                <p>{{ $artistFor($index) }}, {{ $yearFor($index, '2024') }}</p>
-                                <small>{{ $mediumFor($index, 'Oil on canvas') }}</small>
-                            </article>
-                        @endforeach
-                    @endif
+            <section class="collection-artist-index">
+                <div class="collection-artist-index-inner">
+                    <div class="collection-index-heading">
+                        <div><span class="collection-overline">{{ $collectionContent['public_collection_artists_eyebrow'] }}</span><h2>{{ $collectionContent['public_collection_artists_title'] }}</h2></div>
+                        <p>{{ $collectionContent['public_collection_artists_note'] }}</p>
+                    </div>
+                    @forelse($collectionArtists as $index => $artist)
+                        <article class="collection-artist-row {{ strcasecmp((string) $artist->country, 'Malaysia') === 0 ? 'is-highlighted' : '' }}">
+                            <span class="collection-artist-number">{{ str_pad((string) ($index + 1), 2, '0', STR_PAD_LEFT) }}</span>
+                            <h3>{{ $artist->name }}</h3>
+                            <span class="collection-artist-country">{{ $artist->country ?: 'International' }}</span>
+                        </article>
+                    @empty
+                        <p class="page-copy">Selected artists coming soon.</p>
+                    @endforelse
                 </div>
             </section>
 
-            <section class="section alt">
-                <div class="text-panel">
+            <section class="collection-reading">
+                <div class="collection-reading-inner">
+                    <div><span class="collection-overline">{{ $collectionContent['public_collection_story_eyebrow'] }}</span><h2>{!! nl2br(e($collectionContent['public_collection_story_title'])) !!}</h2></div>
+                    <span class="collection-reading-divider" aria-hidden="true"></span>
+                    <div><p>{{ $collectionContent['public_collection_story_description'] }}</p><a href="{{ $routes['events'] }}">{{ $collectionContent['public_collection_story_button'] }} &nbsp; ↗</a></div>
+                </div>
+            </section>
+
+            <section class="collection-philosophy">
+                <div class="collection-philosophy-inner">
                     <h2>{{ $collectionContent['public_collection_philosophy_title'] }}</h2>
                     <p>{{ $collectionContent['public_collection_philosophy_paragraph_1'] }}</p>
                     <p>{{ $collectionContent['public_collection_philosophy_paragraph_2'] }}</p>
@@ -2328,30 +2972,30 @@
                 </div>
             </section>
         @elseif($publicPage === 'visit')
-            <section class="image-hero">
+            <section class="image-hero visit-hero">
                 <img src="{{ $imageFor(10) }}" alt="Museum Azman private viewing" loading="eager">
                 <div class="image-hero-content">
                     <h1>Request a Visit</h1>
-                    <p>Experience our collection through a private viewing</p>
+                    <p>Experience the collection through a private, considered encounter</p>
                 </div>
             </section>
 
-            <section class="section alt">
+            <section class="visit-overview">
                 <div class="center-copy">
                     <h2>Private Viewings</h2>
-                    <p>Museum Azman offers exclusive private viewings for collectors, curators, artists, and art enthusiasts. Complete the registration form below to request your visit. All requests are reviewed and confirmed by our team.</p>
+                    <p>Museum Azman offers private, collection-led viewings for collectors, curators, researchers and art enthusiasts. Complete the form below to request an encounter shaped around your interests. All requests are reviewed individually by our team.</p>
                 </div>
                 <div class="visit-stats">
-                    <div><h3>Duration</h3><p>60-90 minutes</p></div>
+                    <div><h3>Duration</h3><p>90–120 minutes</p></div>
                     <div><h3>Availability</h3><p>Tuesday - Saturday</p></div>
-                    <div><h3>Group Size</h3><p>Up to 6 guests</p></div>
+                    <div><h3>Group Size</h3><p>Group size considered individually</p></div>
                 </div>
             </section>
 
-            <section class="section narrow">
+            <section class="visit-registration">
                 <div class="text-panel">
                     <h2>Visitor Registration</h2>
-                    <form class="public-form" method="POST" action="{{ route('public.visit.store', [], false) }}">
+                    <form class="public-form visit-form" method="POST" action="{{ route('public.visit.store', [], false) }}">
                         @csrf
                         @if(session('visit_success'))
                             <p class="form-response" role="status">{{ session('visit_success') }}</p>
@@ -2374,7 +3018,7 @@
                             <div class="field full"><label for="visit-purpose">Purpose of Visit *</label><select id="visit-purpose" name="purpose" required><option value="">Select purpose</option>@foreach(['Collector viewing', 'Curatorial research', 'Artist visit', 'Private tour'] as $option)<option @selected(old('purpose') === $option)>{{ $option }}</option>@endforeach</select></div>
                             <div class="field full"><label for="visit-category">Interest Category *</label><select id="visit-category" name="category" required><option value="">Select category</option>@foreach(['Contemporary painting', 'Southeast Asian art', 'Acquisition inquiry', 'General viewing'] as $option)<option @selected(old('category') === $option)>{{ $option }}</option>@endforeach</select></div>
                             <div class="field"><label for="visit-date">Preferred Visit Date *</label><input id="visit-date" name="date" type="date" min="{{ now()->toDateString() }}" value="{{ old('date') }}" required></div>
-                            <div class="field"><label for="visit-guests">Number of Guests *</label><input id="visit-guests" name="guests" type="number" min="1" max="6" value="{{ old('guests', 1) }}" required></div>
+                            <div class="field"><label for="visit-guests">Number of Guests *</label><input id="visit-guests" name="guests" type="number" min="1" max="6" value="{{ old('guests', 1) }}" required><small class="visit-field-note">Group size is considered individually according to the nature of your request, preferred format and availability.</small></div>
                             <div class="field full"><label for="visit-source">How Did You Hear About Us? *</label><select id="visit-source" name="source" required><option value="">Select source</option>@foreach(['Collector referral', 'Artist referral', 'Social media', 'Press or publication'] as $option)<option @selected(old('source') === $option)>{{ $option }}</option>@endforeach</select></div>
                             <div class="field full"><label for="visit-message">Message / Special Requests</label><textarea id="visit-message" name="message" maxlength="5000" placeholder="Share any specific interests, questions, or accessibility requirements">{{ old('message') }}</textarea></div>
                         </div>
@@ -2387,46 +3031,54 @@
                             <label><input type="checkbox" name="consent" value="1" required> I agree to the privacy policy and consent to Museum Azman storing and processing my information for coordinating my visit. *</label>
                         </div>
                         <button type="submit">Submit Request</button>
+                        <small class="visit-submit-note">All requests are reviewed individually. We will contact you within 48 hours to confirm your visit details.</small>
                     </form>
                 </div>
             </section>
         @elseif($publicPage === 'contact')
-            <section class="page-intro">
-                <div class="page-intro-inner">
-                    <h1 class="page-title">Contact</h1>
-                    <p class="page-copy">We welcome inquiries from collectors, curators, artists, and art enthusiasts.</p>
+            <section class="contact-intro">
+                <div class="contact-intro-inner">
+                    <span class="contact-overline">Museum Azman / Correspondence</span>
+                    <div>
+                        <h1>Contact</h1>
+                        <p>We welcome inquiries from collectors, curators, artists, and art enthusiasts.</p>
+                    </div>
                 </div>
             </section>
 
-            <section class="section">
-                <div class="contact-grid">
-                    <div>
-                        <h2>Get in Touch</h2>
-                        <p class="page-copy">For private viewing requests, please use our visitor registration form. For all other inquiries, reach out through the contact details below.</p>
-                        <div class="contact-list">
-                            <div class="contact-item"><span class="contact-icon">@</span><div><h3>Email</h3><p>faiz@museumazman.com</p></div></div>
-                            <!--<div class="contact-item"><span class="contact-icon">T</span><div><h3>Phone</h3><p>+1 (234) 567-8900</p></div></div>-->
-                            <div class="contact-item"><span class="contact-icon">L</span><div><h3>Location</h3><p>Museum Azman<br>By Invitation Only<br>Location disclosed upon registration</p></div></div>
+            <section class="contact-main">
+                <div class="contact-main-inner">
+                    <div class="contact-enquiry">
+                        <div>
+                            <span class="contact-overline">Enquiries</span>
+                            <h2>Get in touch.</h2>
+                            <p class="contact-enquiry-copy">For private viewing requests, please use our visitor registration form. For other enquiries, use the form and a member of the museum team will respond personally.</p>
+                            <a class="contact-visit-link" href="{{ $routes['visit'] }}">Request a private viewing</a>
                         </div>
-                        <div class="text-panel" style="margin: 48px 0 0; border-top: 1px solid var(--line); padding-top: 34px;">
-                            <h3>Visiting Hours</h3>
+                        <div class="contact-hours">
+                            <span class="contact-overline">Visiting hours</span>
                             <p>By appointment only<br>Tuesday - Saturday<br>10:00 AM - 6:00 PM</p>
                         </div>
                     </div>
-                    <form class="public-form" method="POST" action="{{ route('public.contact.store', [], false) }}">
-                        @csrf
-                        @if(session('contact_success'))
-                            <p class="form-response" role="status">{{ session('contact_success') }}</p>
-                        @endif
-                        @if($errors->any())
-                            <p class="form-response" role="alert">{{ $errors->first() }}</p>
-                        @endif
-                        <div class="field"><label for="contact-name">Name *</label><input id="contact-name" name="name" value="{{ old('name') }}" maxlength="255" required></div>
-                        <div class="field"><label for="contact-email">Email *</label><input id="contact-email" name="email" type="email" value="{{ old('email') }}" maxlength="255" required></div>
-                        <div class="field"><label for="contact-subject">Subject</label><input id="contact-subject" name="subject" value="{{ old('subject') }}" maxlength="255"></div>
-                        <div class="field"><label for="contact-message">Message *</label><textarea id="contact-message" name="message" maxlength="5000" required>{{ old('message') }}</textarea></div>
-                        <button type="submit">Send Message</button>
-                    </form>
+                    <div class="contact-direct">
+                        <span class="contact-overline">Direct enquiry</span>
+                        <h2>Send a message.</h2>
+                        <p>Please share a little context so the appropriate member of the museum team can respond.</p>
+                        <form class="public-form contact-form" method="POST" action="{{ route('public.contact.store', [], false) }}">
+                            @csrf
+                            @if(session('contact_success'))
+                                <p class="form-response" role="status">{{ session('contact_success') }}</p>
+                            @endif
+                            @if($errors->any())
+                                <p class="form-response" role="alert">{{ $errors->first() }}</p>
+                            @endif
+                            <div class="field"><label for="contact-name">Name *</label><input id="contact-name" name="name" value="{{ old('name') }}" maxlength="255" required></div>
+                            <div class="field"><label for="contact-email">Email *</label><input id="contact-email" name="email" type="email" value="{{ old('email') }}" maxlength="255" required></div>
+                            <div class="field"><label for="contact-subject">Subject</label><input id="contact-subject" name="subject" value="{{ old('subject') }}" maxlength="255"></div>
+                            <div class="field"><label for="contact-message">Message *</label><textarea id="contact-message" name="message" maxlength="5000" required>{{ old('message') }}</textarea></div>
+                            <div class="contact-form-actions"><p>We will respond personally as soon as possible.</p><button type="submit">Send Message</button></div>
+                        </form>
+                    </div>
                 </div>
             </section>
         @elseif($publicPage === 'about')

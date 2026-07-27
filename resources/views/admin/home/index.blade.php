@@ -1,14 +1,157 @@
 <x-layout title="Home CMS - Museum Azman">
-<section class="space-y-6"><div><h2 class="museum-page-title">Home CMS</h2><p class="museum-page-subtitle">Manage the public home page. Featured cards follow published Events, Artists and Collection CMS order.</p></div>
-<form method="POST" action="{{ route('admin.home.update', [], false) }}" enctype="multipart/form-data" class="space-y-6">@csrf @method('PUT')
-<details class="museum-panel" open><summary class="museum-section-title cursor-pointer">Hero</summary><div class="mt-5 grid gap-4 md:grid-cols-2"><label class="museum-field"><span>Optional Hero Title</span><input name="public_home_hero_title" value="{{ old('public_home_hero_title', $content['public_home_hero_title']) }}"></label><label class="museum-field"><span>Optional Hero Subtitle</span><input name="public_home_hero_subtitle" value="{{ old('public_home_hero_subtitle', $content['public_home_hero_subtitle']) }}"></label><label class="museum-field"><span>Replace Hero Video</span><input type="file" name="hero_video" accept="video/mp4,video/webm"></label><label class="museum-field"><span>Replace Video Poster</span><input type="file" name="hero_poster" accept="image/jpeg,image/png,image/webp"></label></div></details>
-<details class="museum-panel" open><summary class="museum-section-title cursor-pointer">Featured Sections</summary><div class="mt-5 grid gap-4 md:grid-cols-2">@foreach(['events' => 'Events', 'artists' => 'Artists', 'works' => 'Selected Works'] as $key => $label)<label class="museum-field"><span>{{ $label }} Title *</span><input name="public_home_{{ $key }}_title" value="{{ old('public_home_'.$key.'_title', $content['public_home_'.$key.'_title']) }}" required></label><label class="museum-field"><span>{{ $label }} Description *</span><textarea name="public_home_{{ $key }}_description" rows="2" required>{{ old('public_home_'.$key.'_description', $content['public_home_'.$key.'_description']) }}</textarea></label>@endforeach</div>
-<div class="mt-6 space-y-6 border-t border-zinc-200 pt-6">
-    <div><h3 class="font-semibold">Featured Events — 3 fixed boxes</h3><p class="text-sm text-zinc-500">Choose the event displayed in each position.</p><div class="mt-3 grid gap-4 md:grid-cols-3">@foreach(range(0, 2) as $slot)<label class="museum-field"><span>Event Box {{ $slot + 1 }}</span><select name="featured_event_ids[]"><option value="">Coming Soon</option>@foreach($events as $event)<option value="{{ $event->id }}" @selected((string) old('featured_event_ids.'.$slot, $selectedEventIds[$slot] ?? '') === (string) $event->id)>{{ $event->title }}</option>@endforeach</select></label>@endforeach</div></div>
-    <div><h3 class="font-semibold">Featured Artists — 4 fixed boxes</h3><p class="text-sm text-zinc-500">Choose the artist displayed in each position.</p><div class="mt-3 grid gap-4 md:grid-cols-2 xl:grid-cols-4">@foreach(range(0, 3) as $slot)<label class="museum-field"><span>Artist Box {{ $slot + 1 }}</span><select name="featured_artist_ids[]"><option value="">Coming Soon</option>@foreach($artists as $profile)<option value="{{ $profile->id }}" @selected((string) old('featured_artist_ids.'.$slot, $selectedArtistIds[$slot] ?? '') === (string) $profile->id)>{{ $profile->artist?->name ?: 'Unknown artist' }}</option>@endforeach</select></label>@endforeach</div></div>
-    <div><h3 class="font-semibold">Selected Works — 3 fixed boxes</h3><p class="text-sm text-zinc-500">Choose the artwork displayed in each position.</p><div class="mt-3 grid gap-4 md:grid-cols-3">@foreach(range(0, 2) as $slot)<label class="museum-field"><span>Artwork Box {{ $slot + 1 }}</span><select name="selected_work_ids[]"><option value="">Coming Soon</option>@foreach($works as $item)<option value="{{ $item->id }}" @selected((string) old('selected_work_ids.'.$slot, $selectedWorkIds[$slot] ?? '') === (string) $item->id)>{{ $item->artwork?->title ?: 'Untitled' }} — {{ $item->artwork?->artist?->name ?: 'Unknown artist' }}</option>@endforeach</select></label>@endforeach</div></div>
-</div></details>
-<details class="museum-panel" open><summary class="museum-section-title cursor-pointer">Experience</summary><div class="mt-5 grid gap-4 md:grid-cols-2"><label class="museum-field"><span>Title *</span><input name="public_home_experience_title" value="{{ old('public_home_experience_title', $content['public_home_experience_title']) }}" required></label><label class="museum-field"><span>Button Text *</span><input name="public_home_experience_button" value="{{ old('public_home_experience_button', $content['public_home_experience_button']) }}" required></label><label class="museum-field md:col-span-2"><span>Description *</span><textarea name="public_home_experience_description" rows="3" required>{{ old('public_home_experience_description', $content['public_home_experience_description']) }}</textarea></label></div></details>
-<details class="museum-panel" open><summary class="museum-section-title cursor-pointer">Vision</summary><div class="mt-5 grid gap-4 md:grid-cols-2"><label class="museum-field"><span>Title *</span><input name="public_home_vision_title" value="{{ old('public_home_vision_title', $content['public_home_vision_title']) }}" required></label><label class="museum-field"><span>Button Text *</span><input name="public_home_vision_button" value="{{ old('public_home_vision_button', $content['public_home_vision_button']) }}" required></label><label class="museum-field md:col-span-2"><span>Paragraph 1 *</span><textarea name="public_home_vision_paragraph_1" rows="3" required>{{ old('public_home_vision_paragraph_1', $content['public_home_vision_paragraph_1']) }}</textarea></label><label class="museum-field md:col-span-2"><span>Paragraph 2 *</span><textarea name="public_home_vision_paragraph_2" rows="3" required>{{ old('public_home_vision_paragraph_2', $content['public_home_vision_paragraph_2']) }}</textarea></label><label class="museum-field md:col-span-2"><span>Highlighted Note *</span><textarea name="public_home_vision_note" rows="2" required>{{ old('public_home_vision_note', $content['public_home_vision_note']) }}</textarea></label></div></details>
-<div class="sticky bottom-4 z-20 flex justify-end"><button class="museum-btn shadow-lg" type="submit">Save Home Page</button></div></form></section>
+    <section class="space-y-6">
+        <div>
+            <h2 class="museum-page-title">Home CMS</h2>
+            <p class="museum-page-subtitle">Manage the content and featured items displayed on the public homepage.</p>
+        </div>
+
+        <form method="POST" action="{{ route('admin.home.update', [], false) }}" enctype="multipart/form-data" class="space-y-6">
+            @csrf
+            @method('PUT')
+
+            <details class="museum-panel" open>
+                <summary class="museum-section-title cursor-pointer">Hero</summary>
+                <div class="mt-5 grid gap-4 md:grid-cols-2">
+                    <label class="museum-field">
+                        <span>Hero Title</span>
+                        <input name="public_home_hero_title" value="{{ old('public_home_hero_title', $content['public_home_hero_title']) }}" placeholder="Museum Azman">
+                    </label>
+                    <label class="museum-field">
+                        <span>Hero Subtitle</span>
+                        <input name="public_home_hero_subtitle" value="{{ old('public_home_hero_subtitle', $content['public_home_hero_subtitle']) }}" placeholder="A private contemporary art museum creating dialogue between East and West.">
+                    </label>
+                    <label class="museum-field md:col-span-2">
+                        <span>Replace Hero Image</span>
+                        <input type="file" name="hero_image" accept="image/jpeg,image/png,image/webp">
+                        <small>Leave blank to retain the current homepage image. Recommended wide image, at least 1920px.</small>
+                    </label>
+                </div>
+            </details>
+
+            <details class="museum-panel" open>
+                <summary class="museum-section-title cursor-pointer">Museum Programmes</summary>
+                <div class="mt-5 grid gap-4 md:grid-cols-2">
+                    <label class="museum-field">
+                        <span>Section Title *</span>
+                        <input name="public_home_events_title" value="{{ old('public_home_events_title', $content['public_home_events_title']) }}" required>
+                    </label>
+                    <label class="museum-field">
+                        <span>Section Description *</span>
+                        <textarea name="public_home_events_description" rows="2" required>{{ old('public_home_events_description', $content['public_home_events_description']) }}</textarea>
+                    </label>
+                </div>
+                <div class="mt-6 border-t border-zinc-200 pt-6">
+                    <h3 class="font-semibold">Programme Cards — 3 fixed positions</h3>
+                    <p class="text-sm text-zinc-500">Choose a published event for each homepage card.</p>
+                    <div class="mt-3 grid gap-4 md:grid-cols-3">
+                        @foreach(range(0, 2) as $slot)
+                            <label class="museum-field">
+                                <span>Programme {{ $slot + 1 }}</span>
+                                <select name="featured_event_ids[]">
+                                    <option value="">Use default programme</option>
+                                    @foreach($events as $event)
+                                        <option value="{{ $event->id }}" @selected((string) old('featured_event_ids.'.$slot, $selectedEventIds[$slot] ?? '') === (string) $event->id)>{{ $event->title }}</option>
+                                    @endforeach
+                                </select>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+            </details>
+
+            <details class="museum-panel" open>
+                <summary class="museum-section-title cursor-pointer">Collection in Focus</summary>
+                <div class="mt-5 grid gap-4 md:grid-cols-2">
+                    <label class="museum-field">
+                        <span>Section Title *</span>
+                        <input name="public_home_works_title" value="{{ old('public_home_works_title', $content['public_home_works_title']) }}" required>
+                    </label>
+                    <label class="museum-field">
+                        <span>Section Description *</span>
+                        <textarea name="public_home_works_description" rows="2" required>{{ old('public_home_works_description', $content['public_home_works_description']) }}</textarea>
+                    </label>
+                </div>
+                <div class="mt-6 border-t border-zinc-200 pt-6">
+                    <h3 class="font-semibold">Collection Cards — 3 fixed positions</h3>
+                    <p class="text-sm text-zinc-500">Choose a published artwork for each homepage card.</p>
+                    <div class="mt-3 grid gap-4 md:grid-cols-3">
+                        @foreach(range(0, 2) as $slot)
+                            <label class="museum-field">
+                                <span>Artwork {{ $slot + 1 }}</span>
+                                <select name="selected_work_ids[]">
+                                    <option value="">Use default artwork</option>
+                                    @foreach($works as $item)
+                                        <option value="{{ $item->id }}" @selected((string) old('selected_work_ids.'.$slot, $selectedWorkIds[$slot] ?? '') === (string) $item->id)>{{ $item->artwork?->title ?: 'Untitled' }} — {{ $item->artwork?->artist?->name ?: 'Unknown artist' }}</option>
+                                    @endforeach
+                                </select>
+                            </label>
+                        @endforeach
+                    </div>
+                </div>
+            </details>
+
+            <details class="museum-panel" open>
+                <summary class="museum-section-title cursor-pointer">One Artwork, One Story</summary>
+                <div class="mt-5 grid gap-4 md:grid-cols-2">
+                    <label class="museum-field md:col-span-2">
+                        <span>Story Artwork</span>
+                        <select name="story_work_id">
+                            <option value="">Use the first Collection in Focus artwork</option>
+                            @foreach($works as $item)
+                                <option value="{{ $item->id }}" @selected((string) old('story_work_id', $selectedStoryWorkId) === (string) $item->id)>{{ $item->artwork?->title ?: 'Untitled' }} — {{ $item->artwork?->artist?->name ?: 'Unknown artist' }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+                    <label class="museum-field">
+                        <span>Eyebrow *</span>
+                        <input name="public_home_story_eyebrow" value="{{ old('public_home_story_eyebrow', $content['public_home_story_eyebrow']) }}" required>
+                    </label>
+                    <label class="museum-field">
+                        <span>Optional Display Title</span>
+                        <input name="public_home_story_title" value="{{ old('public_home_story_title', $content['public_home_story_title']) }}" placeholder="Uses artwork title when blank">
+                    </label>
+                    <label class="museum-field md:col-span-2">
+                        <span>Optional Story Description</span>
+                        <textarea name="public_home_story_description" rows="3" placeholder="Uses an automatically generated description when blank">{{ old('public_home_story_description', $content['public_home_story_description']) }}</textarea>
+                    </label>
+                    <label class="museum-field">
+                        <span>Button Text *</span>
+                        <input name="public_home_story_button" value="{{ old('public_home_story_button', $content['public_home_story_button']) }}" required>
+                    </label>
+                </div>
+            </details>
+
+            <details class="museum-panel" open>
+                <summary class="museum-section-title cursor-pointer">Experience Art Intimately</summary>
+                <div class="mt-5 grid gap-4 md:grid-cols-2">
+                    <label class="museum-field"><span>Title *</span><input name="public_home_experience_title" value="{{ old('public_home_experience_title', $content['public_home_experience_title']) }}" required></label>
+                    <label class="museum-field"><span>Button Text *</span><input name="public_home_experience_button" value="{{ old('public_home_experience_button', $content['public_home_experience_button']) }}" required></label>
+                    <label class="museum-field md:col-span-2"><span>Description *</span><textarea name="public_home_experience_description" rows="3" required>{{ old('public_home_experience_description', $content['public_home_experience_description']) }}</textarea></label>
+                </div>
+            </details>
+
+            <details class="museum-panel" open>
+                <summary class="museum-section-title cursor-pointer">Our Vision</summary>
+                <div class="mt-5 grid gap-4 md:grid-cols-2">
+                    <label class="museum-field md:col-span-2"><span>Title *</span><input name="public_home_vision_title" value="{{ old('public_home_vision_title', $content['public_home_vision_title']) }}" required></label>
+                    <label class="museum-field md:col-span-2"><span>Paragraph 1 *</span><textarea name="public_home_vision_paragraph_1" rows="3" required>{{ old('public_home_vision_paragraph_1', $content['public_home_vision_paragraph_1']) }}</textarea></label>
+                    <label class="museum-field md:col-span-2"><span>Paragraph 2 *</span><textarea name="public_home_vision_paragraph_2" rows="3" required>{{ old('public_home_vision_paragraph_2', $content['public_home_vision_paragraph_2']) }}</textarea></label>
+                    <label class="museum-field md:col-span-2"><span>Highlighted Note *</span><textarea name="public_home_vision_note" rows="2" required>{{ old('public_home_vision_note', $content['public_home_vision_note']) }}</textarea></label>
+                </div>
+            </details>
+
+            <details class="museum-panel" open>
+                <summary class="museum-section-title cursor-pointer">Stay Connected</summary>
+                <div class="mt-5 grid gap-4 md:grid-cols-2">
+                    <label class="museum-field"><span>Title *</span><input name="public_home_connect_title" value="{{ old('public_home_connect_title', $content['public_home_connect_title']) }}" required></label>
+                    <label class="museum-field"><span>Button Text *</span><input name="public_home_connect_button" value="{{ old('public_home_connect_button', $content['public_home_connect_button']) }}" required></label>
+                    <label class="museum-field md:col-span-2"><span>Description *</span><textarea name="public_home_connect_description" rows="3" required>{{ old('public_home_connect_description', $content['public_home_connect_description']) }}</textarea></label>
+                </div>
+            </details>
+
+            <div class="sticky bottom-4 z-20 flex justify-end">
+                <button class="museum-btn shadow-lg" type="submit">Save Home Page</button>
+            </div>
+        </form>
+    </section>
 </x-layout>

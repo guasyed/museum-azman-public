@@ -44,7 +44,7 @@ class AdminMuseumEventController extends Controller
             Setting::updateOrCreate(['key' => $key], ['value' => trim($value)]);
         }
 
-        return back()->with('success', 'Events page content updated successfully.');
+        return back()->with('success', 'Programmes page content updated successfully.');
     }
 
     public function store(Request $request): RedirectResponse
@@ -58,7 +58,7 @@ class AdminMuseumEventController extends Controller
 
         MuseumEvent::create($validated);
 
-        return back()->with('success', 'Event created successfully.');
+        return back()->with('success', 'Programme created successfully.');
     }
 
     public function update(Request $request, MuseumEvent $event): RedirectResponse
@@ -75,7 +75,7 @@ class AdminMuseumEventController extends Controller
 
         $event->update($validated);
 
-        return back()->with('success', 'Event updated successfully.');
+        return back()->with('success', 'Programme updated successfully.');
     }
 
     public function destroy(MuseumEvent $event): RedirectResponse
@@ -86,7 +86,7 @@ class AdminMuseumEventController extends Controller
 
         $event->delete();
 
-        return back()->with('success', 'Event deleted successfully.');
+        return back()->with('success', 'Programme deleted successfully.');
     }
 
     private function validated(Request $request): array

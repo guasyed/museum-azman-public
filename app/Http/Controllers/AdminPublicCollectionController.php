@@ -37,14 +37,17 @@ class AdminPublicCollectionController extends Controller
 
     public function updateContent(Request $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'public_collection_page_title' => ['required', 'string', 'max:255'],
-            'public_collection_page_description' => ['required', 'string', 'max:1000'],
-            'public_collection_philosophy_title' => ['required', 'string', 'max:255'],
-            'public_collection_philosophy_paragraph_1' => ['required', 'string', 'max:2000'],
-            'public_collection_philosophy_paragraph_2' => ['required', 'string', 'max:2000'],
-            'public_collection_philosophy_paragraph_3' => ['required', 'string', 'max:2000'],
-        ]);
+        $rules = [];
+        foreach (PublicCollectionItem::CONTENT_DEFAULTS as $key => $default) {
+            $rules[$key] = [
+                'required',
+                'string',
+                str_contains($key, 'description') || str_contains($key, 'paragraph') || str_ends_with($key, '_note')
+                    ? 'max:2000'
+                    : 'max:255',
+            ];
+        }
+        $validated = $request->validate($rules);
 
         foreach ($validated as $key => $value) {
             Setting::updateOrCreate(['key' => $key], ['value' => trim($value)]);

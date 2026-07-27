@@ -1,23 +1,23 @@
-<x-layout title="Events CMS - Museum Azman">
+<x-layout title="Programmes CMS - Museum Azman">
     <section class="space-y-6">
         <div>
-            <h2 class="museum-page-title">Events CMS</h2>
-            <p class="museum-page-subtitle">Manage the event cards displayed on the public website</p>
+            <h2 class="museum-page-title">Programmes CMS</h2>
+            <p class="museum-page-subtitle">Manage the programmes, stories and upcoming initiatives displayed on the public website.</p>
         </div>
 
         <details class="museum-panel" open>
             <summary class="museum-section-title cursor-pointer">Page Content</summary>
-            <p class="mt-2 text-sm text-zinc-500">Edit the introduction and Event Programming section highlighted on the public Events page.</p>
+            <p class="mt-2 text-sm text-zinc-500">Edit the introduction and “In preparation” section on the public Programmes page.</p>
             <form method="POST" action="{{ route('admin.events.content.update', [], false) }}" class="mt-5 grid gap-4 md:grid-cols-2">
                 @csrf
                 @method('PUT')
                 <label class="museum-field"><span>Page Title *</span><input name="public_events_page_title" value="{{ old('public_events_page_title', $content['public_events_page_title']) }}" required></label>
                 <label class="museum-field md:col-span-2"><span>Page Introduction *</span><textarea name="public_events_page_description" rows="3" required>{{ old('public_events_page_description', $content['public_events_page_description']) }}</textarea></label>
-                <label class="museum-field"><span>Programming Section Title *</span><input name="public_events_programming_title" value="{{ old('public_events_programming_title', $content['public_events_programming_title']) }}" required></label>
-                @foreach(range(1, 4) as $number)
+                <label class="museum-field"><span>In Preparation Title *</span><input name="public_events_programming_title" value="{{ old('public_events_programming_title', $content['public_events_programming_title']) }}" required></label>
+                @foreach(range(1, 2) as $number)
                     <div class="grid gap-4 rounded-xl border border-zinc-200 p-4 md:col-span-2 md:grid-cols-2">
-                        <label class="museum-field"><span>Program {{ $number }} Title *</span><input name="public_events_program_{{ $number }}_title" value="{{ old('public_events_program_'.$number.'_title', $content['public_events_program_'.$number.'_title']) }}" required></label>
-                        <label class="museum-field"><span>Program {{ $number }} Description *</span><textarea name="public_events_program_{{ $number }}_description" rows="2" required>{{ old('public_events_program_'.$number.'_description', $content['public_events_program_'.$number.'_description']) }}</textarea></label>
+                        <label class="museum-field"><span>Upcoming Initiative {{ $number }} Title *</span><input name="public_events_program_{{ $number }}_title" value="{{ old('public_events_program_'.$number.'_title', $content['public_events_program_'.$number.'_title']) }}" required></label>
+                        <label class="museum-field"><span>Upcoming Initiative {{ $number }} Description *</span><textarea name="public_events_program_{{ $number }}_description" rows="2" required>{{ old('public_events_program_'.$number.'_description', $content['public_events_program_'.$number.'_description']) }}</textarea></label>
                     </div>
                 @endforeach
                 <div class="md:col-span-2"><button class="museum-btn" type="submit">Save Page Content</button></div>
@@ -25,18 +25,18 @@
         </details>
 
         <details class="museum-panel" open>
-            <summary class="museum-section-title cursor-pointer">Add Event</summary>
+            <summary class="museum-section-title cursor-pointer">Add Programme</summary>
             <form method="POST" action="{{ route('admin.events.store', [], false) }}" enctype="multipart/form-data" class="mt-5 grid gap-4 md:grid-cols-2">
                 @csrf
                 <label class="museum-field"><span>Title *</span><input name="title" value="{{ old('title') }}" required></label>
                 <label class="museum-field"><span>Section *</span><select name="section" required>@foreach($sections as $value => $label)<option value="{{ $value }}" @selected(old('section') === $value)>{{ $label }}</option>@endforeach</select></label>
-                <label class="museum-field"><span>Event Type</span><input name="event_type" value="{{ old('event_type') }}" placeholder="Exhibition, Artist Talk, Private Event"></label>
+                <label class="museum-field"><span>Programme Type</span><input name="event_type" value="{{ old('event_type') }}" placeholder="Museum Tour, Private Visit, Education"></label>
                 <label class="museum-field"><span>Schedule</span><input name="schedule" value="{{ old('schedule') }}" placeholder="March 2027 or Every Saturday, 2pm"></label>
                 <label class="museum-field"><span>Display Order</span><input name="sort_order" type="number" min="0" max="999" value="{{ old('sort_order', 0) }}"></label>
                 <label class="museum-field"><span>Image</span><input name="image" type="file" accept="image/jpeg,image/png,image/webp"></label>
                 <label class="museum-field md:col-span-2"><span>Description</span><textarea name="description" rows="3">{{ old('description') }}</textarea></label>
                 <label class="flex items-center gap-2 text-sm font-semibold text-zinc-700"><input name="is_published" type="checkbox" value="1" @checked(old('is_published'))> Display on public website</label>
-                <div class="md:col-span-2"><button class="museum-btn" type="submit">Add Event</button></div>
+                <div class="md:col-span-2"><button class="museum-btn" type="submit">Add Programme</button></div>
             </form>
         </details>
 
@@ -62,7 +62,7 @@
                             <div class="grid gap-4 md:grid-cols-2">
                                 <label class="museum-field"><span>Title *</span><input name="title" value="{{ $event->title }}" required></label>
                                 <label class="museum-field"><span>Section *</span><select name="section" required>@foreach($sections as $value => $label)<option value="{{ $value }}" @selected($event->section === $value)>{{ $label }}</option>@endforeach</select></label>
-                                <label class="museum-field"><span>Event Type</span><input name="event_type" value="{{ $event->event_type }}"></label>
+                                <label class="museum-field"><span>Programme Type</span><input name="event_type" value="{{ $event->event_type }}"></label>
                                 <label class="museum-field"><span>Schedule</span><input name="schedule" value="{{ $event->schedule }}"></label>
                                 <label class="museum-field"><span>Display Order</span><input name="sort_order" type="number" min="0" max="999" value="{{ $event->sort_order }}"></label>
                                 <label class="museum-field"><span>Replace Image</span><input name="image" type="file" accept="image/jpeg,image/png,image/webp"></label>
@@ -71,14 +71,14 @@
                                 <div class="flex flex-wrap gap-2 md:col-span-2"><button class="museum-btn" type="submit">Save Changes</button></div>
                             </div>
                         </form>
-                        <form method="POST" action="{{ route('admin.events.destroy', $event, false) }}" class="mt-3 flex justify-end" onsubmit="return confirm('Delete this event?')">
+                        <form method="POST" action="{{ route('admin.events.destroy', $event, false) }}" class="mt-3 flex justify-end" onsubmit="return confirm('Delete this programme?')">
                             @csrf
                             @method('DELETE')
-                            <button type="submit" class="museum-btn-danger">Delete Event</button>
+                            <button type="submit" class="museum-btn-danger">Delete Programme</button>
                         </form>
                     </article>
                 @empty
-                    <div class="museum-panel p-6 text-center text-zinc-500">No CMS events yet. The public section displays three Coming Soon cards.</div>
+                    <div class="museum-panel p-6 text-center text-zinc-500">No programmes in this section yet.</div>
                 @endforelse
             </div>
         @endforeach

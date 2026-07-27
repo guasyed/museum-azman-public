@@ -112,6 +112,7 @@ $publicMuseumPage = function (string $publicPage = 'home') {
 	$homeFeaturedEvents = collect();
 	$homeFeaturedArtists = collect();
 	$homeSelectedWorks = collect();
+	$homeStoryWork = null;
 	if ($publicPage === 'home') {
 		if (\Illuminate\Support\Facades\Schema::hasTable('settings')) {
 			$homeContent = array_replace($homeContent, \App\Models\Setting::query()->whereIn('key', array_keys($homeContent))->pluck('value', 'key')->all());
@@ -120,7 +121,7 @@ $publicMuseumPage = function (string $publicPage = 'home') {
 			$homeHeroVideoUrl = $videoPath && Storage::disk('public')->exists($videoPath) ? Storage::url($videoPath) : null;
 			$homeHeroPosterUrl = $posterPath && Storage::disk('public')->exists($posterPath) ? Storage::url($posterPath) : null;
 		}
-		$homeSelectionSettings = \Illuminate\Support\Facades\Schema::hasTable('settings') ? \App\Models\Setting::query()->whereIn('key', ['public_home_featured_event_ids', 'public_home_featured_artist_ids', 'public_home_selected_work_ids'])->pluck('value', 'key') : collect();
+		$homeSelectionSettings = \Illuminate\Support\Facades\Schema::hasTable('settings') ? \App\Models\Setting::query()->whereIn('key', ['public_home_featured_event_ids', 'public_home_featured_artist_ids', 'public_home_selected_work_ids', 'public_home_story_work_id'])->pluck('value', 'key') : collect();
 		$orderedSelection = static function ($records, ?string $json, int $limit) {
 			$ids = json_decode((string) $json, true);
 			if (! is_array($ids) || $ids === []) return $records->take($limit)->values();
@@ -137,6 +138,7 @@ $publicMuseumPage = function (string $publicPage = 'home') {
 		if (\Illuminate\Support\Facades\Schema::hasTable('public_collection_items')) {
 			$records = \App\Models\PublicCollectionItem::where('is_published', true)->with(['artwork.artist', 'artwork.images'])->orderBy('sort_order')->get();
 			$homeSelectedWorks = $orderedSelection($records, $homeSelectionSettings['public_home_selected_work_ids'] ?? null, 3);
+			$homeStoryWork = $orderedSelection($records, $homeSelectionSettings['public_home_story_work_id'] ?? null, 1)->first();
 		}
 	}
 	if ($publicPage === 'events' && \Illuminate\Support\Facades\Schema::hasTable('museum_events')) {
@@ -200,7 +202,7 @@ $publicMuseumPage = function (string $publicPage = 'home') {
 		$aboutSpaceImageUrl = $spacePath && Storage::disk('public')->exists($spacePath) ? Storage::url($spacePath) : null;
 	}
 
-	return view('welcome', compact('homeArtworks', 'publicPage', 'publicEvents', 'eventContent', 'publicArtistProfiles', 'artistsCmsConfigured', 'artistContent', 'publicCollectionItems', 'collectionCmsConfigured', 'collectionContent', 'aboutContent', 'aboutHeroImageUrl', 'aboutSpaceImageUrl', 'homeContent', 'homeHeroVideoUrl', 'homeHeroPosterUrl', 'homeFeaturedEvents', 'homeFeaturedArtists', 'homeSelectedWorks'));
+	return view('welcome', compact('homeArtworks', 'publicPage', 'publicEvents', 'eventContent', 'publicArtistProfiles', 'artistsCmsConfigured', 'artistContent', 'publicCollectionItems', 'collectionCmsConfigured', 'collectionContent', 'aboutContent', 'aboutHeroImageUrl', 'aboutSpaceImageUrl', 'homeContent', 'homeHeroVideoUrl', 'homeHeroPosterUrl', 'homeFeaturedEvents', 'homeFeaturedArtists', 'homeSelectedWorks', 'homeStoryWork'));
 };
 
 Route::get('/', function () use ($publicMuseumPage) {

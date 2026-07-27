@@ -8,23 +8,19 @@ use Illuminate\Support\Facades\Storage;
 class MuseumEvent extends Model
 {
     public const SECTIONS = [
-        'currently_active' => 'Currently Active',
-        'upcoming' => 'Upcoming',
-        'archive' => 'Archive',
+        'currently_active' => 'Featured Programmes',
+        'upcoming' => 'Upcoming Programmes',
+        'archive' => 'Past Programmes',
     ];
 
     public const CONTENT_DEFAULTS = [
-        'public_events_page_title' => 'Events',
-        'public_events_page_description' => 'Special exhibitions, artist talks, interviews, and exclusive events exploring contemporary art and cultural dialogue.',
-        'public_events_programming_title' => 'Event Programming',
-        'public_events_program_1_title' => 'Exhibitions',
-        'public_events_program_1_description' => 'Curated presentations of contemporary art featuring solo and group shows.',
-        'public_events_program_2_title' => 'Artist Talks',
-        'public_events_program_2_description' => 'Intimate conversations with artists about their practice and vision.',
-        'public_events_program_3_title' => 'Interviews',
-        'public_events_program_3_description' => 'In-depth dialogues exploring artistic processes and cultural contexts.',
-        'public_events_program_4_title' => 'Special Events',
-        'public_events_program_4_description' => 'Exclusive gatherings, collector evenings, and symposiums.',
+        'public_events_page_title' => "Programmes\n& stories",
+        'public_events_page_description' => 'A thoughtful rhythm of visits, close looking and cultural exchange—rooted in the collection and designed to make room for reflection.',
+        'public_events_programming_title' => 'The conversation continues.',
+        'public_events_program_1_title' => 'Collector Conversations',
+        'public_events_program_1_description' => 'A series of intimate exchanges on the instincts, encounters and responsibilities that shape a collection.',
+        'public_events_program_2_title' => 'Museum Azman Conversations',
+        'public_events_program_2_description' => 'New voices from across the collection: artists, scholars and thinkers in sustained dialogue.',
     ];
 
     protected $fillable = [

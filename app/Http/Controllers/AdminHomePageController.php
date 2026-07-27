@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 use App\Models\MuseumEvent;
-use App\Models\PublicArtistProfile;
 use App\Models\PublicCollectionItem;
 use App\Support\HomePageContent;
 use Illuminate\Http\RedirectResponse;
@@ -22,16 +21,17 @@ class AdminHomePageController extends Controller
             'public_home_featured_event_ids',
             'public_home_featured_artist_ids',
             'public_home_selected_work_ids',
+            'public_home_story_work_id',
         ])->pluck('value', 'key');
 
         return view('admin.home.index', [
             'content' => $content,
             'events' => MuseumEvent::query()->where('is_published', true)->orderBy('title')->get(),
-            'artists' => PublicArtistProfile::query()->where('is_published', true)->with('artist')->get()->sortBy(fn ($profile) => strtolower($profile->artist?->name ?? '')),
             'works' => PublicCollectionItem::query()->where('is_published', true)->with(['artwork.artist'])->get()->sortBy(fn ($item) => strtolower($item->artwork?->title ?? '')),
             'selectedEventIds' => $this->decodedIds($selectionSettings['public_home_featured_event_ids'] ?? null),
             'selectedArtistIds' => $this->decodedIds($selectionSettings['public_home_featured_artist_ids'] ?? null),
             'selectedWorkIds' => $this->decodedIds($selectionSettings['public_home_selected_work_ids'] ?? null),
+            'selectedStoryWorkId' => $this->decodedIds($selectionSettings['public_home_story_work_id'] ?? null)[0] ?? null,
         ]);
     }
 
@@ -40,28 +40,28 @@ class AdminHomePageController extends Controller
         $rules = [];
         foreach (HomePageContent::DEFAULTS as $key => $default) {
             if (str_ends_with($key, '_path')) continue;
-            $rules[$key] = str_starts_with($key, 'public_home_hero_')
+            if (in_array($key, ['public_home_artists_title', 'public_home_artists_description', 'public_home_vision_button'], true)) continue;
+            $rules[$key] = str_starts_with($key, 'public_home_hero_') || $default === ''
                 ? ['nullable', 'string', 'max:500']
                 : ['required', 'string', str_contains($key, 'description') || str_contains($key, 'paragraph') || str_ends_with($key, '_note') ? 'max:2500' : 'max:255'];
         }
-        $rules['hero_video'] = ['nullable', 'file', 'mimes:mp4,webm', 'max:102400'];
-        $rules['hero_poster'] = ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'];
+        $rules['hero_image'] = ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:15360'];
         $rules['featured_event_ids'] = ['nullable', 'array', 'max:3'];
         $rules['featured_event_ids.*'] = ['nullable', 'integer', 'distinct', 'exists:museum_events,id'];
-        $rules['featured_artist_ids'] = ['nullable', 'array', 'max:4'];
-        $rules['featured_artist_ids.*'] = ['nullable', 'integer', 'distinct', 'exists:public_artist_profiles,id'];
         $rules['selected_work_ids'] = ['nullable', 'array', 'max:3'];
         $rules['selected_work_ids.*'] = ['nullable', 'integer', 'distinct', 'exists:public_collection_items,id'];
+        $rules['story_work_id'] = ['nullable', 'integer', 'exists:public_collection_items,id'];
         $validated = $request->validate($rules);
 
         foreach (array_keys(HomePageContent::DEFAULTS) as $key) {
-            if (! str_ends_with($key, '_path')) Setting::updateOrCreate(['key' => $key], ['value' => trim((string) ($validated[$key] ?? ''))]);
+            if (! str_ends_with($key, '_path') && array_key_exists($key, $validated)) {
+                Setting::updateOrCreate(['key' => $key], ['value' => trim((string) ($validated[$key] ?? ''))]);
+            }
         }
-        $this->saveUpload($request, 'hero_video', 'public_home_hero_video_path');
-        $this->saveUpload($request, 'hero_poster', 'public_home_hero_poster_path');
+        $this->saveUpload($request, 'hero_image', 'public_home_hero_poster_path');
         $this->saveIds('public_home_featured_event_ids', $validated['featured_event_ids'] ?? []);
-        $this->saveIds('public_home_featured_artist_ids', $validated['featured_artist_ids'] ?? []);
         $this->saveIds('public_home_selected_work_ids', $validated['selected_work_ids'] ?? []);
+        $this->saveIds('public_home_story_work_id', filled($validated['story_work_id'] ?? null) ? [(int) $validated['story_work_id']] : []);
 
         return back()->with('success', 'Home page updated successfully.');
     }

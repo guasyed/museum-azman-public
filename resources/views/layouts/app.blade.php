@@ -642,7 +642,7 @@
                 </a>
                 <a href="{{ route('admin.events.index', [], false) }}" class="museum-nav-item flex items-center gap-3 {{ request()->routeIs('admin.events.*') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path></svg>
-                    <span>Events CMS</span>
+                    <span>Programmes CMS</span>
                 </a>
                 <a href="{{ route('admin.public-artists.index', [], false) }}" class="museum-nav-item flex items-center gap-3 {{ request()->routeIs('admin.public-artists.*') ? 'active' : '' }}">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M19 8v6"></path><path d="M22 11h-6"></path></svg>
@@ -832,7 +832,7 @@
             <p class="mobile-nav-group-label">Public Website</p>
             <a href="{{ route('admin.home.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.home.*') ? 'active' : '' }}">Home CMS</a>
             <a href="{{ route('admin.about.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.about.*') ? 'active' : '' }}">About CMS</a>
-            <a href="{{ route('admin.events.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.events.*') ? 'active' : '' }}">Events CMS</a>
+            <a href="{{ route('admin.events.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.events.*') ? 'active' : '' }}">Programmes CMS</a>
             <a href="{{ route('admin.public-artists.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.public-artists.*') ? 'active' : '' }}">Artists CMS</a>
             <a href="{{ route('admin.public-collection.index', [], false) }}" class="mobile-nav-link {{ request()->routeIs('admin.public-collection.*') ? 'active' : '' }}">Collection CMS</a>
             <p class="mobile-nav-group-label">Public Enquiries</p>

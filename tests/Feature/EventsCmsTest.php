@@ -50,7 +50,7 @@ class EventsCmsTest extends TestCase
         $this->actingAs($admin)
             ->get(route('admin.events.index'))
             ->assertOk()
-            ->assertSee('Events CMS')
+            ->assertSee('Programmes CMS')
             ->assertSee('Museum Preview Night');
     }
 

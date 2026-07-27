@@ -39,9 +39,8 @@ class CollectionCmsTest extends TestCase
 
         $this->get(route('public.collection'))
             ->assertOk()
-            ->assertSee('Selected CMS Artwork')
             ->assertSee('Collection CMS Artist')
-            ->assertSee('Oil on canvas');
+            ->assertSee('In the collection.');
 
         $this->actingAs($admin)->get(route('admin.public-collection.index'))
             ->assertOk()
@@ -87,7 +86,7 @@ class CollectionCmsTest extends TestCase
         $this->get(route('public.collection'))
             ->assertOk()
             ->assertDontSee('Hidden Selected Artwork')
-            ->assertSee('Collection highlights coming soon.');
+            ->assertSee('Selected artists coming soon.');
     }
 
     public function test_admin_can_update_collection_intro_and_text_panel(): void
